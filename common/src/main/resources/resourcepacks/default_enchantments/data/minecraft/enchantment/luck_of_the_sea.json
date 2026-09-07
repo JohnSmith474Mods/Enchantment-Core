@@ -1,0 +1,118 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.luck_of_the_sea"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "luck_of_the_sea",
+        "property": "min_cost_base"
+      },
+      "fallback": 15
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "luck_of_the_sea",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 9
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "luck_of_the_sea",
+        "property": "max_cost_base"
+      },
+      "fallback": 65
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "luck_of_the_sea",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 9
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "luck_of_the_sea",
+      "property": "anvil_cost"
+    },
+    "fallback": 4
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "luck_of_the_sea",
+      "property": "slots"
+    },
+    "fallback": [
+      "mainhand"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "luck_of_the_sea",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/fishing"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "luck_of_the_sea",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "luck_of_the_sea",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
+  "effects": {
+    "minecraft:fishing_luck_bonus": [
+      {
+        "effect": {
+          "value": {
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "luck_of_the_sea",
+              "property": "value_per_level"
+            },
+            "per_level_default": 1.0,
+            "base_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "luck_of_the_sea",
+              "property": "value_base"
+            },
+            "base_default": 1.0,
+            "type": "enchantment_core:configurable_linear"
+          },
+          "type": "minecraft:add"
+        }
+      }
+    ]
+  }
+}

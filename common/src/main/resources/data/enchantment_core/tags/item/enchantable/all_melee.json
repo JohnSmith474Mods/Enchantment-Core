@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:enchantable/sword",
+    "#minecraft:enchantable/axe",
+    "#minecraft:enchantable/mace",
+    "minecraft:trident"
+  ]
+}

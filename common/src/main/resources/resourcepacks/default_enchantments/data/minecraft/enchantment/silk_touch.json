@@ -1,0 +1,112 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.silk_touch"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "silk_touch",
+        "property": "min_cost_base"
+      },
+      "fallback": 15
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "silk_touch",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 0
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "silk_touch",
+        "property": "max_cost_base"
+      },
+      "fallback": 65
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "silk_touch",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 0
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "silk_touch",
+      "property": "anvil_cost"
+    },
+    "fallback": 8
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "silk_touch",
+      "property": "slots"
+    },
+    "fallback": [
+      "mainhand"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "silk_touch",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/mining_loot"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "silk_touch",
+      "property": "weight"
+    },
+    "fallback": 1
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "silk_touch",
+      "property": "max_level"
+    },
+    "fallback": 1
+  },
+  "exclusive_set": "#minecraft:exclusive_set/mining",
+  "effects": {
+    "minecraft:block_experience": [
+      {
+        "effect": {
+          "value": {
+            "config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "silk_touch",
+              "property": "value"
+            },
+            "default_value": 0.0,
+            "type": "enchantment_core:configurable_constant"
+          },
+          "type": "minecraft:set"
+        }
+      }
+    ]
+  }
+}

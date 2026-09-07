@@ -1,0 +1,34 @@
+{
+  "description": {
+    "translate": "enchantment.enchantment_core.transparency_test"
+  },
+  "supported_items": "#minecraft:enchantable/vanishing",
+  "primary_items": "#minecraft:enchantable/armor",
+  "weight": 2,
+  "max_level": 3,
+  "min_cost": {
+    "base": 15,
+    "per_level_above_first": 9
+  },
+  "max_cost": {
+    "base": 65,
+    "per_level_above_first": 9
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "any"
+  ],
+  "effects": {
+    "enchantment_core:transparency": [
+      {
+        "effect": {
+          "alpha_multiplier": {
+            "type": "minecraft:linear",
+            "base": 0.66,
+            "per_level_above_first": -0.33
+          }
+        }
+      }
+    ]
+  }
+}

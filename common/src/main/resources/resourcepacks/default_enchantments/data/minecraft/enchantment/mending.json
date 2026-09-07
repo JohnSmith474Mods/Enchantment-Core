@@ -1,0 +1,102 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.mending"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "mending",
+        "property": "min_cost_base"
+      },
+      "fallback": 25
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "mending",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 25
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "mending",
+        "property": "max_cost_base"
+      },
+      "fallback": 75
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "mending",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 25
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "mending",
+      "property": "anvil_cost"
+    },
+    "fallback": 4
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "mending",
+      "property": "slots"
+    },
+    "fallback": [
+      "any"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "mending",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/durability"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "mending",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "mending",
+      "property": "max_level"
+    },
+    "fallback": 1
+  },
+  "effects": {
+    "minecraft:repair_with_xp": [
+      {
+        "effect": {
+          "factor": 2.0,
+          "type": "minecraft:multiply"
+        }
+      }
+    ]
+  }
+}

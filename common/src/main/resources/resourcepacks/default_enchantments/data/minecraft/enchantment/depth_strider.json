@@ -1,0 +1,119 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.depth_strider"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "depth_strider",
+        "property": "min_cost_base"
+      },
+      "fallback": 10
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "depth_strider",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 10
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "depth_strider",
+        "property": "max_cost_base"
+      },
+      "fallback": 25
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "depth_strider",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 10
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "depth_strider",
+      "property": "anvil_cost"
+    },
+    "fallback": 4
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "depth_strider",
+      "property": "slots"
+    },
+    "fallback": [
+      "feet"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "depth_strider",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/foot_armor"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "depth_strider",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "depth_strider",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
+  "exclusive_set": "#minecraft:exclusive_set/boots",
+  "effects": {
+    "minecraft:attributes": [
+      {
+        "id": "minecraft:enchantment.depth_strider",
+        "attribute": "minecraft:generic.water_movement_efficiency",
+        "amount": {
+          "per_level_config": {
+            "mod_id": "enchantment_core",
+            "category": "enchantment",
+            "group": "depth_strider",
+            "property": "amount_per_level"
+          },
+          "per_level_default": 0.33333334,
+          "base_config": {
+            "mod_id": "enchantment_core",
+            "category": "enchantment",
+            "group": "depth_strider",
+            "property": "amount_base"
+          },
+          "base_default": 0.33333334,
+          "type": "enchantment_core:configurable_linear"
+        },
+        "operation": "add_value"
+      }
+    ]
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.fire_protection"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "fire_protection",
+        "property": "min_cost_base"
+      },
+      "fallback": 10
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "fire_protection",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "fire_protection",
+        "property": "max_cost_base"
+      },
+      "fallback": 18
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "fire_protection",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_protection",
+      "property": "anvil_cost"
+    },
+    "fallback": 2
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_protection",
+      "property": "slots"
+    },
+    "fallback": [
+      "armor"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_protection",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/armor"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_protection",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_protection",
+      "property": "max_level"
+    },
+    "fallback": 4
+  },
+  "exclusive_set": "#minecraft:exclusive_set/armor",
+  "effects": {
+    "minecraft:attributes": [
+      {
+        "id": "minecraft:enchantment.fire_protection",
+        "attribute": "minecraft:generic.burning_time",
+        "amount": {
+          "per_level_config": {
+            "mod_id": "enchantment_core",
+            "category": "enchantment",
+            "group": "fire_protection",
+            "property": "amount_per_level"
+          },
+          "per_level_default": -0.15,
+          "base_config": {
+            "mod_id": "enchantment_core",
+            "category": "enchantment",
+            "group": "fire_protection",
+            "property": "amount_base"
+          },
+          "base_default": -0.15,
+          "type": "enchantment_core:configurable_linear"
+        },
+        "operation": "add_multiplied_base"
+      }
+    ],
+    "minecraft:damage_protection": [
+      {
+        "effect": {
+          "value": {
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "fire_protection",
+              "property": "value_per_level"
+            },
+            "per_level_default": 2.0,
+            "base_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "fire_protection",
+              "property": "value_base"
+            },
+            "base_default": 2.0,
+            "type": "enchantment_core:configurable_linear"
+          },
+          "type": "minecraft:add"
+        },
+        "requirements": {
+          "terms": [
+            {
+              "predicate": {
+                "tags": [
+                  {
+                    "id": "minecraft:is_fire",
+                    "expected": true
+                  },
+                  {
+                    "id": "minecraft:bypasses_invulnerability",
+                    "expected": false
+                  }
+                ]
+              },
+              "condition": "minecraft:damage_source_properties"
+            }
+          ],
+          "condition": "minecraft:all_of"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "johnsmith.enchantmentcore.mixin",
+  "refmap": "${mod_id}.refmap.json",
+  "compatibilityLevel": "JAVA_18",
+  "mixins": [
+    "client.tooltip.ItemEnchantmentsMixin",
+    "enchantment.EnchantmentCodecMixin",
+    "enchantment.EnchantmentMixin",
+    "enchantment.accessor.ExperienceOrbAccessor",
+    "enchantment.accessor.ItemEntityAccessor",
+    "enchantment.effect.block.EnchantmentEventsMixin",
+    "enchantment.effect.block.FluidWalkerMixin",
+    "enchantment.effect.entity.GravityMixin",
+    "enchantment.effect.entity.living.CombatStreakMixin",
+    "enchantment.effect.entity.living.DragMixin",
+    "enchantment.effect.entity.living.EnchantmentEventsMixin",
+    "enchantment.effect.entity.living.ExperienceMixin",
+    "enchantment.effect.entity.living.OnDamageHealingMixin",
+    "enchantment.effect.entity.living.PassiveEffectsMixin",
+    "enchantment.effect.entity.living.VisibilityMixin",
+    "enchantment.effect.entity.living.player.DestroySpeedMixin",
+    "enchantment.effect.entity.living.player.InventoryTickMixin",
+    "enchantment.effect.entity.projectile.AccuracyMixin",
+    "enchantment.effect.entity.projectile.DragMixin",
+    "enchantment.effect.entity.projectile.HomingMixin",
+    "enchantment.effect.entity.projectile.MagneticMixin",
+    "enchantment.effect.entity.projectile.RicochetMixin",
+    "enchantment.effect.entity.projectile.ShrapnelMixin",
+    "enchantment.effect.entity.projectile.StateCaptureMixin",
+    "enchantment.effect.entity.projectile.StateDeclarationMixin",
+    "enchantment.effect.entity.projectile.VelocityMixin",
+    "enchantment.effect.item.BowItemMixin",
+    "enchantment.effect.item.ItemStackMiningStreakMixin",
+    "item.ItemMixin",
+    "world.damagesource.CombatRulesMixin",
+    "world.level.ExplosionDamageCalculatorMixin"
+  ],
+  "client": [
+    "client.debug.EntityRenderDispatcherMixin",
+    "client.item.ItemPropertiesMixin",
+    "client.render.BlockEntityWithoutLevelRendererMixin",
+    "client.render.ElytraLayerMixin",
+    "client.render.FogRendererMixin",
+    "client.render.ItemRendererMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+

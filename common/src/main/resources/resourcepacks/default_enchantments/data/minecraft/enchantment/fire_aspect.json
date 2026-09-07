@@ -1,0 +1,135 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.fire_aspect"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "fire_aspect",
+        "property": "min_cost_base"
+      },
+      "fallback": 10
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "fire_aspect",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 20
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "fire_aspect",
+        "property": "max_cost_base"
+      },
+      "fallback": 60
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "fire_aspect",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 20
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "anvil_cost"
+    },
+    "fallback": 4
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "slots"
+    },
+    "fallback": [
+      "mainhand"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/fire_aspect"
+  },
+  "primary_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "primary_items"
+    },
+    "fallback": "#minecraft:enchantable/sword"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "max_level"
+    },
+    "fallback": 2
+  },
+  "effects": {
+    "minecraft:post_attack": [
+      {
+        "enchanted": "attacker",
+        "affected": "victim",
+        "effect": {
+          "duration": {
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "fire_aspect",
+              "property": "duration_per_level"
+            },
+            "per_level_default": 4.0,
+            "base_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "fire_aspect",
+              "property": "duration_base"
+            },
+            "base_default": 4.0,
+            "type": "enchantment_core:configurable_linear"
+          },
+          "type": "minecraft:ignite"
+        },
+        "requirements": {
+          "predicate": {
+            "is_direct": true
+          },
+          "condition": "minecraft:damage_source_properties"
+        }
+      }
+    ]
+  }
+}

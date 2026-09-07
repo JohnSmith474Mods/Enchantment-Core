@@ -1,0 +1,50 @@
+{
+  "description": {
+    "translate": "enchantment.enchantment_core.profiler_stress_test"
+  },
+  "supported_items": "#minecraft:enchantable/weapon",
+  "primary_items": "#minecraft:enchantable/weapon",
+  "weight": 1,
+  "max_level": 1,
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 1
+  },
+  "max_cost": {
+    "base": 10,
+    "per_level_above_first": 1
+  },
+  "anvil_cost": 1,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {
+    "minecraft:post_attack": [
+      {
+        "enchanted": "attacker",
+        "affected": "victim",
+        "effect": {
+          "type": "enchantment_core:spell_field",
+          "volumes": [
+            {
+              "shape": {
+                "type": "enchantment_core:cube",
+                "radius": 15.0
+              }
+            }
+          ],
+          "block_effects": [
+            {
+              "type": "enchantment_core:place_temporary_block",
+              "block": "minecraft:glass",
+              "lifetime": 100.0,
+              "decay_duration": 40.0,
+              "require_air": true,
+              "restore_previous": true
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

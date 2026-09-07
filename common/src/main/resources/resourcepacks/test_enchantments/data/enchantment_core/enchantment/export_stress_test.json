@@ -1,0 +1,353 @@
+{
+  "description": {
+    "translate": "enchantment.enchantment_core.stress_test"
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "stress_test",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/weapon"
+  },
+  "primary_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "stress_test",
+      "property": "primary_items"
+    },
+    "fallback": "#minecraft:enchantable/sword"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "stress_test",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "stress_test",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "stress_test",
+        "property": "min_cost_base"
+      },
+      "fallback": 15
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "stress_test",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 9
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "stress_test",
+        "property": "max_cost_base"
+      },
+      "fallback": 65
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "stress_test",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 9
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "stress_test",
+      "property": "anvil_cost"
+    },
+    "fallback": 4
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "stress_test",
+      "property": "slots"
+    },
+    "fallback": [
+      "mainhand",
+      "offhand"
+    ]
+  },
+  "effects": {
+    "minecraft:post_attack": [
+      {
+        "enchanted": "attacker",
+        "affected": "victim",
+        "effect": {
+          "type": "enchantment_core:spell_field",
+          "volumes": [
+            {
+              "shape": {
+                "type": "enchantment_core:cuboid",
+                "x_radius": {
+                  "type": "enchantment_core:configurable_constant",
+                  "config": {
+                    "mod_id": "enchantment_core",
+                    "category": "enchantment",
+                    "group": "stress_test",
+                    "property": "x_radius"
+                  },
+                  "default_value": 8.0
+                },
+                "y_radius": {
+                  "type": "enchantment_core:configurable_constant",
+                  "config": {
+                    "mod_id": "enchantment_core",
+                    "category": "enchantment",
+                    "group": "stress_test",
+                    "property": "y_radius"
+                  },
+                  "default_value": 4.0
+                },
+                "z_radius": {
+                  "type": "enchantment_core:configurable_constant",
+                  "config": {
+                    "mod_id": "enchantment_core",
+                    "category": "enchantment",
+                    "group": "stress_test",
+                    "property": "z_radius"
+                  },
+                  "default_value": 8.0
+                }
+              },
+              "topology": {
+                "origin_range": {
+                  "type": "enchantment_core:configurable_linear",
+                  "base_config": {
+                    "mod_id": "enchantment_core",
+                    "category": "enchantment",
+                    "group": "stress_test",
+                    "property": "origin_range_base"
+                  },
+                  "base_default": 4.0,
+                  "per_level_config": {
+                    "mod_id": "enchantment_core",
+                    "category": "enchantment",
+                    "group": "stress_test",
+                    "property": "origin_range_per_level"
+                  },
+                  "per_level_default": 2.0
+                },
+                "metric": "euclidean",
+                "origin_scaling": {
+                  "type": "enchantment_core:polynomial",
+                  "degree": 2.0
+                }
+              }
+            }
+          ],
+          "entity_effects": [
+            {
+              "type": "enchantment_core:damage_entity",
+              "damage_type": "minecraft:magic",
+              "amount": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "amount"
+                },
+                "default_value": 5.0
+              }
+            },
+            {
+              "type": "enchantment_core:orbit",
+              "attraction_strength": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "attraction_strength"
+                },
+                "default_value": 1.25
+              },
+              "orbital_radius": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "orbital_radius"
+                },
+                "default_value": 3.0
+              },
+              "orbit_velocity": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "orbit_velocity"
+                },
+                "default_value": 0.6
+              },
+              "drag_multiplier": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "drag_multiplier"
+                },
+                "default_value": 0.85
+              },
+              "rotation_direction": "clockwise"
+            }
+          ],
+          "block_effects": [
+            {
+              "type": "enchantment_core:place_temporary_block",
+              "block": "minecraft:cobweb",
+              "require_air": true,
+              "restore_previous": true,
+              "lifetime": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "lifetime"
+                },
+                "default_value": 100.0
+              },
+              "decay_duration": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "decay_duration"
+                },
+                "default_value": 40.0
+              }
+            }
+          ],
+          "visual_effects": [
+            {
+              "type": "enchantment_core:vector_field",
+              "particle": {
+                "type": "minecraft:soul_fire_flame"
+              },
+              "count": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "count"
+                },
+                "default_value": 64.0
+              },
+              "speed": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "speed"
+                },
+                "default_value": 0.15
+              },
+              "distribution": {
+                "sampling_attempts": 10
+              }
+            }
+          ],
+          "volume_effects": [
+            {
+              "type": "enchantment_core:explode",
+              "explosion": {
+                "radius": {
+                  "type": "enchantment_core:configurable_constant",
+                  "config": {
+                    "mod_id": "enchantment_core",
+                    "category": "enchantment",
+                    "group": "stress_test",
+                    "property": "radius"
+                  },
+                  "default_value": 2.5
+                },
+                "create_fire": true,
+                "damage_entities": true,
+                "interaction": "block"
+              },
+              "count": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "count_2"
+                },
+                "default_value": 3.0
+              },
+              "fuse_ticks": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "fuse_ticks"
+                },
+                "default_value": 40.0
+              },
+              "fuse_variance": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "fuse_variance"
+                },
+                "default_value": 10.0
+              },
+              "spatial_delay": {
+                "type": "enchantment_core:configurable_constant",
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "stress_test",
+                  "property": "spatial_delay"
+                },
+                "default_value": 5.0
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
