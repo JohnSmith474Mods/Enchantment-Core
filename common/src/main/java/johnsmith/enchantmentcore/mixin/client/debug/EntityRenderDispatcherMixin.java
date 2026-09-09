@@ -17,6 +17,7 @@ import org.joml.Matrix4f;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -38,15 +39,17 @@ public abstract class EntityRenderDispatcherMixin {
      * @param x            The interpolated X coordinate.
      * @param y            The interpolated Y coordinate.
      * @param z            The interpolated Z coordinate.
-     * @param yRot         The entity yaw.
      * @param partialTick  The fractional tick value for interpolation.
      * @param poseStack    The active matrix stack.
      * @param bufferSource The active buffer source.
      * @param packedLight  The calculated light level.
      * @param ci           The callback information.
      */
-    @Inject(method = "render", at = @At("TAIL"))
-    private <E extends Entity> void enchantment_core$renderHomingFrustum(E entity, double x, double y, double z, float yRot, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, CallbackInfo ci) {
+    @Inject(
+            method = "render(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
+            at = @At("TAIL")
+    )
+    private <E extends Entity> void enchantment_core$renderHomingFrustum(E entity, double x, double y, double z, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, CallbackInfo ci) {
 
         if (this.shouldRenderHitBoxes() && entity instanceof Projectile projectile) {
             ProjectileStateAccessor state = (ProjectileStateAccessor) projectile;
@@ -135,6 +138,7 @@ public abstract class EntityRenderDispatcherMixin {
      * @param g       The green color component (0-255).
      * @param b       The blue color component (0-255).
      */
+    @Unique
     private void enchantment_core$drawLine(VertexConsumer builder, Matrix4f matrix, PoseStack.Pose pose, Vec3 p1, Vec3 p2, int r, int g, int b) {
         float nx = (float) (p2.x - p1.x);
         float ny = (float) (p2.y - p1.y);

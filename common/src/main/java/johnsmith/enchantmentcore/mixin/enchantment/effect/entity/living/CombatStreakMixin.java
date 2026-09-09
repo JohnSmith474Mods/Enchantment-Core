@@ -1,5 +1,7 @@
 package johnsmith.enchantmentcore.mixin.enchantment.effect.entity.living;
 
+import com.llamalad7.mixinextras.sugar.Local;
+
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 import java.util.List;
@@ -24,6 +26,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -41,8 +44,13 @@ public abstract class CombatStreakMixin {
      * @param damageSource The damage source context.
      * @return The modified damage value scaled by the active streak.
      */
-    @ModifyVariable(method = "actuallyHurt", at = @At("HEAD"), argsOnly = true, ordinal = 0)
-    private float enchantment_core$applyDamageStreak(float damageAmount, DamageSource damageSource) {
+    @ModifyVariable(
+            method = "actuallyHurt",
+            at = @At("HEAD"),
+            argsOnly = true,
+            ordinal = 0
+    )
+    private float enchantment_core$applyDamageStreak(float damageAmount, @Local ServerLevel serverLevel, @Local DamageSource damageSource) {
         if (damageAmount <= 0.0F) return damageAmount; // Ignore zero or negative damage events.
 
         LivingEntity target = (LivingEntity) (Object) this;
@@ -65,7 +73,7 @@ public abstract class CombatStreakMixin {
         LootContext lootContext = null;
 
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.DAMAGE_STREAK);
+            List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.DAMAGE_STREAK.get());
 
             if (effects != null && !effects.isEmpty()) {
                 // Lazily instantiate the loot context for condition validation.

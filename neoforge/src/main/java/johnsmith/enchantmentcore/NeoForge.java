@@ -49,6 +49,8 @@ public class NeoForge {
         Common.initialize();
         Config.MANAGER.init(FMLPaths.CONFIGDIR.get());
 
+        EnchantmentEffectComponentRegistry.initialize();
+        NeoForgeRegistryHelper.registerAll(eventBus);
         eventBus.addListener(this::onRegister);
         eventBus.addListener(this::onNewRegistry);
         eventBus.addListener(this::onRegisterRenderers);

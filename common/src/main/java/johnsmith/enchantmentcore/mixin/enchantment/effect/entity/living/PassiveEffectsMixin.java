@@ -171,7 +171,7 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
                     lootContext = new LootContext.Builder(params).create(Optional.empty());
                 }
 
-                List<ConditionalEffect<FluidWalkerEffect>> fwEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.FLUID_WALKER);
+                List<ConditionalEffect<FluidWalkerEffect>> fwEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.FLUID_WALKER.get());
                 if (fwEffects != null) {
                     for (ConditionalEffect<FluidWalkerEffect> cond : fwEffects) {
                         if (isClient || cond.matches(lootContext)) {
@@ -182,7 +182,7 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
                 }
 
                 if (!this.enchantment_core$hasBuoyancy) {
-                    List<ConditionalEffect<BuoyancyEffect>> bEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.BUOYANCY);
+                    List<ConditionalEffect<BuoyancyEffect>> bEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.BUOYANCY.get());
                     if (bEffects != null) {
                         for (ConditionalEffect<BuoyancyEffect> cond : bEffects) {
                             if (isClient || cond.matches(lootContext)) {
@@ -193,7 +193,7 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
                     }
                 }
 
-                List<ConditionalEffect<MultiJumpEffect>> mjEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.MULTI_JUMP);
+                List<ConditionalEffect<MultiJumpEffect>> mjEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.MULTI_JUMP.get());
                 if (mjEffects != null) {
                     for (ConditionalEffect<MultiJumpEffect> cond : mjEffects) {
                         if (isClient || cond.matches(lootContext)) {
@@ -208,7 +208,7 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
                     }
                 }
 
-                List<ConditionalEffect<ClimbingEffect>> cEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.CLIMBING);
+                List<ConditionalEffect<ClimbingEffect>> cEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.CLIMBING.get());
                 if (cEffects != null) {
                     for (ConditionalEffect<ClimbingEffect> cond : cEffects) {
                         if (isClient || cond.matches(lootContext)) {
@@ -271,7 +271,14 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
     /**
      * Modifies the movement vector applied during travel calculations for climbing and vertical suspension.
      */
-    @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V"), index = 1)
+    @ModifyArg(
+            method = "handleRelativeFrictionAndCalculateMovement",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/entity/LivingEntity;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V"
+            ),
+            index = 1
+    )
     private Vec3 enchantment_core$applyClimbingModifications(Vec3 originalDelta) {
         if (this.isInWater() || this.isInLava() || ((LivingEntity) (Object) this).isFallFlying()) return originalDelta;
 

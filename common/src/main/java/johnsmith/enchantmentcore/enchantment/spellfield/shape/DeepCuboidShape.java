@@ -36,11 +36,7 @@ public record DeepCuboidShape(
         float hwR = this.heightWidthRadius.calculate(enchantmentLevel);
         float dR = this.depthRadius.calculate(enchantmentLevel);
 
-        Direction lookDir = caster != null ? Direction.getNearest(
-                caster.getViewVector(1.0F).x,
-                caster.getViewVector(1.0F).y,
-                caster.getViewVector(1.0F).z
-        ) : Direction.DOWN;
+        Direction lookDir = caster != null ? Direction.getApproximateNearest(caster.getViewVector(1.0F)) : Direction.DOWN;
 
         if (lookDir.getAxis() == Direction.Axis.X) {
             return new AABB(epicenter.x - dR, epicenter.y - hwR, epicenter.z - hwR,

@@ -68,7 +68,7 @@ public abstract class AccuracyMixin {
                         Holder<Enchantment> enchantment = entry.getKey();
                         int level = entry.getIntValue();
 
-                        List<ConditionalEffect<EnchantmentValueEffect>> accuracyEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_ACCURACY);
+                        List<ConditionalEffect<EnchantmentValueEffect>> accuracyEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_ACCURACY.get());
 
                         if (accuracyEffects != null) {
                             LootContext lootContext = null;

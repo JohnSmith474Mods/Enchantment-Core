@@ -61,7 +61,7 @@ public class ItemPropertiesMixin {
 
                 // Aggregate charge time reductions from all active enchantments on the item.
                 for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
-                    BowChargeTimeEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.BOW_CHARGE_TIME);
+                    BowChargeTimeEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.BOW_CHARGE_TIME.get());
                     if (effect != null) {
                         reductionSeconds += effect.amount().calculate(entry.getValue());
                     }

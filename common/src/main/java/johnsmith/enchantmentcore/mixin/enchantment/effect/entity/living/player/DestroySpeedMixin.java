@@ -70,7 +70,7 @@ public abstract class DestroySpeedMixin {
                 if (enchantments.isEmpty()) continue;
 
                 for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-                    List<ConditionalEffect<BuoyancyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.BUOYANCY);
+                    List<ConditionalEffect<BuoyancyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.BUOYANCY.get());
 
                     if (effects != null) {
                         // Lazily instantiate the loot context exclusively on the server.
@@ -111,7 +111,7 @@ public abstract class DestroySpeedMixin {
                     LootContext streakContext = null;
 
                     for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-                        List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.MINING_STREAK);
+                        List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.MINING_STREAK.get());
 
                         if (effects != null) {
                             if (!isClient && streakContext == null) {

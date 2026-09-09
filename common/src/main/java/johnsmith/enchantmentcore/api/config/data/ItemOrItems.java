@@ -99,7 +99,7 @@ public class ItemOrItems {
                 if (str.startsWith("#")) {
                     return new ItemOrItems(TagKey.create(Registries.ITEM, ResourceLocation.parse(str.substring(1))));
                 } else {
-                    return new ItemOrItems(BuiltInRegistries.ITEM.get(ResourceLocation.parse(str)));
+                    return new ItemOrItems(BuiltInRegistries.ITEM.get(ResourceLocation.parse(str)).get().value());
                 }
             },
             ItemOrItems::asString

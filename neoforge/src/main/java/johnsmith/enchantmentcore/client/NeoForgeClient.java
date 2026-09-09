@@ -1,5 +1,6 @@
 package johnsmith.enchantmentcore.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import johnsmith.enchantmentcore.Constants;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugRenderer;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugTracker;
@@ -39,7 +40,8 @@ public class NeoForgeClient {
         @SubscribeEvent
         public static void onRenderLevelStage(RenderLevelStageEvent event) {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-                SpellFieldDebugRenderer.render(event.getPoseStack(), event.getCamera(), event.getPartialTick().getGameTimeDeltaPartialTick(true));
+                PoseStack poseStack = new PoseStack();
+                SpellFieldDebugRenderer.render(poseStack, event.getCamera(), event.getPartialTick().getGameTimeDeltaPartialTick(true));
             }
         }
     }

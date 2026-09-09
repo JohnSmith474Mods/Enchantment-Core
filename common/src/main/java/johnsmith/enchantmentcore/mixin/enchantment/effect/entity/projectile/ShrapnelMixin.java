@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -117,7 +118,7 @@ public abstract class ShrapnelMixin {
 
         // Spawn generation loop.
         for (int i = 0; i < amount; i++) {
-            Entity clone = projectile.getType().create(serverLevel);
+            Entity clone = projectile.getType().create(serverLevel, EntitySpawnReason.TRIGGERED);
             if (clone instanceof Projectile child) {
                 child.load(sourceTag);
                 ProjectileStateAccessor childState = (ProjectileStateAccessor) child;

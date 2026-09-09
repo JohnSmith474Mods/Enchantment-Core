@@ -107,7 +107,7 @@ public abstract class InventoryTickMixin {
                 continue;
             }
 
-            List<ConditionalEffect<EnchantmentEntityEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.INVENTORY_TICK);
+            List<ConditionalEffect<EnchantmentEntityEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.INVENTORY_TICK.get());
 
             if (effects != null && !effects.isEmpty()) {
                 // Instantiate the parameter builder lazily to eliminate overhead on items lacking the effect.

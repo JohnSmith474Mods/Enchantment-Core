@@ -40,21 +40,31 @@ public abstract class ItemRendererMixin {
     private float enchantment_core$currentItemAlpha = 1.0F;
 
     /**
-     * Intercepts the start of the item rendering pipeline.
+     * Intercepts the start of the core item rendering pipeline.
      * Evaluates the item's enchantments and stores the lowest valid transparency multiplier.
      *
      * @param itemStack       The item stack being rendered.
      * @param displayContext  The rendering context.
-     * @param leftHand        True if rendered in the left hand.
      * @param poseStack       The active transformation matrix stack.
      * @param buffer          The buffer source.
      * @param packedLight     The light level.
      * @param packedOverlay   The overlay map.
      * @param model           The baked model geometry.
+     * @param renderFoil      Whether to render the enchantment glint foil.
      * @param ci              The callback information.
      */
-    @Inject(method = "render", at = @At("HEAD"))
-    private void enchantment_core$captureItemAlpha(ItemStack itemStack, ItemDisplayContext displayContext, boolean leftHand, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, BakedModel model, CallbackInfo ci) {
+    @Inject(method = "renderItem", at = @At("HEAD"))
+    private void enchantment_core$captureItemAlpha(
+            ItemStack itemStack,
+            ItemDisplayContext displayContext,
+            PoseStack poseStack,
+            MultiBufferSource buffer,
+            int packedLight,
+            int packedOverlay,
+            BakedModel model,
+            boolean renderFoil,
+            CallbackInfo ci
+    ) {
         this.enchantment_core$currentItemAlpha = 1.0F;
         if (itemStack.isEmpty()) return;
 
@@ -63,7 +73,7 @@ public abstract class ItemRendererMixin {
 
         float minAlpha = 1.0F;
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.TRANSPARENCY);
+            List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.TRANSPARENCY.get());
             if (effects != null) {
                 for (ConditionalEffect<TransparencyEffect> cond : effects) {
                     minAlpha = Math.min(minAlpha, cond.effect().alphaMultiplier().calculate(entry.getIntValue()));
@@ -80,7 +90,14 @@ public abstract class ItemRendererMixin {
      * @param originalConsumer The vanilla vertex consumer.
      * @return The wrapped vertex consumer, or the original if no transparency modification is required.
      */
-    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/ItemRenderer;renderModelLists(Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V"), index = 5)
+    @ModifyArg(
+            method = "renderItem",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/entity/ItemRenderer;renderModelLists(Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V"
+            ),
+            index = 5
+    )
     private VertexConsumer enchantment_core$applyItemAlphaConsumer(VertexConsumer originalConsumer) {
         if (this.enchantment_core$currentItemAlpha >= 1.0F) return originalConsumer;
 

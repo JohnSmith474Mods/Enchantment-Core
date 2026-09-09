@@ -33,7 +33,6 @@ import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -45,8 +44,8 @@ import static net.minecraftforge.common.MinecraftForge.EVENT_BUS;
 
 @Mod(Constants.MOD_ID)
 public class Forge {
-    public Forge() {
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public Forge(FMLJavaModLoadingContext context) {
+        IEventBus eventBus = context.getModEventBus();
 
         // Initialize common classes
         Common.initialize();
@@ -55,9 +54,12 @@ public class Forge {
         Config.MANAGER.init(FMLPaths.CONFIGDIR.get());
 
         // Register Library Components
+        EnchantmentEffectComponentRegistry.initialize();
+        ForgeRegistryHelper.registerAll(eventBus);
         eventBus.addListener(this::onRegister);
         eventBus.addListener(this::onNewRegistry);
         eventBus.addListener(this::onRegisterRenderers);
+
 
         // Register Optional Data
         eventBus.addListener(this::onAddPackFinders);
@@ -67,7 +69,7 @@ public class Forge {
 
         // Attach Screen
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            ModLoadingContext.get().registerExtensionPoint(
+            context.registerExtensionPoint(
                     ConfigScreenHandler.ConfigScreenFactory.class,
                     () -> new ConfigScreenHandler.ConfigScreenFactory(
                             (minecraft, parentScreen) -> Config.MANAGER.createScreen(parentScreen)

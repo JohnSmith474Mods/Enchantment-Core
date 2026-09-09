@@ -15,6 +15,7 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldVis
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldVolumeEffect;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.math.DistanceScalingFunction;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.math.SpellFieldShape;
+import johnsmith.enchantmentcore.api.util.LazyCodec;
 import johnsmith.enchantmentcore.platform.Services;
 
 import net.minecraft.core.Registry;
@@ -67,8 +68,8 @@ public class EnchantmentCoreRegistries {
      */
     public static Codec<DistanceScalingFunction> getDistanceScalingFunctionCodec() {
         if (distanceScalingFunctionCodec == null) {
-            distanceScalingFunctionCodec = DISTANCE_SCALING_FUNCTIONS.get().byNameCodec()
-                    .dispatch(DistanceScalingFunction::codec, Function.identity());
+            distanceScalingFunctionCodec = LazyCodec.of(() -> DISTANCE_SCALING_FUNCTIONS.get().byNameCodec()
+                    .dispatch(DistanceScalingFunction::codec, Function.identity()));
         }
         return distanceScalingFunctionCodec;
     }
@@ -81,16 +82,16 @@ public class EnchantmentCoreRegistries {
      */
     public static Codec<SpellFieldShape> getSpellFieldShapeCodec() {
         if (spellFieldShapeCodec == null) {
-            spellFieldShapeCodec = SPELL_FIELD_SHAPES.get().byNameCodec()
-                    .dispatch(SpellFieldShape::codec, Function.identity());
+            spellFieldShapeCodec = LazyCodec.of(() -> SPELL_FIELD_SHAPES.get().byNameCodec()
+                    .dispatch(SpellFieldShape::codec, Function.identity()));
         }
         return spellFieldShapeCodec;
     }
 
     private static Codec<SpellFieldEffect> getBaseSpellFieldEffectCodec() {
         if (baseSpellFieldEffectCodec == null) {
-            baseSpellFieldEffectCodec = SPELL_FIELD_EFFECTS.get().byNameCodec()
-                    .dispatch(SpellFieldEffect::codec, Function.identity());
+            baseSpellFieldEffectCodec = LazyCodec.of(() -> SPELL_FIELD_EFFECTS.get().byNameCodec()
+                    .dispatch(SpellFieldEffect::codec, Function.identity()));
         }
         return baseSpellFieldEffectCodec;
     }

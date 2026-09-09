@@ -1,5 +1,7 @@
 package johnsmith.enchantmentcore.mixin.enchantment.effect.entity.living;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 import java.util.List;
@@ -21,9 +23,11 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
+
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 /**
  * Mixin targeting movement drag calculation in {@link LivingEntity#travel}.
@@ -33,13 +37,13 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 public abstract class DragMixin {
 
     /**
-     * Modifies the drag coefficient applied to the movement vector during travel updates.
+     * Internal calculation logic iterating through the equipment slots to extract and apply Drag multipliers.
      *
-     * @param originalDrag The vanilla velocity retention factor (0.0 to 1.0).
-     * @return The modified drag factor.
+     * @param originalDrag The initial drag scalar.
+     * @return The modified drag scalar.
      */
-    @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;scale(D)Lnet/minecraft/world/phys/Vec3;"), index = 0)
-    private double enchantment_core$applyEntityDrag(double originalDrag) {
+    @Unique
+    private double enchantment_core$calculateDragMultiplier(double originalDrag) {
         LivingEntity entity = (LivingEntity) (Object) this;
         boolean isClient = entity.level().isClientSide();
         ServerLevel serverLevel = isClient ? null : (ServerLevel) entity.level();
@@ -47,7 +51,6 @@ public abstract class DragMixin {
         float currentDrag = (float) originalDrag;
         LootContext lootContext = null;
 
-        // Iterate all equipment slots to collect compounding drag modifiers.
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = entity.getItemBySlot(slot);
             if (stack.isEmpty()) continue;
@@ -57,7 +60,7 @@ public abstract class DragMixin {
 
             for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                 if (!entry.getKey().value().matchingSlot(slot)) continue;
-                List<ConditionalEffect<EnchantmentValueEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.ENTITY_DRAG);
+                List<ConditionalEffect<EnchantmentValueEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.ENTITY_DRAG.get());
 
                 if (effects != null) {
                     if (!isClient && lootContext == null) {
@@ -70,7 +73,6 @@ public abstract class DragMixin {
                     }
 
                     for (ConditionalEffect<EnchantmentValueEffect> cond : effects) {
-                        // Allow clients to calculate drag without full loot predicates for prediction smoothness.
                         if (isClient || cond.matches(lootContext)) {
                             currentDrag = cond.effect().process(entry.getIntValue(), entity.getRandom(), currentDrag);
                         }
@@ -80,5 +82,34 @@ public abstract class DragMixin {
         }
 
         return currentDrag;
+    }
+
+    /**
+     * Intercepts lava fluid physics execution.
+     * Requires an explicit method descriptor to resolve the private method across ModDevGradle mapping states.
+     */
+    @WrapOperation(
+            method = "travelInFluid(Lnet/minecraft/world/phys/Vec3;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;scale(D)Lnet/minecraft/world/phys/Vec3;"),
+            require = 0
+    )
+    private Vec3 enchantment_core$applyEntityDragScale(Vec3 instance, double scale, Operation<Vec3> original) {
+        return original.call(instance, enchantment_core$calculateDragMultiplier(scale));
+    }
+
+    /**
+     * Intercepts water fluid physics execution.
+     * Captures the discrete X, Y, and Z coefficients and scales them independently.
+     */
+    @WrapOperation(
+            method = "travelInFluid(Lnet/minecraft/world/phys/Vec3;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;multiply(DDD)Lnet/minecraft/world/phys/Vec3;"),
+            require = 0
+    )
+    private Vec3 enchantment_core$applyEntityDragMultiply(Vec3 instance, double x, double y, double z, Operation<Vec3> original) {
+        double newX = enchantment_core$calculateDragMultiplier(x);
+        double newY = enchantment_core$calculateDragMultiplier(y);
+        double newZ = enchantment_core$calculateDragMultiplier(z);
+        return original.call(instance, newX, newY, newZ);
     }
 }

@@ -21,7 +21,7 @@ public class EnchantableListEntry extends AbstractRegistryEntry<Item, List<ItemO
     public EnchantableListEntry(Property<List<ItemOrItems>> property, ConfigScreen parentScreen, Minecraft minecraft, Runnable onValueChanged) {
         // We pass the Item registry and dummy providers to satisfy the base constructor.
         // We bypass them completely in our overridden methods.
-        super(property, parentScreen, minecraft, onValueChanged, BuiltInRegistries.ITEM, ItemStack::new, Item::getDescription);
+        super(property, parentScreen, minecraft, onValueChanged, BuiltInRegistries.ITEM, ItemStack::new, Item::getName);
         this.updateWidgetValue();
     }
 

@@ -17,8 +17,8 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.math.FieldAxis;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -47,24 +47,24 @@ public class SpellFieldDebugRenderer {
         double cy = cameraPos.y();
         double cz = cameraPos.z();
 
+        RenderSystem.depthMask(false);
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
         // Pass the PoseStack directly to retain proper world-space alignment
         renderLines(poseStack, level, partialTick, cx, cy, cz, activeFields);
         renderSurfaces(poseStack, level, partialTick, cx, cy, cz, activeFields);
         renderFieldPoints(poseStack, level, partialTick, cx, cy, cz, activeFields);
         renderVectorFields(poseStack, level, partialTick, cx, cy, cz, activeFields);
+
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
     }
 
     private static void renderLines(PoseStack poseStack, Level level, float partialTick, double cx, double cy, double cz, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
-        RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.disableCull();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.lineWidth(Math.max(2.5F, (float) Minecraft.getInstance().getWindow().getWidth() / 1920.0F * 2.5F));
-
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+        boolean hasGeometry = false;
 
         int bbCol = Config.BOUNDING_BOX_COLOR.get();
         float bbA = ((bbCol >> 24) & 0xFF) / 255.0F;
@@ -89,7 +89,7 @@ public class SpellFieldDebugRenderer {
             Entity anchorEntity = trackedField.anchorEntity;
             if (anchorEntity == null) continue;
 
-            // Fetch the client-side entity to inherit frame-perfect interpolation
+            // 2. Fetch the client-side entity to inherit frame-perfect interpolation
             Entity clientEntity = level.getEntity(anchorEntity.getId());
             if (clientEntity != null) {
                 anchorEntity = clientEntity;
@@ -100,7 +100,7 @@ public class SpellFieldDebugRenderer {
             for (LocalVolume volume : trackedField.volumes) {
                 poseStack.pushPose();
                 poseStack.translate(lerpPos.x - cx, lerpPos.y - cy, lerpPos.z - cz);
-                LevelRenderer.renderLineBox(
+                ShapeRenderer.renderLineBox(
                         poseStack, buffer,
                         volume.bounds().minX, volume.bounds().minY, volume.bounds().minZ,
                         volume.bounds().maxX, volume.bounds().maxY, volume.bounds().maxZ,
@@ -111,23 +111,26 @@ public class SpellFieldDebugRenderer {
                 if (volume.topology() != null) {
                     Topology topology = volume.topology();
                     float originRange = topology.originRange().calculate(trackedField.enchantmentLevel);
-                    if (originRange <= 0.0F) continue;
+                    if (originRange <= 0.0F) {
+                        hasGeometry = true;
+                        continue;
+                    }
 
                     Vec3 absVolumeCenter = lerpPos.add(volume.volumeCenter());
-
                     Vec3 absOrigin = topology.getOrigin(trackedField.enchantmentLevel, anchorEntity, absVolumeCenter);
+
                     poseStack.pushPose();
                     poseStack.translate(absOrigin.x - cx, absOrigin.y - cy, absOrigin.z - cz);
                     Matrix4f pose = poseStack.last().pose();
 
                     float s = 0.5F;
 
-                    buffer.addVertex(pose, -s, 0, 0).setColor(xr, xg, xb, 255).setNormal(1, 0, 0);
-                    buffer.addVertex(pose, s, 0, 0).setColor(xr, xg, xb, 255).setNormal(1, 0, 0);
-                    buffer.addVertex(pose, 0, -s, 0).setColor(yr, yg, yb, 255).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0, s, 0).setColor(yr, yg, yb, 255).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0, 0, -s).setColor(zr, zg, zb, 255).setNormal(0, 0, 1);
-                    buffer.addVertex(pose, 0, 0, s).setColor(zr, zg, zb, 255).setNormal(0, 0, 1);
+                    buffer.addVertex(pose, -s, 0, 0).setColor(xr, xg, xb, 255).setNormal(poseStack.last(), 1, 0, 0);
+                    buffer.addVertex(pose, s, 0, 0).setColor(xr, xg, xb, 255).setNormal(poseStack.last(), 1, 0, 0);
+                    buffer.addVertex(pose, 0, -s, 0).setColor(yr, yg, yb, 255).setNormal(poseStack.last(), 0, 1, 0);
+                    buffer.addVertex(pose, 0, s, 0).setColor(yr, yg, yb, 255).setNormal(poseStack.last(), 0, 1, 0);
+                    buffer.addVertex(pose, 0, 0, -s).setColor(zr, zg, zb, 255).setNormal(poseStack.last(), 0, 0, 1);
+                    buffer.addVertex(pose, 0, 0, s).setColor(zr, zg, zb, 255).setNormal(poseStack.last(), 0, 0, 1);
 
                     if (topology.axis().isPresent()) {
                         Vec3 dir = topology.axis().get().resolve(trackedField.enchantmentLevel, anchorEntity);
@@ -136,37 +139,32 @@ public class SpellFieldDebugRenderer {
 
                             float axialRange = topology.axialRange().map(v -> v.calculate(trackedField.enchantmentLevel)).orElse(originRange);
 
-                            buffer.addVertex(pose, 0, 0, 0).setColor(ar, ag, ab, 255).setNormal((float) dir.x, (float) dir.y, (float) dir.z);
-                            buffer.addVertex(pose, (float) (dir.x * axialRange), (float) (dir.y * axialRange), (float) (dir.z * axialRange)).setColor(ar, ag, ab, 255).setNormal((float) dir.x, (float) dir.y, (float) dir.z);
+                            buffer.addVertex(pose, 0, 0, 0).setColor(ar, ag, ab, 255).setNormal(poseStack.last(), (float) dir.x, (float) dir.y, (float) dir.z);
+                            buffer.addVertex(pose, (float) (dir.x * axialRange), (float) (dir.y * axialRange), (float) (dir.z * axialRange)).setColor(ar, ag, ab, 255).setNormal(poseStack.last(), (float) dir.x, (float) dir.y, (float) dir.z);
                         }
                     }
                     poseStack.popPose();
                 }
+                hasGeometry = true;
             }
         }
 
-        try {
-            BufferUploader.drawWithShader(buffer.buildOrThrow());
-        } catch (Exception e) {
-            // Safely discard the empty render batch
+        // 3. Execution strictly isolated outside of iterative loops
+        if (hasGeometry) {
+            try {
+                RenderType.lines().draw(buffer.buildOrThrow());
+            } catch (Exception e) {
+                tesselator.clear();
+            }
+        } else {
+            tesselator.clear();
         }
-
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
-        RenderSystem.lineWidth(1.0F);
     }
 
     private static void renderSurfaces(PoseStack poseStack, Level level, float partialTick, double cx, double cy, double cz, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.disableCull();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        boolean hasGeometry = false;
 
         int planeCol = Config.TOPOLOGY_PLANE_COLOR.get();
         int pr = (planeCol >> 16) & 0xFF; int pg = (planeCol >> 8) & 0xFF; int pb = planeCol & 0xFF; int pa = (planeCol >> 24) & 0xFF;
@@ -179,7 +177,6 @@ public class SpellFieldDebugRenderer {
             Entity anchorEntity = trackedField.anchorEntity;
             if (anchorEntity == null) continue;
 
-            // Fetch the client-side entity to inherit frame-perfect interpolation
             Entity clientEntity = level.getEntity(anchorEntity.getId());
             if (clientEntity != null) {
                 anchorEntity = clientEntity;
@@ -236,8 +233,10 @@ public class SpellFieldDebugRenderer {
                                 buffer.addVertex(pose, (float) v0.x, (float) v0.y, (float) v0.z).setColor(pr, pg, pb, pa);
                                 buffer.addVertex(pose, (float) v1.x, (float) v1.y, (float) v1.z).setColor(pr, pg, pb, pa);
                                 buffer.addVertex(pose, (float) v2.x, (float) v2.y, (float) v2.z).setColor(pr, pg, pb, pa);
+                                buffer.addVertex(pose, (float) v2.x, (float) v2.y, (float) v2.z).setColor(pr, pg, pb, pa);
                             }
                             poseStack.popPose();
+                            hasGeometry = true;
                         }
                     }
                 } else {
@@ -274,13 +273,14 @@ public class SpellFieldDebugRenderer {
                             quad = clipPolygon(quad, volume.bounds());
 
                             if (quad.size() >= 3) {
-                                Vec3 v0 = quad.getFirst();
+                                Vec3 v0 = quad.get(0);
                                 for (int k = 1; k < quad.size() - 1; k++) {
                                     Vec3 vk1 = quad.get(k);
                                     Vec3 vk2 = quad.get(k + 1);
 
                                     buffer.addVertex(pose, (float) v0.x, (float) v0.y, (float) v0.z).setColor(sr, sg, sb, sa);
                                     buffer.addVertex(pose, (float) vk1.x, (float) vk1.y, (float) vk1.z).setColor(sr, sg, sb, sa);
+                                    buffer.addVertex(pose, (float) vk2.x, (float) vk2.y, (float) vk2.z).setColor(sr, sg, sb, sa);
                                     buffer.addVertex(pose, (float) vk2.x, (float) vk2.y, (float) vk2.z).setColor(sr, sg, sb, sa);
                                 }
                             }
@@ -292,19 +292,20 @@ public class SpellFieldDebugRenderer {
                     }
 
                     poseStack.popPose();
+                    hasGeometry = true;
                 }
             }
         }
 
-        try {
-            BufferUploader.drawWithShader(buffer.buildOrThrow());
-        } catch (Exception e) {
-            // Safely discard the empty render batch
+        if (hasGeometry) {
+            try {
+                RenderType.debugQuads().draw(buffer.buildOrThrow());
+            } catch (Exception e) {
+                tesselator.clear();
+            }
+        } else {
+            tesselator.clear();
         }
-
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
     }
 
     private static void drawIntersectionCap(VertexConsumer buffer, Matrix4f pose, AABB box, Vec3 center, float radius, DistanceMetric metric, int r, int g, int b, int a, int face) {
@@ -360,6 +361,7 @@ public class SpellFieldDebugRenderer {
                 buffer.addVertex(pose, (float) v0.x, (float) v0.y, (float) v0.z).setColor(r, g, b, a);
                 buffer.addVertex(pose, (float) v1.x, (float) v1.y, (float) v1.z).setColor(r, g, b, a);
                 buffer.addVertex(pose, (float) v2.x, (float) v2.y, (float) v2.z).setColor(r, g, b, a);
+                buffer.addVertex(pose, (float) v2.x, (float) v2.y, (float) v2.z).setColor(r, g, b, a);
             }
         }
     }
@@ -403,15 +405,9 @@ public class SpellFieldDebugRenderer {
     }
 
     private static void renderFieldPoints(PoseStack poseStack, Level level, float partialTick, double cx, double cy, double cz, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.disableCull();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        boolean hasGeometry = false;
 
         int highCol = Config.FIELD_POINT_HIGH_COLOR.get();
         int hr = (highCol >> 16) & 0xFF, hg = (highCol >> 8) & 0xFF, hb = highCol & 0xFF, ha = (highCol >> 24) & 0xFF;
@@ -424,7 +420,6 @@ public class SpellFieldDebugRenderer {
             Entity anchorEntity = trackedField.anchorEntity;
             if (anchorEntity == null) continue;
 
-            // Fetch the client-side entity to inherit frame-perfect interpolation
             Entity clientEntity = level.getEntity(anchorEntity.getId());
             if (clientEntity != null) {
                 anchorEntity = clientEntity;
@@ -493,6 +488,8 @@ public class SpellFieldDebugRenderer {
                                 buffer.addVertex(pose, fx + size, fy + size, fz - size).setColor(r, g, b, a);
                                 buffer.addVertex(pose, fx + size, fy + size, fz + size).setColor(r, g, b, a);
                                 buffer.addVertex(pose, fx + size, fy - size, fz + size).setColor(r, g, b, a);
+
+                                hasGeometry = true;
                             }
                         }
                     }
@@ -501,28 +498,21 @@ public class SpellFieldDebugRenderer {
             poseStack.popPose();
         }
 
-        try {
-            BufferUploader.drawWithShader(buffer.buildOrThrow());
-        } catch (Exception e) {
-            // Safely discard the empty render batch
+        if (hasGeometry) {
+            try {
+                RenderType.debugQuads().draw(buffer.buildOrThrow());
+            } catch (Exception e) {
+                tesselator.clear();
+            }
+        } else {
+            tesselator.clear();
         }
-
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
     }
 
     private static void renderVectorFields(PoseStack poseStack, Level level, float partialTick, double cx, double cy, double cz, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
-        RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.disableCull();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.lineWidth(2.0F);
-
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+        boolean hasGeometry = false;
 
         int stemCol = Config.VECTOR_STEM_COLOR.get();
         int sr = (stemCol >> 16) & 0xFF, sg = (stemCol >> 8) & 0xFF, sb = stemCol & 0xFF, sa = (stemCol >> 24) & 0xFF;
@@ -537,7 +527,6 @@ public class SpellFieldDebugRenderer {
             Entity anchorEntity = trackedField.anchorEntity;
             if (anchorEntity == null) continue;
 
-            // Fetch the client-side entity to inherit frame-perfect interpolation
             Entity clientEntity = level.getEntity(anchorEntity.getId());
             if (clientEntity != null) {
                 anchorEntity = clientEntity;
@@ -581,11 +570,13 @@ public class SpellFieldDebugRenderer {
                                 float py = (float) y;
                                 float pz = (float) z;
 
-                                buffer.addVertex(pose, px, py, pz).setColor(sr, sg, sb, sa).setNormal(dx, dy, dz);
-                                buffer.addVertex(pose, px + dx, py + dy, pz + dz).setColor(sr, sg, sb, sa).setNormal(dx, dy, dz);
+                                buffer.addVertex(pose, px, py, pz).setColor(sr, sg, sb, sa).setNormal(poseStack.last(), dx, dy, dz);
+                                buffer.addVertex(pose, px + dx, py + dy, pz + dz).setColor(sr, sg, sb, sa).setNormal(poseStack.last(), dx, dy, dz);
 
-                                buffer.addVertex(pose, px + dx, py + dy, pz + dz).setColor(tr, tg, tb, ta).setNormal(dx, dy, dz);
-                                buffer.addVertex(pose, px + dx + (dx * 0.2F), py + dy + (dy * 0.2F), pz + dz + (dz * 0.2F)).setColor(tr, tg, tb, ta).setNormal(dx, dy, dz);
+                                buffer.addVertex(pose, px + dx, py + dy, pz + dz).setColor(tr, tg, tb, ta).setNormal(poseStack.last(), dx, dy, dz);
+                                buffer.addVertex(pose, px + dx + (dx * 0.2F), py + dy + (dy * 0.2F), pz + dz + (dz * 0.2F)).setColor(tr, tg, tb, ta).setNormal(poseStack.last(), dx, dy, dz);
+
+                                hasGeometry = true;
                             }
                         }
                     }
@@ -594,15 +585,14 @@ public class SpellFieldDebugRenderer {
             poseStack.popPose();
         }
 
-        try {
-            BufferUploader.drawWithShader(buffer.buildOrThrow());
-        } catch (Exception e) {
-            // Safely discard the empty render batch
+        if (hasGeometry) {
+            try {
+                RenderType.lines().draw(buffer.buildOrThrow());
+            } catch (Exception e) {
+                tesselator.clear();
+            }
+        } else {
+            tesselator.clear();
         }
-
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
-        RenderSystem.lineWidth(1.0F);
     }
 }

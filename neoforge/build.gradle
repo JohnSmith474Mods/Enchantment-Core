@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation "maven.modrinth:config-overhauled:1.0.0+1.21-neoforge"
+    implementation "maven.modrinth:config-overhauled:1.0.0+1.21.2-neoforge"
 }
 
 neoForge {
@@ -13,10 +13,6 @@ neoForge {
     def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
         accessTransformers.add(at.absolutePath)
-    }
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
     }
     runs {
         configureEach {

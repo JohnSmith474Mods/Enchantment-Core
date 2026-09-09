@@ -44,7 +44,7 @@ public record IgniteBlockEffect(
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) {
             BlockState stateBelow = level.getBlockState(pos.below());
-            if (stateBelow.isSolidRender(level, pos.below())) {
+            if (stateBelow.isSolidRender()) {
                 level.setBlockAndUpdate(pos, BaseFireBlock.getState(level, pos));
                 modifiedBlocks.add(pos);
             }

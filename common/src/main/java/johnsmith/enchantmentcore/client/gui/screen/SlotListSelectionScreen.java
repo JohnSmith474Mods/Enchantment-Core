@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -186,11 +187,11 @@ public class SlotListSelectionScreen extends Screen {
                 guiGraphics.pose().translate(0, 0, 200.0F);
 
                 if (this.onMoveUp == null && this.onMoveDown == null) {
-                    guiGraphics.blitSprite(relativeX < 32 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
+                    guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
                 } else {
-                    guiGraphics.blitSprite(relativeX < 16 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
-                    if (this.onMoveUp != null) guiGraphics.blitSprite(relativeX < 32 && relativeX > 16 && relativeY < 16 ? MOVE_UP_HIGHLIGHTED : MOVE_UP, left, top, 32, 32);
-                    if (this.onMoveDown != null) guiGraphics.blitSprite(relativeX < 32 && relativeX > 16 && relativeY > 16 ? MOVE_DOWN_HIGHLIGHTED : MOVE_DOWN, left, top, 32, 32);
+                    guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 16 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
+                    if (this.onMoveUp != null) guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 && relativeX > 16 && relativeY < 16 ? MOVE_UP_HIGHLIGHTED : MOVE_UP, left, top, 32, 32);
+                    if (this.onMoveDown != null) guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 && relativeX > 16 && relativeY > 16 ? MOVE_DOWN_HIGHLIGHTED : MOVE_DOWN, left, top, 32, 32);
                 }
                 guiGraphics.pose().popPose();
             }

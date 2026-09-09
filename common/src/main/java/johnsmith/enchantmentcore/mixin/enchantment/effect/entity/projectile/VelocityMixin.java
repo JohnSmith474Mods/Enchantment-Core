@@ -76,7 +76,7 @@ public abstract class VelocityMixin {
                         Holder<Enchantment> enchantment = entry.getKey();
                         int level = entry.getIntValue();
 
-                        List<ConditionalEffect<EnchantmentValueEffect>> velocityEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_VELOCITY);
+                        List<ConditionalEffect<EnchantmentValueEffect>> velocityEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_VELOCITY.get());
 
                         if (velocityEffects != null) {
                             for (ConditionalEffect<EnchantmentValueEffect> conditional : velocityEffects) {

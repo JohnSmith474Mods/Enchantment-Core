@@ -60,7 +60,7 @@ public abstract class ExperienceMixin {
             for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                 if (!entry.getKey().value().matchingSlot(slot)) continue;
 
-                List<ConditionalEffect<ExperienceYieldEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.EXPERIENCE_YIELD_MULTIPLIER);
+                List<ConditionalEffect<ExperienceYieldEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.EXPERIENCE_YIELD_MULTIPLIER.get());
 
                 if (effects != null && !effects.isEmpty()) {
                     LootParams params = new LootParams.Builder(level)

@@ -24,7 +24,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
@@ -80,11 +79,6 @@ public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
     }
 
     @Override
-    public AABB getBoundingBoxForCulling() {
-        return this.getBoundingBox().inflate(this.getVisualScale());
-    }
-
-    @Override
     public boolean ignoreExplosion(Explosion explosion) {
         return true;
     }
@@ -110,7 +104,7 @@ public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(ServerLevel serverlevel, DamageSource source, float amount) {
         return false;
     }
 

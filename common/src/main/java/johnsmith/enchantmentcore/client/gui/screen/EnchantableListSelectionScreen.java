@@ -16,6 +16,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -55,9 +56,9 @@ public class EnchantableListSelectionScreen extends Screen {
         this.allAvailableItems = new ArrayList<>();
 
         // 1. Populate Enchantable Tags
-        BuiltInRegistries.ITEM.getTagNames()
-                .filter(key -> key.location().getPath().startsWith("enchantable/"))
-                .forEach(key -> this.allAvailableItems.add(new ItemOrItems(key)));
+        BuiltInRegistries.ITEM.getTags()
+                .filter(key -> key.key().location().getPath().startsWith("enchantable/"))
+                .forEach(key -> this.allAvailableItems.add(new ItemOrItems(key.key())));
 
         // 2. Populate Enchantable Items
         BuiltInRegistries.ITEM.stream()
@@ -239,7 +240,7 @@ public class EnchantableListSelectionScreen extends Screen {
                 this.subText = "Item Tag";
             } else {
                 this.icon = new ItemStack(element.getItem());
-                this.displayName = element.getItem().getDescription();
+                this.displayName = element.getItem().getName();
                 ResourceLocation key = BuiltInRegistries.ITEM.getKey(element.getItem());
                 this.subText = key != null ? key.toString() : "";
             }
@@ -254,14 +255,14 @@ public class EnchantableListSelectionScreen extends Screen {
             List<Component> tooltip = new ArrayList<>();
             tooltip.add(this.displayName.copy().withStyle(ChatFormatting.YELLOW));
             if (this.element.isTag()) {
-                Optional<HolderSet.Named<Item>> tagSet = BuiltInRegistries.ITEM.getTag(this.element.getTag());
+                Optional<HolderSet.Named<Item>> tagSet = BuiltInRegistries.ITEM.get(this.element.getTag());
                 if (tagSet.isPresent()) {
                     int count = 0;
                     int maxDisplay = 8;
                     for (Holder<Item> holder : tagSet.get()) {
                         if (count < maxDisplay) {
                             tooltip.add(Component.literal("   ").withStyle(ChatFormatting.DARK_GRAY)
-                                    .append(holder.value().getDescription().copy().withStyle(ChatFormatting.GRAY)));
+                                    .append(holder.value().getName().copy().withStyle(ChatFormatting.GRAY)));
                         }
                         count++;
                     }
@@ -294,11 +295,11 @@ public class EnchantableListSelectionScreen extends Screen {
                 guiGraphics.pose().translate(0, 0, 200.0F);
 
                 if (this.onMoveUp == null && this.onMoveDown == null) {
-                    guiGraphics.blitSprite(relativeX < 32 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
+                    guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
                 } else {
-                    guiGraphics.blitSprite(relativeX < 16 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
-                    if (this.onMoveUp != null) guiGraphics.blitSprite(relativeX < 32 && relativeX > 16 && relativeY < 16 ? MOVE_UP_HIGHLIGHTED : MOVE_UP, left, top, 32, 32);
-                    if (this.onMoveDown != null) guiGraphics.blitSprite(relativeX < 32 && relativeX > 16 && relativeY > 16 ? MOVE_DOWN_HIGHLIGHTED : MOVE_DOWN, left, top, 32, 32);
+                    guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 16 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
+                    if (this.onMoveUp != null) guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 && relativeX > 16 && relativeY < 16 ? MOVE_UP_HIGHLIGHTED : MOVE_UP, left, top, 32, 32);
+                    if (this.onMoveDown != null) guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 && relativeX > 16 && relativeY > 16 ? MOVE_DOWN_HIGHLIGHTED : MOVE_DOWN, left, top, 32, 32);
                 }
                 guiGraphics.pose().popPose();
 

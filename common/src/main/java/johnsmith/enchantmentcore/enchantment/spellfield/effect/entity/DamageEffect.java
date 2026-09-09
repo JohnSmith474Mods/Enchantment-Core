@@ -47,7 +47,7 @@ public record DamageEffect(
         float finalDamage = this.amount.calculate(enchantmentLevel) * volumeScalar;
         if (finalDamage <= 0.0F) return;
 
-        net.minecraft.core.Holder<DamageType> damageHolder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(this.damageType);
+        net.minecraft.core.Holder<DamageType> damageHolder = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(this.damageType);
         DamageSource source = new DamageSource(damageHolder, spatialReference, context.owner());
         victim.hurt(source, finalDamage);
     }

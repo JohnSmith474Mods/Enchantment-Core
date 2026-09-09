@@ -10,10 +10,6 @@ neoForge {
     if (at.exists()) {
         accessTransformers.add(at.absolutePath)
     }
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
-    }
 }
 
 dependencies {
@@ -22,7 +18,7 @@ dependencies {
     compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
 
-    compileOnly "maven.modrinth:config-overhauled:1.0.0+1.21-neoforge"
+    compileOnly "maven.modrinth:config-overhauled:1.0.0+1.21.2-neoforge"
 }
 
 configurations {

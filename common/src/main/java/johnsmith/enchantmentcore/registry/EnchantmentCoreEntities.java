@@ -5,6 +5,8 @@ import johnsmith.enchantmentcore.enchantment.spellfield.entity.SpellFieldAnchorE
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -27,19 +29,20 @@ public class EnchantmentCoreEntities {
                     .clientTrackingRange(64)
                     .updateInterval(1)
                     .noSummon()
-                    .build("spell_field_anchor")
     );
 
     /**
      * Helper method to register an entity type into the built-in Minecraft registry.
      *
-     * @param name   The registry path identifier for the entity.
-     * @param entity The configured entity type instance.
-     * @param <T>    The bounded entity class.
+     * @param name    The registry path identifier for the entity.
+     * @param builder The configured entity type builder.
+     * @param <T>     The bounded entity class.
      * @return The registered entity type.
      */
-    public static <T extends Entity> EntityType<T> register(String name, EntityType<T> entity) {
-        return Registry.register(BuiltInRegistries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name), entity);
+    public static <T extends Entity> EntityType<T> register(String name, EntityType.Builder<T> builder) {
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
+        ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, id);
+        return Registry.register(BuiltInRegistries.ENTITY_TYPE, key, builder.build(key));
     }
 
     /**

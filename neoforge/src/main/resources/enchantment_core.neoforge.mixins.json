@@ -4,9 +4,7 @@
   "package": "johnsmith.enchantmentcore.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
-  "client": [
-    "client.render.HumanoidArmorLayerMixin"
-  ],
+  "client": [],
   "server": [],
   "injectors": {
     "defaultRequire": 1

@@ -30,7 +30,6 @@ public class Config {
     public static final Group COMBAT_RULES = GLOBAL.define("combat_rules");
     public static final Group DATA = GLOBAL.define("data");
     public static final Group DATA_TRANSFORMER = GLOBAL.define("data_transformer");
-    public static final Group ENCHANTING = GLOBAL.define("enchanting");
     public static final Group EXPLOSION = GLOBAL.define("explosion");
     public static final Group SPELL_FIELD = GLOBAL.define("spell_field");
 
@@ -64,12 +63,6 @@ public class Config {
             .globalSide()
             .asFloat(25.F, 1.F, 32_768.F)
             .withComment("The value used to calculate damage reduction. Will be greater than the Numerator and there is nothing you can do about it.")
-            .register();
-
-    public static final Property<Integer> BASE_ENCHANTABILITY = ENCHANTING.define("base_enchantability")
-            .globalSide()
-            .asInteger(0, 0, 255)
-            .withComment("The base enchantability value assigned to items with a base enchantability of '0'. Set to '0' when disabled. Higher values yield better enchantments at lower levels.")
             .register();
 
     public static final Property<List<Block>> SPELL_FIELD_BLOCK_BLACKLIST = SPELL_FIELD.define("block_blacklist")
