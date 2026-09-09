@@ -1,8 +1,10 @@
 package johnsmith.enchantmentcore.registry;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import com.google.gson.JsonPrimitive;
 import johnsmith.enchantmentcore.config.Config;
 
 import java.util.ArrayList;
@@ -162,6 +164,69 @@ public class DataTransformerRegistry {
             exclusions.addAll(userExclusions);
         }
         return exclusions;
+    }
+
+    /**
+     * Recursively traverses a JSON tree and replaces serialized constant objects
+     * with their underlying primitive values to match standard datapack structures.
+     *
+     * @param element The JSON element to process and mutate.
+     */
+    public static void flattenExportedConstants(JsonElement element) {
+        if (element.isJsonArray()) {
+            JsonArray array = element.getAsJsonArray();
+            for (int i = 0; i < array.size(); i++) {
+                JsonElement child = array.get(i);
+                if (isConstantObject(child)) {
+                    array.set(i, extractConstantValue(child));
+                } else {
+                    flattenExportedConstants(child);
+                }
+            }
+        } else if (element.isJsonObject()) {
+            JsonObject obj = element.getAsJsonObject();
+            List<String> keys = new ArrayList<>(obj.keySet());
+            for (String key : keys) {
+                JsonElement child = obj.get(key);
+                if (isConstantObject(child)) {
+                    obj.add(key, extractConstantValue(child));
+                } else {
+                    flattenExportedConstants(child);
+                }
+            }
+        }
+    }
+
+    /**
+     * Evaluates whether a given JSON element represents a serialized constant type definition.
+     *
+     * @param element The JSON element to evaluate.
+     * @return {@code true} if the element is a JSON object with a "type" matching
+     *         a known constant identifier, {@code false} otherwise.
+     */
+    private static boolean isConstantObject(JsonElement element) {
+        if (!element.isJsonObject()) return false;
+        JsonObject obj = element.getAsJsonObject();
+        if (!obj.has("type")) return false;
+        String type = obj.get("type").getAsString();
+        return type.equals("minecraft:constant") || type.equals("enchantment_core:configurable_constant");
+    }
+
+    /**
+     * Extracts the numerical primitive value from a serialized constant object.
+     *
+     * @param element The JSON object representing the constant.
+     * @return A JSON primitive containing the extracted float value, defaulting
+     *         to 0.0F if neither "default_value" nor "value" keys are present.
+     */
+    private static JsonPrimitive extractConstantValue(JsonElement element) {
+        JsonObject obj = element.getAsJsonObject();
+        if (obj.has("default_value")) {
+            return obj.getAsJsonPrimitive("default_value");
+        } else if (obj.has("value")) {
+            return obj.getAsJsonPrimitive("value");
+        }
+        return new JsonPrimitive(0.0F);
     }
 
     static {

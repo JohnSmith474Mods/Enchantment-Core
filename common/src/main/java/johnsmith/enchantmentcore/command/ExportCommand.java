@@ -94,6 +94,8 @@ public class ExportCommand {
                 transformer.applyExport(root);
             }
 
+            DataTransformerRegistry.flattenExportedConstants(root);
+
             File outputFile = outputDir.resolve(id.getPath() + ".json").toFile();
             try (FileWriter writer = new FileWriter(outputFile)) {
                 GSON.toJson(root, writer);
