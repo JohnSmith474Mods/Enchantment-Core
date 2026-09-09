@@ -17,12 +17,8 @@ public class FabricClient implements ClientModInitializer {
         CommonClient.initialize();
         EntityRendererRegistry.register(EnchantmentCoreEntities.SPELL_FIELD_ANCHOR, SpellFieldAnchorRenderer::new);
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            SpellFieldDebugTracker.tick();
-        });
+        ClientTickEvents.END_CLIENT_TICK.register(client -> SpellFieldDebugTracker.tick());
 
-        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
-            SpellFieldDebugRenderer.render(context.matrixStack().last().pose(), context.camera(), context.tickCounter().getGameTimeDeltaPartialTick(true));
-        });
+        WorldRenderEvents.AFTER_ENTITIES.register(context -> SpellFieldDebugRenderer.render(context.matrixStack(), context.camera(), context.tickCounter().getGameTimeDeltaPartialTick(true)));
     }
 }

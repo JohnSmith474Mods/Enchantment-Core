@@ -31,7 +31,7 @@ import org.joml.Vector3f;
 
 public class SpellFieldDebugRenderer {
 
-    public static void render(Matrix4f poseMatrix, Camera camera, float partialTick) {
+    public static void render(PoseStack poseStack, Camera camera, float partialTick) {
         if (!Config.ENABLE_DEBUG_RENDERER.get()) return;
 
         if (!Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) return;
@@ -47,9 +47,7 @@ public class SpellFieldDebugRenderer {
         double cy = cameraPos.y();
         double cz = cameraPos.z();
 
-        PoseStack poseStack = new PoseStack();
-        poseStack.mulPose(poseMatrix);
-
+        // Pass the PoseStack directly to retain proper world-space alignment
         renderLines(poseStack, level, partialTick, cx, cy, cz, activeFields);
         renderSurfaces(poseStack, level, partialTick, cx, cy, cz, activeFields);
         renderFieldPoints(poseStack, level, partialTick, cx, cy, cz, activeFields);
@@ -90,6 +88,12 @@ public class SpellFieldDebugRenderer {
             SpellFieldDebugTracker.TrackedSpellField trackedField = entry.getValue();
             Entity anchorEntity = trackedField.anchorEntity;
             if (anchorEntity == null) continue;
+
+            // Fetch the client-side entity to inherit frame-perfect interpolation
+            Entity clientEntity = level.getEntity(anchorEntity.getId());
+            if (clientEntity != null) {
+                anchorEntity = clientEntity;
+            }
 
             Vec3 lerpPos = anchorEntity.getPosition(partialTick);
 
@@ -144,7 +148,7 @@ public class SpellFieldDebugRenderer {
         try {
             BufferUploader.drawWithShader(buffer.buildOrThrow());
         } catch (Exception e) {
-            tesselator.clear();
+            // Safely discard the empty render batch
         }
 
         RenderSystem.depthMask(true);
@@ -163,7 +167,6 @@ public class SpellFieldDebugRenderer {
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
-        boolean hasSurfaces = false;
 
         int planeCol = Config.TOPOLOGY_PLANE_COLOR.get();
         int pr = (planeCol >> 16) & 0xFF; int pg = (planeCol >> 8) & 0xFF; int pb = planeCol & 0xFF; int pa = (planeCol >> 24) & 0xFF;
@@ -175,6 +178,12 @@ public class SpellFieldDebugRenderer {
             SpellFieldDebugTracker.TrackedSpellField trackedField = entry.getValue();
             Entity anchorEntity = trackedField.anchorEntity;
             if (anchorEntity == null) continue;
+
+            // Fetch the client-side entity to inherit frame-perfect interpolation
+            Entity clientEntity = level.getEntity(anchorEntity.getId());
+            if (clientEntity != null) {
+                anchorEntity = clientEntity;
+            }
 
             Vec3 lerpPos = anchorEntity.getPosition(partialTick);
 
@@ -219,7 +228,7 @@ public class SpellFieldDebugRenderer {
                             poseStack.translate(lerpPos.x - cx, lerpPos.y - cy, lerpPos.z - cz);
                             Matrix4f pose = poseStack.last().pose();
 
-                            Vec3 v0 = poly.get(0);
+                            Vec3 v0 = poly.getFirst();
                             for (int i = 1; i < poly.size() - 1; i++) {
                                 Vec3 v1 = poly.get(i);
                                 Vec3 v2 = poly.get(i + 1);
@@ -229,7 +238,6 @@ public class SpellFieldDebugRenderer {
                                 buffer.addVertex(pose, (float) v2.x, (float) v2.y, (float) v2.z).setColor(pr, pg, pb, pa);
                             }
                             poseStack.popPose();
-                            hasSurfaces = true;
                         }
                     }
                 } else {
@@ -266,7 +274,7 @@ public class SpellFieldDebugRenderer {
                             quad = clipPolygon(quad, volume.bounds());
 
                             if (quad.size() >= 3) {
-                                Vec3 v0 = quad.get(0);
+                                Vec3 v0 = quad.getFirst();
                                 for (int k = 1; k < quad.size() - 1; k++) {
                                     Vec3 vk1 = quad.get(k);
                                     Vec3 vk2 = quad.get(k + 1);
@@ -284,17 +292,14 @@ public class SpellFieldDebugRenderer {
                     }
 
                     poseStack.popPose();
-                    hasSurfaces = true;
                 }
             }
         }
 
-        if (hasSurfaces) {
-            try {
-                BufferUploader.drawWithShader(buffer.buildOrThrow());
-            } catch (Exception e) {
-                tesselator.clear();
-            }
+        try {
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
+        } catch (Exception e) {
+            // Safely discard the empty render batch
         }
 
         RenderSystem.depthMask(true);
@@ -302,7 +307,7 @@ public class SpellFieldDebugRenderer {
         RenderSystem.disableBlend();
     }
 
-    private static void drawIntersectionCap(BufferBuilder buffer, Matrix4f pose, AABB box, Vec3 center, float radius, DistanceMetric metric, int r, int g, int b, int a, int face) {
+    private static void drawIntersectionCap(VertexConsumer buffer, Matrix4f pose, AABB box, Vec3 center, float radius, DistanceMetric metric, int r, int g, int b, int a, int face) {
         double planeVal;
         double dist;
 
@@ -347,7 +352,7 @@ public class SpellFieldDebugRenderer {
         poly = clipPolygon(poly, box.inflate(0.001));
 
         if (poly.size() >= 3) {
-            Vec3 v0 = poly.get(0);
+            Vec3 v0 = poly.getFirst();
             for (int i = 1; i < poly.size() - 1; i++) {
                 Vec3 v1 = poly.get(i);
                 Vec3 v2 = poly.get(i + 1);
@@ -372,7 +377,7 @@ public class SpellFieldDebugRenderer {
     private static List<Vec3> clipAgainstPlane(List<Vec3> poly, double nx, double ny, double nz, double d) {
         if (poly.isEmpty()) return poly;
         List<Vec3> out = new ArrayList<>();
-        Vec3 S = poly.get(poly.size() - 1);
+        Vec3 S = poly.getLast();
         double sDist = S.x * nx + S.y * ny + S.z * nz;
         boolean sInside = sDist >= d;
 
@@ -382,10 +387,10 @@ public class SpellFieldDebugRenderer {
 
             if (sInside && eInside) {
                 out.add(E);
-            } else if (sInside && !eInside) {
+            } else if (sInside) {
                 double t = (d - sDist) / (eDist - sDist);
                 out.add(S.add(E.subtract(S).scale(t)));
-            } else if (!sInside && eInside) {
+            } else if (eInside) {
                 double t = (d - sDist) / (eDist - sDist);
                 out.add(S.add(E.subtract(S).scale(t)));
                 out.add(E);
@@ -407,7 +412,6 @@ public class SpellFieldDebugRenderer {
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        boolean hasPoints = false;
 
         int highCol = Config.FIELD_POINT_HIGH_COLOR.get();
         int hr = (highCol >> 16) & 0xFF, hg = (highCol >> 8) & 0xFF, hb = highCol & 0xFF, ha = (highCol >> 24) & 0xFF;
@@ -419,6 +423,12 @@ public class SpellFieldDebugRenderer {
             SpellFieldDebugTracker.TrackedSpellField trackedField = entry.getValue();
             Entity anchorEntity = trackedField.anchorEntity;
             if (anchorEntity == null) continue;
+
+            // Fetch the client-side entity to inherit frame-perfect interpolation
+            Entity clientEntity = level.getEntity(anchorEntity.getId());
+            if (clientEntity != null) {
+                anchorEntity = clientEntity;
+            }
 
             Vec3 lerpPos = anchorEntity.getPosition(partialTick);
 
@@ -483,8 +493,6 @@ public class SpellFieldDebugRenderer {
                                 buffer.addVertex(pose, fx + size, fy + size, fz - size).setColor(r, g, b, a);
                                 buffer.addVertex(pose, fx + size, fy + size, fz + size).setColor(r, g, b, a);
                                 buffer.addVertex(pose, fx + size, fy - size, fz + size).setColor(r, g, b, a);
-
-                                hasPoints = true;
                             }
                         }
                     }
@@ -493,12 +501,10 @@ public class SpellFieldDebugRenderer {
             poseStack.popPose();
         }
 
-        if (hasPoints) {
-            try {
-                BufferUploader.drawWithShader(buffer.buildOrThrow());
-            } catch (Exception e) {
-                tesselator.clear();
-            }
+        try {
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
+        } catch (Exception e) {
+            // Safely discard the empty render batch
         }
 
         RenderSystem.depthMask(true);
@@ -517,7 +523,6 @@ public class SpellFieldDebugRenderer {
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-        boolean hasVectors = false;
 
         int stemCol = Config.VECTOR_STEM_COLOR.get();
         int sr = (stemCol >> 16) & 0xFF, sg = (stemCol >> 8) & 0xFF, sb = stemCol & 0xFF, sa = (stemCol >> 24) & 0xFF;
@@ -531,6 +536,12 @@ public class SpellFieldDebugRenderer {
 
             Entity anchorEntity = trackedField.anchorEntity;
             if (anchorEntity == null) continue;
+
+            // Fetch the client-side entity to inherit frame-perfect interpolation
+            Entity clientEntity = level.getEntity(anchorEntity.getId());
+            if (clientEntity != null) {
+                anchorEntity = clientEntity;
+            }
 
             Vec3 lerpPos = anchorEntity.getPosition(partialTick);
             Vec3 absEpicenter = lerpPos.add(0, anchorEntity.getBbHeight() / 2.0, 0);
@@ -575,8 +586,6 @@ public class SpellFieldDebugRenderer {
 
                                 buffer.addVertex(pose, px + dx, py + dy, pz + dz).setColor(tr, tg, tb, ta).setNormal(dx, dy, dz);
                                 buffer.addVertex(pose, px + dx + (dx * 0.2F), py + dy + (dy * 0.2F), pz + dz + (dz * 0.2F)).setColor(tr, tg, tb, ta).setNormal(dx, dy, dz);
-
-                                hasVectors = true;
                             }
                         }
                     }
@@ -585,12 +594,10 @@ public class SpellFieldDebugRenderer {
             poseStack.popPose();
         }
 
-        if (hasVectors) {
-            try {
-                BufferUploader.drawWithShader(buffer.buildOrThrow());
-            } catch (Exception e) {
-                tesselator.clear();
-            }
+        try {
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
+        } catch (Exception e) {
+            // Safely discard the empty render batch
         }
 
         RenderSystem.depthMask(true);

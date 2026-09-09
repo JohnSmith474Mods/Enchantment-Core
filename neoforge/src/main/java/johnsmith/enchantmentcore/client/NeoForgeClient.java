@@ -39,7 +39,7 @@ public class NeoForgeClient {
         @SubscribeEvent
         public static void onRenderLevelStage(RenderLevelStageEvent event) {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-                SpellFieldDebugRenderer.render(event.getPoseStack().last().pose(), event.getCamera(), event.getPartialTick().getGameTimeDeltaPartialTick(true));
+                SpellFieldDebugRenderer.render(event.getPoseStack(), event.getCamera(), event.getPartialTick().getGameTimeDeltaPartialTick(true));
             }
         }
     }

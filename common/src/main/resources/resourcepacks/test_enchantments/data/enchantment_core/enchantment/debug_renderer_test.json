@@ -1,0 +1,64 @@
+{
+  "description": {
+    "translate": "enchantment.enchantment_core.debug_renderer_test",
+    "fallback": "Renderer Debug"
+  },
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 1
+  },
+  "max_cost": {
+    "base": 1,
+    "per_level_above_first": 1
+  },
+  "anvil_cost": 1,
+  "slots": [
+    "mainhand",
+    "offhand"
+  ],
+  "supported_items": "#minecraft:enchantable/weapon",
+  "weight": 1,
+  "max_level": 1,
+  "effects": {
+    "minecraft:tick": [
+      {
+        "effect": {
+          "volumes": [
+            {
+              "shape": {
+                "radius": 12.0,
+                "type": "enchantment_core:cube"
+              },
+              "topology": {
+                "axial_scaling": {
+                  "type": "enchantment_core:linear"
+                },
+                "radial_scaling": {
+                  "decay_rate": 1.5,
+                  "type": "enchantment_core:exponential"
+                },
+                "axis": {
+                  "up": 1.0
+                },
+                "origin_range": 12.0,
+                "axial_range": 6.0,
+                "radial_range": 10.0
+              }
+            }
+          ],
+          "entity_effects": [
+            {
+              "axis": "vertical",
+              "rotation_direction": "clockwise",
+              "attraction_strength": 1.0,
+              "orbital_radius": 5.0,
+              "orbit_velocity": 0.8,
+              "type": "enchantment_core:orbit"
+            }
+          ],
+          "type": "enchantment_core:spell_field"
+        }
+      }
+    ]
+  }
+}

@@ -2,106 +2,23 @@
   "description": {
     "translate": "enchantment.enchantmentcore.dummy"
   },
-  "exclusive_set": "#minecraft:exclusive_set/armor",
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "general",
-      "group": "items",
-      "property": "supported_dummy"
-    },
-    "fallback": [
-      "#minecraft:enchantable/armor"
-    ]
-  },
-  "primary_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "general",
-      "group": "items",
-      "property": "primary_dummy"
-    },
-    "fallback": [
-      "minecraft:diamond_chestplate"
-    ]
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "general",
-      "group": "stats",
-      "property": "weight_dummy"
-    },
-    "fallback": 10
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "general",
-      "group": "stats",
-      "property": "max_level_dummy"
-    },
-    "fallback": 5
-  },
   "min_cost": {
-    "base": {
-      "config": {
-        "mod_id": "enchantment_core",
-        "category": "general",
-        "group": "costs",
-        "property": "min_cost_base_dummy"
-      },
-      "fallback": 1
-    },
-    "per_level_above_first": {
-      "config": {
-        "mod_id": "enchantment_core",
-        "category": "general",
-        "group": "costs",
-        "property": "min_cost_per_level_dummy"
-      },
-      "fallback": 11
-    }
+    "base": 1,
+    "per_level_above_first": 11
   },
   "max_cost": {
-    "base": {
-      "config": {
-        "mod_id": "enchantment_core",
-        "category": "general",
-        "group": "costs",
-        "property": "max_cost_base_dummy"
-      },
-      "fallback": 6
-    },
-    "per_level_above_first": {
-      "config": {
-        "mod_id": "enchantment_core",
-        "category": "general",
-        "group": "costs",
-        "property": "max_cost_per_level_dummy"
-      },
-      "fallback": 11
-    }
+    "base": 6,
+    "per_level_above_first": 11
   },
-  "anvil_cost": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "general",
-      "group": "costs",
-      "property": "anvil_cost_dummy"
-    },
-    "fallback": 2
-  },
-  "slots": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "general",
-      "group": "slots",
-      "property": "equipment_slots_dummy"
-    },
-    "fallback": [
-      "any"
-    ]
-  },
-  "effects": {}
+  "anvil_cost": 2,
+  "slots": [
+    "any"
+  ],
+  "supported_items": "#minecraft:enchantable/armor",
+  "primary_items": [
+    "minecraft:diamond_chestplate"
+  ],
+  "weight": 10,
+  "max_level": 5,
+  "exclusive_set": "#minecraft:exclusive_set/armor"
 }

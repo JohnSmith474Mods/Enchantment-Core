@@ -1,5 +1,7 @@
 package johnsmith.enchantmentcore.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import johnsmith.enchantmentcore.Constants;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugRenderer;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugTracker;
@@ -14,8 +16,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-
-import org.joml.Matrix4f;
 
 public class ForgeClient {
 
@@ -44,22 +44,13 @@ public class ForgeClient {
         }
 
         @SubscribeEvent
-        @SuppressWarnings("deprecation")
         public static void onRenderLevelStage(RenderLevelStageEvent event) {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-                // Extract game-time simulation delta to align entity interpolation with camera motion.
                 float partialTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
 
-                // The event.getPoseStack() method returns the compound Frustum matrix (Projection * ModelView = Compound).
-                Matrix4f frustumMatrix = event.getPoseStack();
+                PoseStack poseStack = new PoseStack();
 
-                // Invert the projection matrix.
-                Matrix4f projectionInverse = new Matrix4f(event.getProjectionMatrix()).invert();
-
-                // Multiply the inverted projection matrix by the compound Frustum matrix (Compound * Inverse = ModelView).
-                Matrix4f modelViewMatrix = projectionInverse.mul(frustumMatrix);
-
-                SpellFieldDebugRenderer.render(modelViewMatrix, event.getCamera(), partialTick);
+                SpellFieldDebugRenderer.render(poseStack, event.getCamera(), partialTick);
             }
         }
     }
