@@ -40,6 +40,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegisterEvent;
+import org.jetbrains.annotations.NotNull;
 
 import static net.minecraftforge.common.MinecraftForge.EVENT_BUS;
 
@@ -126,14 +127,25 @@ public class Forge {
     private void registerBuiltInPack(AddPackFindersEvent event, String namespace, String directory, String name, PackInclusionType inclusionType) {
         Path path = ModList.get().getModFileById(Constants.MOD_ID).getFile().findResource("resourcepacks", directory);
         if (Files.exists(path)) {
-            PackSelectionConfig selectionConfig = switch (inclusionType) {
-                case REQUIRED -> new PackSelectionConfig(true, Pack.Position.TOP, true);
-                case ACTIVE -> new PackSelectionConfig(true, Pack.Position.TOP, false);
-                case OPTIONAL -> new PackSelectionConfig(false, Pack.Position.TOP, false);
+            boolean isRequired = inclusionType == PackInclusionType.REQUIRED;
+            boolean isDefaultActive = inclusionType != PackInclusionType.OPTIONAL;
+
+            PackSelectionConfig selectionConfig = new PackSelectionConfig(isRequired, Pack.Position.TOP, false);
+
+            PackSource packSource = new PackSource() {
+                @Override
+                public @NotNull Component decorate(@NotNull Component component) {
+                    return PackSource.BUILT_IN.decorate(component);
+                }
+
+                @Override
+                public boolean shouldAddAutomatically() {
+                    return isDefaultActive;
+                }
             };
 
             Pack.ResourcesSupplier resourcesSupplier = new PathPackResources.PathResourcesSupplier(path);
-            PackLocationInfo info = new PackLocationInfo(namespace + ":" + directory, Component.literal(name), PackSource.BUILT_IN, Optional.empty());
+            PackLocationInfo info = new PackLocationInfo(namespace + ":" + directory, Component.literal(name), packSource, Optional.empty());
             Pack pack = Pack.readMetaAndCreate(info, resourcesSupplier, PackType.SERVER_DATA, selectionConfig);
 
             if (pack != null) {
