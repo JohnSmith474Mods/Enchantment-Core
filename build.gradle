@@ -7,6 +7,11 @@ plugins {
 
 allprojects {
     repositories {
+        mavenCentral()
+        maven {
+            name = "Forge"
+            url = "https://maven.minecraftforge.net/"
+        }
         maven {
             name = "Modrinth"
             url = "https://api.modrinth.com/maven"
