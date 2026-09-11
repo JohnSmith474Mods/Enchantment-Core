@@ -1,6 +1,6 @@
 plugins {
     id 'multiloader-loader'
-    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.3)'
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
 base {
@@ -78,7 +78,7 @@ dependencies {
 
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
-    implementation fg.deobf("maven.modrinth:config-overhauled:1.0.0+1.21.3-forge")
+    implementation fg.deobf("maven.modrinth:config-overhauled:1.0.0+1.21.4-forge")
 }
 
 publishing {

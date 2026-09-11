@@ -39,11 +39,12 @@
   ],
   "client": [
     "client.debug.EntityRenderDispatcherMixin",
-    "client.item.ItemPropertiesMixin",
-    "client.render.BlockEntityWithoutLevelRendererMixin",
+    "client.item.UseDurationMixin",
     "client.render.EquipmentLayerRendererMixin",
     "client.render.FogRendererMixin",
-    "client.render.ItemRendererMixin"
+    "client.render.ItemModelResolverMixin",
+    "client.render.ItemStackRenderStateMixin",
+    "client.render.RenderTypeMixin"
   ],
   "server": [],
   "injectors": {

@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation "maven.modrinth:config-overhauled:1.0.0+1.21.2-neoforge"
+    implementation "maven.modrinth:config-overhauled:1.0.0+1.21.4-neoforge"
 }
 
 neoForge {
@@ -22,8 +22,9 @@ neoForge {
         client {
             client()
         }
-        data {
-            data()
+        clientData {
+            clientData()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
         server {
             server()
