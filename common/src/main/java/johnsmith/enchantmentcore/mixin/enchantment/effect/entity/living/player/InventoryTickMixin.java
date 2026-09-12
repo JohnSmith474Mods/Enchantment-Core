@@ -11,6 +11,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityEquipment;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -41,10 +42,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class InventoryTickMixin {
 
     @Shadow @Final public Player player;
-    @Shadow @Final public NonNullList<ItemStack> items;
-    @Shadow @Final public NonNullList<ItemStack> armor;
-    @Shadow @Final public NonNullList<ItemStack> offhand;
-    @Shadow public int selected;
+    @Shadow @Final private NonNullList<ItemStack> items;
+    @Shadow @Final private EntityEquipment equipment;
+    @Shadow private int selected;
 
     /**
      * Intercepts the conclusion of the inventory tick sequence.
@@ -58,25 +58,11 @@ public abstract class InventoryTickMixin {
 
         LootParams.Builder paramsBuilder = null;
 
-        // Map armor array indices to specific armor equipment slots.
-        for (int i = 0; i < this.armor.size(); i++) {
-            EquipmentSlot slot = switch (i) {
-                case 0 -> EquipmentSlot.FEET;
-                case 1 -> EquipmentSlot.LEGS;
-                case 2 -> EquipmentSlot.CHEST;
-                case 3 -> EquipmentSlot.HEAD;
-                default -> null;
-            };
-            paramsBuilder = enchantment_core$processItem(this.armor.get(i), slot, paramsBuilder);
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot == EquipmentSlot.MAINHAND) continue;
+            paramsBuilder = enchantment_core$processItem(this.equipment.get(slot), slot, paramsBuilder);
         }
 
-        // Map offhand array to the offhand equipment slot.
-        for (int i = 0; i < this.offhand.size(); i++) {
-            paramsBuilder = enchantment_core$processItem(this.offhand.get(i), EquipmentSlot.OFFHAND, paramsBuilder);
-        }
-
-        // Map main inventory array. Assign MAINHAND strictly to the actively selected hotbar index.
-        // Assign null to all unequipped background items.
         for (int i = 0; i < this.items.size(); i++) {
             EquipmentSlot slot = (i == this.selected) ? EquipmentSlot.MAINHAND : null;
             paramsBuilder = enchantment_core$processItem(this.items.get(i), slot, paramsBuilder);
@@ -100,9 +86,6 @@ public abstract class InventoryTickMixin {
         if (enchantments.isEmpty()) return paramsBuilder;
 
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-
-            // Require the item to reside in a configured operational slot.
-            // Bypasses unequipped backpack items.
             if (slot == null || !entry.getKey().value().matchingSlot(slot)) {
                 continue;
             }
@@ -110,7 +93,6 @@ public abstract class InventoryTickMixin {
             List<ConditionalEffect<EnchantmentEntityEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.INVENTORY_TICK.get());
 
             if (effects != null && !effects.isEmpty()) {
-                // Instantiate the parameter builder lazily to eliminate overhead on items lacking the effect.
                 if (paramsBuilder == null) {
                     paramsBuilder = new LootParams.Builder((ServerLevel) this.player.level())
                             .withParameter(LootContextParams.THIS_ENTITY, this.player)

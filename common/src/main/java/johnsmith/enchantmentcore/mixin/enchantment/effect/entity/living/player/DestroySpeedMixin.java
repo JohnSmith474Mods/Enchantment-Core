@@ -14,6 +14,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ConditionalEffect;
@@ -49,7 +50,6 @@ public abstract class DestroySpeedMixin {
     private void enchantment_core$applyBreakSpeedModifiers(BlockState state, CallbackInfoReturnable<Float> cir) {
         float speed = cir.getReturnValueF();
 
-        // Terminate evaluation if the base speed indicates no effective mining progress.
         if (speed <= 1.0F) return;
 
         Player player = (Player) (Object) this;
@@ -59,12 +59,11 @@ public abstract class DestroySpeedMixin {
         float buoyancyMultiplier = 1.0F;
         float streakMultiplier = 1.0F;
 
-        // Evaluate buoyancy compensation. Execute strictly when the player is submerged and not grounded.
         if (!player.onGround() && (player.isInWater() || player.isInLava())) {
             LootContext buoyancyContext = null;
 
-            // Scan all equipment slots for active buoyancy enchantment effects.
-            for (ItemStack equipment : player.getAllSlots()) {
+            for (EquipmentSlot slot : EquipmentSlot.values()) {
+                ItemStack equipment = player.getItemBySlot(slot);
                 if (equipment.isEmpty()) continue;
                 ItemEnchantments enchantments = equipment.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
                 if (enchantments.isEmpty()) continue;
@@ -73,7 +72,6 @@ public abstract class DestroySpeedMixin {
                     List<ConditionalEffect<BuoyancyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.BUOYANCY.get());
 
                     if (effects != null) {
-                        // Lazily instantiate the loot context exclusively on the server.
                         if (!isClient && buoyancyContext == null) {
                             LootParams params = new LootParams.Builder(serverLevel)
                                     .withParameter(LootContextParams.THIS_ENTITY, player)
@@ -84,10 +82,8 @@ public abstract class DestroySpeedMixin {
                         }
 
                         for (ConditionalEffect<BuoyancyEffect> cond : effects) {
-                            // The client bypasses condition matching to maintain visual mining synchronization.
                             if (isClient || cond.matches(buoyancyContext)) {
                                 float mult = cond.effect().breakSpeedMultiplier().calculate(entry.getIntValue());
-                                // Retain the highest available buoyancy multiplier.
                                 if (mult > buoyancyMultiplier) buoyancyMultiplier = mult;
                             }
                         }
@@ -96,13 +92,10 @@ public abstract class DestroySpeedMixin {
             }
         }
 
-        // Evaluate mining streak acceleration.
-        // Identify the target block and retrieve the active streak counter from the player state.
         String targetId = BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
         int currentStreak = ((StreakStateAccessor) player).enchantment_core$getStreakCount(targetId);
 
         if (currentStreak > 0) {
-            // Restrict mining streak logic to the main hand item.
             ItemStack mainhand = player.getMainHandItem();
             if (!mainhand.isEmpty()) {
                 ItemEnchantments enchantments = mainhand.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
@@ -124,7 +117,6 @@ public abstract class DestroySpeedMixin {
 
                             for (ConditionalEffect<StreakEffect> cond : effects) {
                                 if (isClient || cond.matches(streakContext)) {
-                                    // Calculate the aggregate multiplier increment based on the active streak count.
                                     streakMultiplier += (cond.effect().increment().calculate(entry.getIntValue()) * currentStreak);
                                 }
                             }
@@ -134,7 +126,6 @@ public abstract class DestroySpeedMixin {
             }
         }
 
-        // Apply calculated multipliers to the base destruction speed and overwrite the return value.
         if (buoyancyMultiplier > 1.0F || streakMultiplier > 1.0F) {
             cir.setReturnValue(speed * buoyancyMultiplier * streakMultiplier);
         }

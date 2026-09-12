@@ -58,8 +58,8 @@ public final class Orphanage implements OrphanHandler {
             message.append(Component.literal("\nClick to copy log path to clipboard.")
                     .withStyle(style -> style.withUnderlined(true)
                             .withColor(Config.LINK_COLOR.get())
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, targetDir))
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy path")))));
+                            .withClickEvent(new ClickEvent.CopyToClipboard(targetDir))
+                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to copy directory path.")))));
         }
 
         player.sendSystemMessage(message);

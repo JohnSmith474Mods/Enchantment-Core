@@ -81,7 +81,9 @@ public record TemporaryTransmuteBlockEffect(
         BlockEntity be = level.getBlockEntity(pos);
         if (be != null) {
             beTag = be.saveWithFullMetadata(level.registryAccess());
-            Clearable.tryClear(be);
+            if (be instanceof Clearable clearable) {
+                clearable.clearContent();
+            }
         }
 
         level.setBlockAndUpdate(pos, this.replacementBlock.defaultBlockState());

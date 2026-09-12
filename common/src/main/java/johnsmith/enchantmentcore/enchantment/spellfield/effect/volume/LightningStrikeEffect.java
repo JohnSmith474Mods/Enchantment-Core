@@ -93,7 +93,7 @@ public record LightningStrikeEffect(
             Runnable strikeAction = () -> {
                 LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
                 if (lightning != null) {
-                    lightning.moveTo(targetPos);
+                    lightning.snapTo(targetPos);
                     lightning.setVisualOnly(this.visualOnly);
                     level.addFreshEntity(lightning);
                 }

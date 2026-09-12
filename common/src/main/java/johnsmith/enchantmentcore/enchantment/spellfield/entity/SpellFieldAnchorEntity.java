@@ -8,6 +8,7 @@ import java.util.UUID;
 import johnsmith.enchantmentcore.api.entity.SpellFieldAnchor;
 import johnsmith.enchantmentcore.enchantment.spellfield.SpellFieldComponent;
 
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -182,13 +183,13 @@ public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
-        this.lifeTime = tag.getInt("LifeTime");
-        this.tickCount = tag.getInt("Age");
-        this.tickRate = Math.max(1, tag.getInt("TickRate"));
-        this.activationDelay = tag.getInt("ActivationDelay");
-        this.activePhase = tag.getInt("ActivePhase");
-        this.restPhase = tag.getInt("RestPhase");
-        this.enchantmentLevel = tag.getInt("EnchantmentLevel");
+        this.lifeTime = tag.getInt("LifeTime").orElse(100);
+        this.tickCount = tag.getInt("Age").orElse(0);
+        this.tickRate = Math.max(1, tag.getInt("TickRate").orElse(1));
+        this.activationDelay = tag.getInt("ActivationDelay").orElse(0);
+        this.activePhase = tag.getInt("ActivePhase").orElse(0);
+        this.restPhase = tag.getInt("RestPhase").orElse(0);
+        this.enchantmentLevel = tag.getInt("EnchantmentLevel").orElse(0);
 
         if (tag.contains("VisualConfig")) {
             AnchorVisualConfig.CODEC.parse(NbtOps.INSTANCE, tag.get("VisualConfig"))
@@ -197,14 +198,18 @@ public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
         }
 
         if (tag.contains("OwnerUUID")) {
-            this.ownerUUID = tag.getUUID("OwnerUUID");
+            UUIDUtil.CODEC.parse(NbtOps.INSTANCE, tag.get("OwnerUUID"))
+                    .result()
+                    .ifPresent(uuid -> this.ownerUUID = uuid);
         }
+
         if (tag.contains("Item")) {
-            this.itemStack = ItemStack.parseOptional(this.registryAccess(), tag.getCompound("Item"));
+            ItemStack.OPTIONAL_CODEC.parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), tag.get("Item"))
+                    .result()
+                    .ifPresent(item -> this.itemStack = item);
         }
-        if (tag.contains("Slot")) {
-            this.slot = EquipmentSlot.byName(tag.getString("Slot"));
-        }
+
+        tag.getString("Slot").ifPresent(slotName -> this.slot = EquipmentSlot.byName(slotName));
 
         if (tag.contains("SpellField")) {
             SpellFieldComponent.CODEC.codec().parse(NbtOps.INSTANCE, tag.get("SpellField"))
@@ -240,11 +245,17 @@ public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
                 .ifPresent(visualNbt -> tag.put("VisualConfig", visualNbt));
 
         if (this.ownerUUID != null) {
-            tag.putUUID("OwnerUUID", this.ownerUUID);
+            UUIDUtil.CODEC.encodeStart(NbtOps.INSTANCE, this.ownerUUID)
+                    .result()
+                    .ifPresent(uuidNbt -> tag.put("OwnerUUID", uuidNbt));
         }
+
         if (!this.itemStack.isEmpty()) {
-            tag.put("Item", this.itemStack.saveOptional(this.registryAccess()));
+            ItemStack.OPTIONAL_CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), this.itemStack)
+                    .result()
+                    .ifPresent(itemNbt -> tag.put("Item", itemNbt));
         }
+
         tag.putString("Slot", this.slot.getName());
 
         if (this.spellField != null) {

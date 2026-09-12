@@ -1,6 +1,5 @@
 package johnsmith.enchantmentcore.client.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 
 import java.util.ArrayList;
@@ -47,18 +46,10 @@ public class SpellFieldDebugRenderer {
         double cy = cameraPos.y();
         double cz = cameraPos.z();
 
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-
-        // Pass the PoseStack directly to retain proper world-space alignment
         renderLines(poseStack, level, partialTick, cx, cy, cz, activeFields);
         renderSurfaces(poseStack, level, partialTick, cx, cy, cz, activeFields);
         renderFieldPoints(poseStack, level, partialTick, cx, cy, cz, activeFields);
         renderVectorFields(poseStack, level, partialTick, cx, cy, cz, activeFields);
-
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
     }
 
     private static void renderLines(PoseStack poseStack, Level level, float partialTick, double cx, double cy, double cz, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
@@ -89,7 +80,6 @@ public class SpellFieldDebugRenderer {
             Entity anchorEntity = trackedField.anchorEntity;
             if (anchorEntity == null) continue;
 
-            // 2. Fetch the client-side entity to inherit frame-perfect interpolation
             Entity clientEntity = level.getEntity(anchorEntity.getId());
             if (clientEntity != null) {
                 anchorEntity = clientEntity;
@@ -149,7 +139,6 @@ public class SpellFieldDebugRenderer {
             }
         }
 
-        // 3. Execution strictly isolated outside of iterative loops
         if (hasGeometry) {
             try {
                 RenderType.lines().draw(buffer.buildOrThrow());

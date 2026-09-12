@@ -120,8 +120,8 @@ public class ImportCommand {
                         .withStyle(style -> style
                                 .withColor(Config.LINK_COLOR.get())
                                 .withUnderlined(true)
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, absolutePath))
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open directory")))
+                                .withClickEvent(new ClickEvent.CopyToClipboard(absolutePath))
+                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to copy directory path.")))
                         )
                 ), true);
         return finalCount;

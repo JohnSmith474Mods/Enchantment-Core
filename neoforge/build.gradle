@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation "maven.modrinth:config-overhauled:1.0.0+1.21.4-neoforge"
+    implementation "maven.modrinth:config-overhauled:1.0.0+1.21.5-neoforge"
 }
 
 neoForge {

@@ -52,7 +52,7 @@ public record SummonEntityEffect(
         for (int i = 0; i < spawnAmount; i++) {
             Entity spawned = this.entityType.create(level, EntitySpawnReason.MOB_SUMMONED);
             if (spawned != null) {
-                spawned.moveTo(victim.getX(), victim.getY(), victim.getZ(), victim.getYRot(), victim.getXRot());
+                spawned.snapTo(victim.getX(), victim.getY(), victim.getZ(), victim.getYRot(), victim.getXRot());
                 level.addFreshEntity(spawned);
             }
         }

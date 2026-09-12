@@ -15,9 +15,9 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    modApi "maven.modrinth:config-overhauled:1.0.0+1.21.4-fabric"
+    modApi "maven.modrinth:config-overhauled:1.0.0+1.21.5-fabric"
 
-    modImplementation "com.terraformersmc:modmenu:13.0.4"
+    modImplementation "com.terraformersmc:modmenu:14.0.2"
 
     // Explicitly add Night Config for the development environment runtime
     implementation "com.electronwill.night-config:toml:3.8.3"
