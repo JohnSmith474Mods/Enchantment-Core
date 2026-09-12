@@ -26,7 +26,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EquipmentLayerRenderer.class)
 public abstract class EquipmentLayerRendererMixin {
 
-    @Inject(method = "renderLayers*", at = @At("HEAD"))
+    @Inject(
+            method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/ResourceLocation;)V",
+            at = @At("HEAD")
+    )
     private void enchantment_core$captureEquipmentAlpha(CallbackInfo ci, @Local(argsOnly = true) ItemStack itemStack) {
         float alpha = TransparencyRenderHelper.calculateAlpha(itemStack);
         if (alpha < 1.0F) {
@@ -34,17 +37,17 @@ public abstract class EquipmentLayerRendererMixin {
         }
     }
 
-    @Inject(method = "renderLayers*", at = @At("RETURN"))
+    @Inject(
+            method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/ResourceLocation;)V",
+            at = @At("RETURN")
+    )
     private void enchantment_core$clearEquipmentAlpha(CallbackInfo ci) {
         TransparencyRenderHelper.clearAlphaActive();
     }
 
     @WrapOperation(
             method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/ResourceLocation;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/RenderType;armorCutoutNoCull(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"
-            )
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;armorCutoutNoCull(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;")
     )
     private RenderType enchantment_core$switchToTranslucent(ResourceLocation location, Operation<RenderType> original) {
         if (TransparencyRenderHelper.isAlphaActive()) {
@@ -67,7 +70,6 @@ public abstract class EquipmentLayerRendererMixin {
             return;
         }
 
-        // Downscales the alpha component (bits 24-31) of the ARGB integer
         int a = (int) (((color >> 24) & 0xFF) * alpha);
         int modifiedColor = (color & 0x00FFFFFF) | (a << 24);
         original.call(instance, poseStack, buffer, packedLight, packedOverlay, modifiedColor);
