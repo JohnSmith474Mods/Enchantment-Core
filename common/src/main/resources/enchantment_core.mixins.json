@@ -22,6 +22,7 @@
     "enchantment.effect.entity.living.VisibilityMixin",
     "enchantment.effect.entity.living.player.DestroySpeedMixin",
     "enchantment.effect.entity.living.player.InventoryTickMixin",
+    "enchantment.effect.entity.projectile.AbstractArrowAccessor",
     "enchantment.effect.entity.projectile.AbstractArrowDragMixin",
     "enchantment.effect.entity.projectile.AccuracyMixin",
     "enchantment.effect.entity.projectile.HomingMixin",

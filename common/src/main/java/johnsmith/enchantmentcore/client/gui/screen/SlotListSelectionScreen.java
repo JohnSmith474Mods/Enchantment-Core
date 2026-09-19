@@ -240,6 +240,7 @@ public class SlotListSelectionScreen extends Screen {
             case LEGS -> new ItemStack(Items.IRON_LEGGINGS);
             case FEET -> new ItemStack(Items.IRON_BOOTS);
             case BODY -> new ItemStack(Items.IRON_HORSE_ARMOR);
+            case SADDLE -> new ItemStack(Items.SADDLE);
         };
     }
 }

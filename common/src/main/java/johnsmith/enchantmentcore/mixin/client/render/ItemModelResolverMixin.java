@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ItemModelResolverMixin {
 
     @Inject(method = "updateForTopItem", at = @At("HEAD"))
-    private void enchantment_core$captureAlphaTop(ItemStackRenderState state, ItemStack stack, ItemDisplayContext context, boolean leftHand, Level level, LivingEntity entity, int i, CallbackInfo ci) {
+    private void enchantment_core$captureAlphaTop(ItemStackRenderState state, ItemStack stack, ItemDisplayContext context, Level level, LivingEntity entity, int i, CallbackInfo ci) {
         enchantment_core$applyAlpha(state, stack);
     }
 
@@ -31,7 +31,7 @@ public class ItemModelResolverMixin {
     }
 
     @Inject(method = "updateForLiving", at = @At("HEAD"))
-    private void enchantment_core$captureAlphaLiving(ItemStackRenderState state, ItemStack stack, ItemDisplayContext context, boolean leftHand, LivingEntity entity, CallbackInfo ci) {
+    private void enchantment_core$captureAlphaLiving(ItemStackRenderState state, ItemStack stack, ItemDisplayContext context, LivingEntity entity, CallbackInfo ci) {
         enchantment_core$applyAlpha(state, stack);
     }
 

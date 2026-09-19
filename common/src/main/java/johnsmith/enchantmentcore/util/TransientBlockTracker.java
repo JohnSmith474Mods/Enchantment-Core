@@ -1,21 +1,25 @@
 package johnsmith.enchantmentcore.util;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderGetter;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
-
-import java.util.*;
+import net.minecraft.world.level.saveddata.SavedDataType;
 
 /**
  * Manages the temporary modification and restoration of block states within a server level.
@@ -24,6 +28,41 @@ import java.util.*;
  */
 public class TransientBlockTracker extends SavedData {
     private static final String DATA_NAME = "enchantment_core_transient_blocks";
+
+    public static final Codec<TransientBlockTracker> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            TransientBlockRecord.CODEC.listOf().optionalFieldOf("blocks", List.of()).forGetter(tracker -> {
+                List<TransientBlockRecord> list = new ArrayList<>();
+                for (Map.Entry<BlockPos, TransientBlock> entry : tracker.blocks.entrySet()) {
+                    list.add(new TransientBlockRecord(
+                            entry.getKey(),
+                            entry.getValue().originalState,
+                            Optional.ofNullable(entry.getValue().blockEntityData),
+                            entry.getValue().decayStartTick,
+                            entry.getValue().expiryTick
+                    ));
+                }
+                return list;
+            })
+    ).apply(instance, list -> {
+        TransientBlockTracker tracker = new TransientBlockTracker();
+        for (TransientBlockRecord record : list) {
+            tracker.blocks.put(record.pos(), new TransientBlock(
+                    record.state(),
+                    record.blockEntity().orElse(null),
+                    record.decayStartTick(),
+                    record.expiryTick()
+            ));
+            tracker.addToSchedule(record.pos(), record.expiryTick());
+        }
+        return tracker;
+    }));
+
+    public static final SavedDataType<TransientBlockTracker> TYPE = new SavedDataType<TransientBlockTracker>(
+            DATA_NAME,
+            TransientBlockTracker::new,
+            CODEC,
+            DataFixTypes.SAVED_DATA_COMMAND_STORAGE
+    );
 
     /**
      * Primary storage mapping block coordinates to their respective transient state records.
@@ -44,10 +83,7 @@ public class TransientBlockTracker extends SavedData {
      * @return The bound TransientBlockTracker instance.
      */
     public static TransientBlockTracker get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(TransientBlockTracker::new, TransientBlockTracker::load, null),
-                DATA_NAME
-        );
+        return level.getDataStorage().computeIfAbsent(TYPE);
     }
 
     /**
@@ -64,19 +100,16 @@ public class TransientBlockTracker extends SavedData {
     public void addBlock(ServerLevel level, BlockPos pos, BlockState originalState, CompoundTag blockEntityData, long decayStartTick, long expiryTick) {
         TransientBlock existing = this.blocks.get(pos);
         if (existing != null) {
-            // Remove block from current schedule bucket before modifying expiration parameters.
             this.removeFromSchedule(pos, existing.expiryTick);
 
             existing.decayStartTick = Math.max(existing.decayStartTick, decayStartTick);
             existing.expiryTick = Math.max(existing.expiryTick, expiryTick);
 
-            // Reset block break animation if it is actively rendering.
             if (existing.lastProgress >= 0) {
                 level.destroyBlockProgress(pos.hashCode(), pos, -1);
                 existing.lastProgress = -1;
             }
 
-            // Insert block into the new schedule bucket.
             this.addToSchedule(pos, existing.expiryTick);
         } else {
             this.blocks.put(pos, new TransientBlock(originalState, blockEntityData, decayStartTick, expiryTick));
@@ -106,7 +139,6 @@ public class TransientBlockTracker extends SavedData {
         List<BlockPos> scheduled = this.expirySchedule.get(expiryTick);
         if (scheduled != null) {
             scheduled.remove(pos);
-            // Delete empty temporal buckets to prevent memory leaks.
             if (scheduled.isEmpty()) {
                 this.expirySchedule.remove(expiryTick);
             }
@@ -125,8 +157,6 @@ public class TransientBlockTracker extends SavedData {
         long currentTick = level.getGameTime();
         boolean changed = false;
 
-        // headMap isolates temporal buckets strictly less than or equal to currentTick.
-        // Bypasses iteration over future scheduled events.
         Iterator<Map.Entry<Long, List<BlockPos>>> scheduleIterator = this.expirySchedule.headMap(currentTick, true).entrySet().iterator();
         while (scheduleIterator.hasNext()) {
             Map.Entry<Long, List<BlockPos>> entry = scheduleIterator.next();
@@ -137,10 +167,8 @@ public class TransientBlockTracker extends SavedData {
                 if (block == null) continue;
 
                 if (level.isLoaded(pos)) {
-                    // Restore original block state.
                     level.setBlockAndUpdate(pos, block.originalState);
 
-                    // Restore block entity data if present.
                     if (block.blockEntityData != null) {
                         BlockEntity be = level.getBlockEntity(pos);
                         if (be != null) {
@@ -149,27 +177,21 @@ public class TransientBlockTracker extends SavedData {
                         }
                     }
 
-                    // Terminate block break animation.
                     level.destroyBlockProgress(pos.hashCode(), pos, -1);
                     changed = true;
                 }
             }
-            // Remove the processed temporal bucket from the schedule map.
             scheduleIterator.remove();
         }
 
-        // Iteration required to calculate and transmit dynamic block-breaking animation progress.
         for (Map.Entry<BlockPos, TransientBlock> entry : this.blocks.entrySet()) {
             TransientBlock block = entry.getValue();
             if (currentTick >= block.decayStartTick) {
                 long totalDecay = block.expiryTick - block.decayStartTick;
                 if (totalDecay > 0) {
                     long elapsedDecay = currentTick - block.decayStartTick;
-
-                    // Calculate linear progress integer from 0 to 9.
                     int progress = (int) ((elapsedDecay * 10) / totalDecay);
 
-                    // Transmit packet only if progress increments.
                     if (progress != block.lastProgress && progress >= 0 && progress < 10) {
                         BlockPos pos = entry.getKey();
                         level.destroyBlockProgress(pos.hashCode(), pos, progress);
@@ -182,70 +204,6 @@ public class TransientBlockTracker extends SavedData {
         if (changed) {
             this.setDirty();
         }
-    }
-
-    /**
-     * Serializes the active tracker state into NBT format for disk storage.
-     *
-     * @param tag      The root compound tag.
-     * @param provider The registry lookup provider.
-     * @return The populated compound tag.
-     */
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
-        ListTag list = new ListTag();
-        for (Map.Entry<BlockPos, TransientBlock> entry : this.blocks.entrySet()) {
-            CompoundTag blockTag = new CompoundTag();
-            blockTag.putInt("x", entry.getKey().getX());
-            blockTag.putInt("y", entry.getKey().getY());
-            blockTag.putInt("z", entry.getKey().getZ());
-            blockTag.put("state", NbtUtils.writeBlockState(entry.getValue().originalState));
-            blockTag.putLong("decay_start", entry.getValue().decayStartTick);
-            blockTag.putLong("expiry", entry.getValue().expiryTick);
-
-            if (entry.getValue().blockEntityData != null) {
-                blockTag.put("block_entity", entry.getValue().blockEntityData);
-            }
-
-            list.add(blockTag);
-        }
-        tag.put("blocks", list);
-        return tag;
-    }
-
-    /**
-     * Deserializes tracker state from NBT format. Reconstructs the temporal schedule map.
-     *
-     * @param tag      The root compound tag containing saved state.
-     * @param provider The registry lookup provider.
-     * @return The reconstructed TransientBlockTracker instance.
-     */
-    public static TransientBlockTracker load(CompoundTag tag, HolderLookup.Provider provider) {
-        TransientBlockTracker tracker = new TransientBlockTracker();
-        ListTag list = tag.getList("blocks", Tag.TAG_COMPOUND);
-        HolderGetter<Block> blockGetter = provider.lookupOrThrow(Registries.BLOCK);
-
-        for (int i = 0; i < list.size(); i++) {
-            CompoundTag blockTag = list.getCompound(i);
-            BlockPos pos = new BlockPos(blockTag.getInt("x"), blockTag.getInt("y"), blockTag.getInt("z"));
-            BlockState state = NbtUtils.readBlockState(blockGetter, blockTag.getCompound("state"));
-
-            // Support legacy NBT key format "start".
-            long decayStart = blockTag.contains("decay_start") ? blockTag.getLong("decay_start") : blockTag.getLong("start");
-            long expiry = blockTag.getLong("expiry");
-            CompoundTag beData = blockTag.contains("block_entity") ? blockTag.getCompound("block_entity") : null;
-
-            // Correct state resolution failure for air blocks missing Name tag data.
-            if (state.isAir() && !blockTag.getCompound("state").contains("Name")) {
-                state = Blocks.AIR.defaultBlockState();
-            }
-
-            tracker.blocks.put(pos, new TransientBlock(state, beData, decayStart, expiry));
-
-            // Rebuild the temporal map schedule for the loaded block.
-            tracker.addToSchedule(pos, expiry);
-        }
-        return tracker;
     }
 
     /**
@@ -264,5 +222,30 @@ public class TransientBlockTracker extends SavedData {
             this.decayStartTick = decayStartTick;
             this.expiryTick = expiryTick;
         }
+    }
+
+    /**
+     * DTO mapping used solely for serializing tracked block data to disk.
+     */
+    private record TransientBlockRecord(
+            BlockPos pos,
+            BlockState state,
+            Optional<CompoundTag> blockEntity,
+            long decayStartTick,
+            long expiryTick
+    ) {
+        public static final Codec<TransientBlockRecord> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.INT.fieldOf("x").forGetter(r -> r.pos().getX()),
+                Codec.INT.fieldOf("y").forGetter(r -> r.pos().getY()),
+                Codec.INT.fieldOf("z").forGetter(r -> r.pos().getZ()),
+                BlockState.CODEC.optionalFieldOf("state", Blocks.AIR.defaultBlockState()).forGetter(TransientBlockRecord::state),
+                CompoundTag.CODEC.optionalFieldOf("block_entity").forGetter(TransientBlockRecord::blockEntity),
+                Codec.LONG.optionalFieldOf("decay_start", -1L).forGetter(TransientBlockRecord::decayStartTick),
+                Codec.LONG.optionalFieldOf("start", -1L).forGetter(r -> -1L),
+                Codec.LONG.fieldOf("expiry").forGetter(TransientBlockRecord::expiryTick)
+        ).apply(instance, (x, y, z, state, be, decayStart, start, expiry) -> {
+            long actualDecay = decayStart != -1L ? decayStart : (start != -1L ? start : 0L);
+            return new TransientBlockRecord(new BlockPos(x, y, z), state, be, actualDecay, expiry);
+        }));
     }
 }

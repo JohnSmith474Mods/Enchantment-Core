@@ -80,7 +80,9 @@ public record PlaceTemporaryBlockEffect(
         BlockEntity be = level.getBlockEntity(pos);
         if (be != null) {
             beTag = be.saveWithFullMetadata(level.registryAccess());
-            Clearable.tryClear(be);
+            if (be instanceof Clearable clearable) {
+                clearable.clearContent();
+            }
         }
 
         level.setBlockAndUpdate(pos, this.block.defaultBlockState());

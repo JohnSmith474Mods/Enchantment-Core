@@ -11,6 +11,7 @@ import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ConditionalEffect;
@@ -51,8 +52,10 @@ public abstract class VisibilityMixin {
         int totalSlots = 0;
         float unmitigatedPieces = 0.0F;
 
-        // Iterate armor inventory slots to evaluate individual mitigation values.
-        for (ItemStack stack : entity.getArmorSlots()) {
+        EquipmentSlot[] armorSlots = { EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET };
+
+        for (EquipmentSlot slot : armorSlots) {
+            ItemStack stack = entity.getItemBySlot(slot);
             totalSlots++;
             if (stack.isEmpty()) continue;
 
@@ -80,13 +83,11 @@ public abstract class VisibilityMixin {
                 }
             }
 
-            // A fully mitigated piece contributes 0.0 towards the visibility detection profile.
             unmitigatedPieces += Math.max(0.0F, 1.0F - pieceMitigation);
         }
 
         if (totalSlots > 0) {
             float newCover = unmitigatedPieces / (float) totalSlots;
-            // Guarantee the new coverage ratio cannot exceed original vanilla coverage.
             cir.setReturnValue(Math.max(0.0F, Math.min(newCover, originalCover)));
         }
     }

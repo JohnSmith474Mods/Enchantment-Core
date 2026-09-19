@@ -136,7 +136,8 @@ public abstract class ShrapnelMixin {
                 // Constrain arrow clones so players cannot farm them.
                 if (child instanceof AbstractArrow arrow && projectile instanceof AbstractArrow sourceArrow) {
                     arrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
-                    arrow.setBaseDamage(sourceArrow.getBaseDamage() * dmgRetention);
+                    double parentDamage = ((AbstractArrowAccessor) sourceArrow).enchantment_core$getBaseDamage();
+                    arrow.setBaseDamage(parentDamage * dmgRetention);
                 }
 
                 if (hitResult.getType() == HitResult.Type.BLOCK) {

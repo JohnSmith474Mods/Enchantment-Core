@@ -44,11 +44,12 @@ public abstract class EnchantmentEventsMixin {
      * Evaluates a targeted effect component collection on a specific item stack.
      *
      * @param item          The source item stack.
+     * @param slot          The active equipment slot containing the item.
      * @param componentType The registry component to match.
      * @param damageSource  Optional damage source if context is combat-driven.
      */
     @Unique
-    private void enchantment_core$evaluateEffect(ItemStack item, DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>> componentType, DamageSource damageSource) {
+    private void enchantment_core$evaluateEffect(ItemStack item, EquipmentSlot slot, DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>> componentType, DamageSource damageSource) {
         if (item == null || item.isEmpty()) return;
         LivingEntity entity = (LivingEntity) (Object) this;
         if (entity.level().isClientSide()) return;
@@ -60,6 +61,10 @@ public abstract class EnchantmentEventsMixin {
         EnchantedItemInUse inUse = null;
 
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+            if (!entry.getKey().value().matchingSlot(slot)) {
+                continue;
+            }
+
             List<ConditionalEffect<EnchantmentEntityEffect>> effects = entry.getKey().value().effects().get(componentType);
 
             if (effects != null && !effects.isEmpty()) {
@@ -74,7 +79,7 @@ public abstract class EnchantmentEventsMixin {
                             paramsBuilder.withParameter(LootContextParams.ATTACKING_ENTITY, damageSource.getEntity());
                         }
                     }
-                    inUse = new EnchantedItemInUse(item, EquipmentSlot.MAINHAND, entity);
+                    inUse = new EnchantedItemInUse(item, slot, entity);
                 }
 
                 LootParams params = paramsBuilder.withParameter(LootContextParams.ENCHANTMENT_LEVEL, entry.getIntValue()).create(LootContextParamSets.ENCHANTED_ENTITY);
@@ -95,8 +100,11 @@ public abstract class EnchantmentEventsMixin {
     @Unique
     private void enchantment_core$evaluateAllSlots(DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>> componentType, DamageSource damageSource) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        for (ItemStack equipment : entity.getAllSlots()) {
-            enchantment_core$evaluateEffect(equipment, componentType, damageSource);
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack equipment = entity.getItemBySlot(slot);
+            if (!equipment.isEmpty()) {
+                enchantment_core$evaluateEffect(equipment, slot, componentType, damageSource);
+            }
         }
     }
 
@@ -117,12 +125,15 @@ public abstract class EnchantmentEventsMixin {
     }
 
     /**
-     * Injects when an active shield absorbs attack damage.
+     * Injects when an active shield successfully absorbs attack damage.
      */
-    @Inject(method = "hurtCurrentlyUsedShield", at = @At("HEAD"))
-    private void enchantment_core$onShieldBlock(float damage, CallbackInfo ci) {
-        LivingEntity entity = (LivingEntity) (Object) this;
-        enchantment_core$evaluateEffect(entity.getUseItem(), EnchantmentEffectComponentRegistry.SHIELD_BLOCK.get(), null);
+    @Inject(method = "applyItemBlocking", at = @At("RETURN"))
+    private void enchantment_core$onShieldBlock(ServerLevel level, DamageSource damageSource, float damage, CallbackInfoReturnable<Float> cir) {
+        if (cir.getReturnValueF() > 0.0F) {
+            LivingEntity entity = (LivingEntity) (Object) this;
+            EquipmentSlot slot = entity.getUsedItemHand() == InteractionHand.OFF_HAND ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+            enchantment_core$evaluateEffect(entity.getUseItem(), slot, EnchantmentEffectComponentRegistry.SHIELD_BLOCK.get(), damageSource);
+        }
     }
 
     /**
@@ -132,7 +143,8 @@ public abstract class EnchantmentEventsMixin {
     private void enchantment_core$onItemUseStart(InteractionHand hand, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
         ItemStack item = entity.getItemInHand(hand);
-        enchantment_core$evaluateEffect(item, EnchantmentEffectComponentRegistry.ITEM_USE_START.get(), null);
+        EquipmentSlot slot = hand == InteractionHand.OFF_HAND ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+        enchantment_core$evaluateEffect(item, slot, EnchantmentEffectComponentRegistry.ITEM_USE_START.get(), null);
     }
 
     /**
@@ -140,6 +152,8 @@ public abstract class EnchantmentEventsMixin {
      */
     @Inject(method = "updateUsingItem", at = @At("HEAD"))
     private void enchantment_core$onItemUseTick(ItemStack usingItem, CallbackInfo ci) {
-        enchantment_core$evaluateEffect(usingItem, EnchantmentEffectComponentRegistry.ITEM_USE_TICK.get(), null);
+        LivingEntity entity = (LivingEntity) (Object) this;
+        EquipmentSlot slot = entity.getUsedItemHand() == InteractionHand.OFF_HAND ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+        enchantment_core$evaluateEffect(usingItem, slot, EnchantmentEffectComponentRegistry.ITEM_USE_TICK.get(), null);
     }
 }
