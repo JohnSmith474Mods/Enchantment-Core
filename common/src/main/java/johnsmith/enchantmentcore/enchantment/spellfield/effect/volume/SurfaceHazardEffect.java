@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.EvokerFangs;
@@ -94,7 +95,7 @@ public record SurfaceHazardEffect(
         }
 
         if (found) {
-            Entity hazard = this.entityType.create(level);
+            Entity hazard = this.entityType.create(level, EntitySpawnReason.TRIGGERED);
             if (hazard != null) {
                 hazard.setPos(cursor.getX() + 0.5D, cursor.getY() + 1.0D, cursor.getZ() + 0.5D);
 

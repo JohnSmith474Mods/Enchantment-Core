@@ -87,7 +87,7 @@ public record DropItemEffect(
             ItemStack stackToDrop = living.getItemBySlot(slot).copy();
             living.setItemSlot(slot, ItemStack.EMPTY);
 
-            ItemEntity dropped = living.spawnAtLocation(stackToDrop);
+            ItemEntity dropped = living.spawnAtLocation(level, stackToDrop);
             if (dropped != null) {
                 dropped.setPickUpDelay(40);
             }

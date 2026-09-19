@@ -1,17 +1,12 @@
 package johnsmith.enchantmentcore.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import johnsmith.enchantmentcore.Constants;
-import johnsmith.enchantmentcore.client.debug.SpellFieldDebugRenderer;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugTracker;
 import johnsmith.enchantmentcore.client.render.SpellFieldAnchorRenderer;
 import johnsmith.enchantmentcore.registry.EnchantmentCoreEntities;
 
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -40,17 +35,6 @@ public class ForgeClient {
         public static void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END) {
                 SpellFieldDebugTracker.tick();
-            }
-        }
-
-        @SubscribeEvent
-        public static void onRenderLevelStage(RenderLevelStageEvent event) {
-            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-                float partialTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
-
-                PoseStack poseStack = new PoseStack();
-
-                SpellFieldDebugRenderer.render(poseStack, event.getCamera(), partialTick);
             }
         }
     }

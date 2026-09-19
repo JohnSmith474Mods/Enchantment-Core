@@ -12,6 +12,7 @@ import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
@@ -49,7 +50,7 @@ public record SummonEntityEffect(
         }
 
         for (int i = 0; i < spawnAmount; i++) {
-            Entity spawned = this.entityType.create(level);
+            Entity spawned = this.entityType.create(level, EntitySpawnReason.MOB_SUMMONED);
             if (spawned != null) {
                 spawned.moveTo(victim.getX(), victim.getY(), victim.getZ(), victim.getYRot(), victim.getXRot());
                 level.addFreshEntity(spawned);

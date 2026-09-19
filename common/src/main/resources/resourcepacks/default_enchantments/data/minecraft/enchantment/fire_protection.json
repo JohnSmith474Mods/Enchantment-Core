@@ -94,7 +94,7 @@
     "minecraft:attributes": [
       {
         "id": "minecraft:enchantment.fire_protection",
-        "attribute": "minecraft:generic.burning_time",
+        "attribute": "minecraft:burning_time",
         "amount": {
           "per_level_config": {
             "mod_id": "enchantment_core",

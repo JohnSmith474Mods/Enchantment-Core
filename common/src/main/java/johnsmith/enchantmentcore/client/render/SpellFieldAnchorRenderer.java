@@ -10,43 +10,59 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
 
-public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEntity> {
+public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEntity, SpellFieldAnchorRenderer.SpellFieldAnchorRenderState> {
 
     public SpellFieldAnchorRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
     @Override
-    public void render(SpellFieldAnchorEntity entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        String modelIdStr = entity.getModelId();
-        if (modelIdStr != null && !modelIdStr.isEmpty()) {
-            AnchorModelRenderer delegate = AnchorRendererRegistry.get(ResourceLocation.parse(modelIdStr));
+    public SpellFieldAnchorRenderState createRenderState() {
+        return new SpellFieldAnchorRenderState();
+    }
+
+    @Override
+    public void extractRenderState(SpellFieldAnchorEntity entity, SpellFieldAnchorRenderState state, float partialTicks) {
+        super.extractRenderState(entity, state, partialTicks);
+        state.modelIdStr = entity.getModelId();
+        state.textureStr = entity.getVisualTexture();
+        state.visualScale = entity.getVisualScale();
+        state.visualFrames = entity.getVisualFrames();
+        state.visualTickRate = entity.getVisualTickRate();
+        state.visualTint = entity.getVisualTint();
+        state.tickCount = entity.tickCount;
+    }
+
+    @Override
+    public void render(SpellFieldAnchorRenderState state, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        if (state.modelIdStr != null && !state.modelIdStr.isEmpty()) {
+            AnchorModelRenderer delegate = AnchorRendererRegistry.get(ResourceLocation.parse(state.modelIdStr));
             if (delegate != null) {
-                delegate.render(entity, entityYaw, partialTicks, poseStack, bufferSource, packedLight);
-                super.render(entity, entityYaw, partialTicks, poseStack, bufferSource, packedLight);
+                delegate.render(state, poseStack, bufferSource, packedLight);
+                super.render(state, poseStack, bufferSource, packedLight);
                 return;
             }
         }
 
-        String textureStr = entity.getVisualTexture();
-        if (textureStr == null || textureStr.isEmpty()) {
-            super.render(entity, entityYaw, partialTicks, poseStack, bufferSource, packedLight);
+        if (state.textureStr == null || state.textureStr.isEmpty()) {
+            super.render(state, poseStack, bufferSource, packedLight);
             return;
         }
 
-        ResourceLocation texture = ResourceLocation.parse(textureStr);
-        float scale = entity.getVisualScale();
+        ResourceLocation texture = ResourceLocation.parse(state.textureStr);
+        float scale = state.visualScale;
 
-        // 1. Failsafe against delayed data sync
         if (scale <= 0.01F) scale = 1.0F;
 
-        int frames = Math.max(1, entity.getVisualFrames());
-        int frameRate = Math.max(1, entity.getVisualTickRate());
-        int tint = entity.getVisualTint();
+        int frames = Math.max(1, state.visualFrames);
+        int frameRate = Math.max(1, state.visualTickRate);
+        int tint = state.visualTint;
 
         int r = (tint >> 16) & 0xFF;
         int g = (tint >> 8) & 0xFF;
@@ -58,38 +74,43 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         poseStack.scale(scale, scale, scale);
 
-        int currentFrame = (entity.tickCount / frameRate) % frames;
+        int currentFrame = (state.tickCount / frameRate) % frames;
         float v0 = (float) currentFrame / frames;
         float v1 = (float) (currentFrame + 1) / frames;
 
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucentCull(texture));
+        VertexConsumer consumer = bufferSource.getBuffer(RenderType.itemEntityTranslucentCull(texture));
         PoseStack.Pose pose = poseStack.last();
         Matrix4f matrix4f = pose.pose();
 
-        // 2. Force full brightness (LightTexture.FULL_BRIGHT) for spell effects
-        // to prevent them from rendering black inside entity hitboxes or blocks.
         int light = 15728880;
 
-        // 3. Front Face: Counter-Clockwise (CCW) Winding.
         consumer.addVertex(matrix4f, -0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
         consumer.addVertex(matrix4f,  0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
         consumer.addVertex(matrix4f,  0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
         consumer.addVertex(matrix4f, -0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
 
-        // 4. Back Face: Clockwise (CW) Winding.
-        // Eliminates rendering failure entirely by explicitly drawing the reverse side of the quad.
         consumer.addVertex(matrix4f, -0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
         consumer.addVertex(matrix4f,  0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
         consumer.addVertex(matrix4f,  0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
         consumer.addVertex(matrix4f, -0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
 
         poseStack.popPose();
-        super.render(entity, entityYaw, partialTicks, poseStack, bufferSource, packedLight);
+        super.render(state, poseStack, bufferSource, packedLight);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(SpellFieldAnchorEntity entity) {
-        String textureStr = entity.getVisualTexture();
-        return (textureStr != null && !textureStr.isEmpty()) ? ResourceLocation.parse(textureStr) : null;
+    protected AABB getBoundingBoxForCulling(SpellFieldAnchorEntity entity) {
+        return entity.getBoundingBox().inflate(entity.getVisualScale());
     }
+
+    public static class SpellFieldAnchorRenderState extends EntityRenderState {
+        public String modelIdStr;
+        public String textureStr;
+        public float visualScale;
+        public int visualFrames;
+        public int visualTickRate;
+        public int visualTint;
+        public int tickCount;
+    }
+
 }

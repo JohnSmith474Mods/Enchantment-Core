@@ -46,7 +46,7 @@ public record RandomTeleportEffect(
 
         for (int i = 0; i < 16; i++) {
             double x = living.getX() + (living.getRandom().nextDouble() - 0.5D) * tpRange * 2.0D;
-            double y = Mth.clamp(living.getY() + (living.getRandom().nextInt((int) tpRange * 2) - tpRange), level.getMinBuildHeight(), level.getMaxBuildHeight() - 1);
+            double y = Mth.clamp(living.getY() + (living.getRandom().nextInt((int) tpRange * 2) - tpRange), level.getMinY(), level.getMaxY() - 1);
             double z = living.getZ() + (living.getRandom().nextDouble() - 0.5D) * tpRange * 2.0D;
 
             if (living.isPassenger()) living.stopRiding();

@@ -73,7 +73,7 @@ public record ExplosionDefinition(
             ParticleOptions large = this.largeParticles.orElse(ParticleTypes.EXPLOSION_EMITTER);
             Holder<SoundEvent> snd = this.sound.orElse(SoundEvents.GENERIC_EXPLODE);
 
-            level.explode(source, damageSource, damageCalculator, pos.x(), pos.y(), pos.z(), calculatedRadius, this.createFire, vanillaInteraction, true, small, large, snd);
+            level.explode(source, damageSource, damageCalculator, pos.x(), pos.y(), pos.z(), calculatedRadius, this.createFire, vanillaInteraction, small, large, snd);
         } else {
             level.explode(source, damageSource, damageCalculator, pos.x(), pos.y(), pos.z(), calculatedRadius, this.createFire, vanillaInteraction);
         }

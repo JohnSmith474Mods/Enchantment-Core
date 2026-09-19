@@ -93,27 +93,48 @@
     "minecraft:location_changed": [
       {
         "effect": {
-          "id": "minecraft:enchantment.soul_speed",
-          "attribute": "minecraft:generic.movement_speed",
-          "amount": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "soul_speed",
-              "property": "amount_per_level"
+          "effects": [
+            {
+              "id": "minecraft:enchantment.soul_speed",
+              "attribute": "minecraft:movement_speed",
+              "amount": {
+                "per_level_config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "soul_speed",
+                  "property": "amount_per_level"
+                },
+                "per_level_default": 0.0105,
+                "base_config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "soul_speed",
+                  "property": "amount_base"
+                },
+                "base_default": 0.0405,
+                "type": "enchantment_core:configurable_linear"
+              },
+              "operation": "add_value",
+              "type": "minecraft:attribute"
             },
-            "per_level_default": 0.0105,
-            "base_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "soul_speed",
-              "property": "amount_base"
-            },
-            "base_default": 0.0405,
-            "type": "enchantment_core:configurable_linear"
-          },
-          "operation": "add_value",
-          "type": "minecraft:attribute"
+            {
+              "id": "minecraft:enchantment.soul_speed",
+              "attribute": "minecraft:movement_efficiency",
+              "amount": {
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "soul_speed",
+                  "property": "amount_2"
+                },
+                "default_value": 1.0,
+                "type": "enchantment_core:configurable_constant"
+              },
+              "operation": "add_value",
+              "type": "minecraft:attribute"
+            }
+          ],
+          "type": "minecraft:all_of"
         },
         "requirements": {
           "terms": [
@@ -204,35 +225,6 @@
       },
       {
         "effect": {
-          "id": "minecraft:enchantment.soul_speed",
-          "attribute": "minecraft:generic.movement_efficiency",
-          "amount": {
-            "config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "soul_speed",
-              "property": "amount_2"
-            },
-            "default_value": 1.0,
-            "type": "enchantment_core:configurable_constant"
-          },
-          "operation": "add_value",
-          "type": "minecraft:attribute"
-        },
-        "requirements": {
-          "predicate": {
-            "movement_affected_by": {
-              "block": {
-                "blocks": "#minecraft:soul_speed_blocks"
-              }
-            }
-          },
-          "entity": "this",
-          "condition": "minecraft:entity_properties"
-        }
-      },
-      {
-        "effect": {
           "amount": {
             "config": {
               "mod_id": "enchantment_core",
@@ -243,7 +235,7 @@
             "default_value": 1.0,
             "type": "enchantment_core:configurable_constant"
           },
-          "type": "minecraft:damage_item"
+          "type": "minecraft:change_item_damage"
         },
         "requirements": {
           "terms": [

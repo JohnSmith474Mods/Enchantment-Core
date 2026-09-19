@@ -75,7 +75,11 @@ public abstract class EnchantmentEventsMixin {
      * @param tool        The item stack used to break the block.
      * @param cir         The callback information containing the modifiable drop list.
      */
-    @Inject(method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)Ljava/util/List;", at = @At("RETURN"), cancellable = true)
+    @Inject(
+        method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)Ljava/util/List;",
+        at = @At("RETURN"),
+        cancellable = true
+    )
     private static void enchantment_core$processDropModifiers(BlockState state, ServerLevel level, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack tool, CallbackInfoReturnable<List<ItemStack>> cir) {
         if (tool == null || tool.isEmpty()) return;
 
@@ -88,9 +92,9 @@ public abstract class EnchantmentEventsMixin {
         boolean hasExp = false;
 
         for (Holder<Enchantment> ench : enchantments.keySet()) {
-            if (ench.value().effects().has(EnchantmentEffectComponentRegistry.AUTO_SMELT)) hasSmelt = true;
-            if (ench.value().effects().has(EnchantmentEffectComponentRegistry.BONUS_LOOT)) hasBonus = true;
-            if (ench.value().effects().has(EnchantmentEffectComponentRegistry.EXPERIENCE_YIELD_MULTIPLIER)) hasExp = true;
+            if (ench.value().effects().has(EnchantmentEffectComponentRegistry.AUTO_SMELT.get())) hasSmelt = true;
+            if (ench.value().effects().has(EnchantmentEffectComponentRegistry.BONUS_LOOT.get())) hasBonus = true;
+            if (ench.value().effects().has(EnchantmentEffectComponentRegistry.EXPERIENCE_YIELD_MULTIPLIER.get())) hasExp = true;
         }
 
         if (!hasSmelt && !hasBonus && !hasExp) return;
@@ -120,7 +124,7 @@ public abstract class EnchantmentEventsMixin {
             int levelValue = entry.getIntValue();
 
             if (hasSmelt && smeltEffect == null) {
-                List<ConditionalEffect<AutoSmeltEffect>> sEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.AUTO_SMELT);
+                List<ConditionalEffect<AutoSmeltEffect>> sEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.AUTO_SMELT.get());
                 if (sEffects != null) {
                     for (ConditionalEffect<AutoSmeltEffect> cond : sEffects) {
                         if (cond.matches(blockContext)) {
@@ -133,7 +137,7 @@ public abstract class EnchantmentEventsMixin {
             }
 
             if (hasBonus) {
-                List<ConditionalEffect<BonusLootEffect>> bEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.BONUS_LOOT);
+                List<ConditionalEffect<BonusLootEffect>> bEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.BONUS_LOOT.get());
                 if (bEffects != null) {
                     for (ConditionalEffect<BonusLootEffect> cond : bEffects) {
                         if (cond.matches(blockContext)) {
@@ -145,7 +149,7 @@ public abstract class EnchantmentEventsMixin {
             }
 
             if (hasExp) {
-                List<ConditionalEffect<ExperienceYieldEffect>> eEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.EXPERIENCE_YIELD_MULTIPLIER);
+                List<ConditionalEffect<ExperienceYieldEffect>> eEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.EXPERIENCE_YIELD_MULTIPLIER.get());
                 if (eEffects != null) {
                     LootParams expParams = new LootParams.Builder(level)
                             .withParameter(LootContextParams.TOOL, tool)
@@ -172,7 +176,7 @@ public abstract class EnchantmentEventsMixin {
         // 5. Execute Bonus Loot generation logic.
         if (!activeBonusEffects.isEmpty()) {
             int fortuneLevel = 0;
-            Optional<Holder.Reference<Enchantment>> fortuneOpt = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(Enchantments.FORTUNE);
+            Optional<Holder.Reference<Enchantment>> fortuneOpt = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.FORTUNE);
             if (fortuneOpt.isPresent()) {
                 fortuneLevel = enchantments.getLevel(fortuneOpt.get());
             }
@@ -204,7 +208,7 @@ public abstract class EnchantmentEventsMixin {
 
         // 6. Execute Auto-Smelt transformation logic.
         if (smeltEffect != null && !drops.isEmpty()) {
-            RecipeManager recipeManager = level.getRecipeManager();
+            RecipeManager recipeManager = level.getServer().getRecipeManager();
             ServerPlayer serverPlayer = entity instanceof ServerPlayer sp ? sp : null;
 
             int totalAdditionalUsage = 0;
@@ -218,14 +222,14 @@ public abstract class EnchantmentEventsMixin {
 
                 if (recipeOpt.isPresent()) {
                     RecipeHolder<SmeltingRecipe> recipeHolder = recipeOpt.get();
-                    ItemStack result = recipeHolder.value().getResultItem(level.registryAccess()).copy();
+                    ItemStack result = recipeHolder.value().assemble(input, level.registryAccess()).copy();
                     // Maintain original drop counts (e.g., 3 iron ore -> 3 iron ingots).
                     result.setCount(drop.getCount() * result.getCount());
                     smeltedDrops.add(result);
 
                     totalAdditionalUsage += calculatedUsagePerDrop * drop.getCount();
                     if (smeltEffect.dropXp()) {
-                        generatedXp += recipeHolder.value().getExperience() * drop.getCount();
+                        generatedXp += recipeHolder.value().experience() * drop.getCount();
                     }
                 } else {
                     smeltedDrops.add(drop);
@@ -245,7 +249,7 @@ public abstract class EnchantmentEventsMixin {
             generatedXp *= xpMultiplier;
 
             // Retrieve previously stored fractional XP from the tool.
-            float storedXp = tool.getOrDefault(EnchantmentEffectComponentRegistry.STORED_SMELTING_XP, 0.0f) + generatedXp;
+            float storedXp = tool.getOrDefault(EnchantmentEffectComponentRegistry.STORED_SMELTING_XP.get(), 0.0f) + generatedXp;
 
             if (storedXp >= 1.0f) {
                 int xpToDrop = (int) storedXp;
@@ -255,9 +259,9 @@ public abstract class EnchantmentEventsMixin {
 
             // Persist remaining fractional XP.
             if (storedXp > 0.0f) {
-                tool.set(EnchantmentEffectComponentRegistry.STORED_SMELTING_XP, storedXp);
+                tool.set(EnchantmentEffectComponentRegistry.STORED_SMELTING_XP.get(), storedXp);
             } else {
-                tool.remove(EnchantmentEffectComponentRegistry.STORED_SMELTING_XP);
+                tool.remove(EnchantmentEffectComponentRegistry.STORED_SMELTING_XP.get());
             }
         }
 
@@ -285,7 +289,7 @@ public abstract class EnchantmentEventsMixin {
         float totalMultiplier = 1.0F;
 
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            List<ConditionalEffect<ExperienceYieldEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.EXPERIENCE_YIELD_MULTIPLIER);
+            List<ConditionalEffect<ExperienceYieldEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.EXPERIENCE_YIELD_MULTIPLIER.get());
 
             if (effects != null && !effects.isEmpty()) {
                 LootParams params = new LootParams.Builder(level)
@@ -336,7 +340,7 @@ public abstract class EnchantmentEventsMixin {
         EnchantedItemInUse itemInUse = null;
 
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            List<ConditionalEffect<EnchantmentEntityEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.POST_MINE);
+            List<ConditionalEffect<EnchantmentEntityEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.POST_MINE.get());
 
             if (effects != null && !effects.isEmpty()) {
                 // Defer loot context instantiation until an active effect is confirmed.

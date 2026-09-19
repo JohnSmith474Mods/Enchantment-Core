@@ -37,16 +37,17 @@ public abstract class OnDamageHealingMixin {
     /**
      * Triggers health restoration or absorption generation when the attacker deals damage.
      *
+     * @param serverLevel  The ServerLevel.
      * @param damageSource The damage source context.
      * @param damageAmount The total damage inflicted.
      * @param ci           Callback control handle.
      */
     @Inject(method = "actuallyHurt", at = @At("HEAD"))
-    private void enchantment_core$applyDamageHealing(DamageSource damageSource, float damageAmount, CallbackInfo ci) {
+    private void enchantment_core$applyDamageHealing(ServerLevel serverLevel, DamageSource damageSource, float damageAmount, CallbackInfo ci) {
         if (damageAmount <= 0.0F) return;
 
         LivingEntity target = (LivingEntity) (Object) this;
-        if (target.level().isClientSide()) return;
+        if (serverLevel.isClientSide()) return;
 
         Entity attacker = damageSource.getEntity();
         if (!(attacker instanceof LivingEntity livingAttacker)) return;
@@ -60,11 +61,11 @@ public abstract class OnDamageHealingMixin {
         LootContext lootContext = null;
 
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            List<ConditionalEffect<DamageHealingEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.ON_DAMAGE_HEALING);
+            List<ConditionalEffect<DamageHealingEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.ON_DAMAGE_HEALING.get());
 
             if (effects != null && !effects.isEmpty()) {
                 if (lootContext == null) {
-                    LootParams params = new LootParams.Builder((ServerLevel) target.level())
+                    LootParams params = new LootParams.Builder(serverLevel)
                             .withParameter(LootContextParams.THIS_ENTITY, target)
                             .withParameter(LootContextParams.ORIGIN, livingAttacker.position())
                             .withParameter(LootContextParams.DAMAGE_SOURCE, damageSource)

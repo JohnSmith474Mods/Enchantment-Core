@@ -61,7 +61,7 @@ public abstract class VisibilityMixin {
 
             if (!enchantments.isEmpty()) {
                 for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-                    List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.TRANSPARENCY);
+                    List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.TRANSPARENCY.get());
 
                     if (effects != null) {
                         LootParams params = new LootParams.Builder(serverLevel)

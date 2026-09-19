@@ -140,7 +140,7 @@
                 "default_value": 2.0,
                 "type": "enchantment_core:configurable_constant"
               },
-              "type": "minecraft:damage_item"
+              "type": "minecraft:change_item_damage"
             }
           ],
           "type": "minecraft:all_of"

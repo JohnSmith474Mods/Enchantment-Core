@@ -31,13 +31,13 @@ public class EnchantableItemListProperty extends DefaultProperty.List<ItemOrItem
                 ResourceLocation tagLoc = ResourceLocation.tryParse(entry.substring(1));
                 if (tagLoc != null) {
                     TagKey<net.minecraft.world.item.Item> tagKey = TagKey.create(Registries.ITEM, tagLoc);
-                    Optional<HolderSet.Named<net.minecraft.world.item.Item>> tagSet = BuiltInRegistries.ITEM.getTag(tagKey);
+                    Optional<HolderSet.Named<net.minecraft.world.item.Item>> tagSet = BuiltInRegistries.ITEM.get(tagKey);
                     tagSet.ifPresent(named -> named.forEach(holder -> items.add(holder.value())));
                 }
             } else {
                 ResourceLocation itemLoc = ResourceLocation.tryParse(entry);
                 if (itemLoc != null && BuiltInRegistries.ITEM.containsKey(itemLoc)) {
-                    items.add(BuiltInRegistries.ITEM.get(itemLoc));
+                    items.add(BuiltInRegistries.ITEM.get(itemLoc).get().value());
                 }
             }
         }
@@ -74,10 +74,10 @@ public class EnchantableItemListProperty extends DefaultProperty.List<ItemOrItem
 
         for (ItemOrItems entry : entries) {
             if (entry.isTag()) {
-                Optional<HolderSet.Named<net.minecraft.world.item.Item>> tagSet = BuiltInRegistries.ITEM.getTag(entry.getTag());
+                Optional<HolderSet.Named<net.minecraft.world.item.Item>> tagSet = BuiltInRegistries.ITEM.get(entry.getTag());
                 tagSet.ifPresent(named -> named.forEach(holders::add));
             } else {
-                BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey(entry.getItem())).ifPresent(holders::add);
+                BuiltInRegistries.ITEM.get(BuiltInRegistries.ITEM.getKey(entry.getItem())).ifPresent(holders::add);
             }
         }
 

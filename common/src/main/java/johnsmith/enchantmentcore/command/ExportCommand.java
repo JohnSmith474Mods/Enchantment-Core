@@ -39,7 +39,7 @@ public class ExportCommand {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private static final SuggestionProvider<CommandSourceStack> SOURCE_SUGGESTIONS = (context, builder) -> {
-        Registry<Enchantment> registry = context.getSource().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        Registry<Enchantment> registry = context.getSource().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         Set<String> namespaces = registry.keySet().stream()
                 .map(ResourceLocation::getNamespace)
                 .collect(Collectors.toSet());
@@ -62,7 +62,7 @@ public class ExportCommand {
     }
 
     private static int execute(CommandSourceStack source, String sourceNamespace) {
-        Registry<Enchantment> registry = source.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        Registry<Enchantment> registry = source.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         Path outputDir = Paths.get("enchantment_core", "export", sourceNamespace, "enchantment");
 
         try {

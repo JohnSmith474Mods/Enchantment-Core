@@ -1,5 +1,6 @@
 package johnsmith.enchantmentcore.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugRenderer;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugTracker;
 import johnsmith.enchantmentcore.client.render.SpellFieldAnchorRenderer;
@@ -19,6 +20,9 @@ public class FabricClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> SpellFieldDebugTracker.tick());
 
-        WorldRenderEvents.AFTER_ENTITIES.register(context -> SpellFieldDebugRenderer.render(context.matrixStack(), context.camera(), context.tickCounter().getGameTimeDeltaPartialTick(true)));
+        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
+            PoseStack poseStack = new PoseStack();
+            SpellFieldDebugRenderer.render(poseStack, context.camera(), context.tickCounter().getGameTimeDeltaPartialTick(true));
+        });
     }
 }

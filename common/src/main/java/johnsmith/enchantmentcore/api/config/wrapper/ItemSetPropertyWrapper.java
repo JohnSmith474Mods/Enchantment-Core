@@ -44,12 +44,12 @@ public record ItemSetPropertyWrapper(Property<List<ItemOrItems>> property, Confi
         List<Holder<Item>> holders = new ArrayList<>();
         for (ItemOrItems entry : entries) {
             if (entry.isTag()) {
-                Optional<HolderSet.Named<Item>> tagSet = BuiltInRegistries.ITEM.getTag(entry.getTag());
+                Optional<HolderSet.Named<Item>> tagSet = BuiltInRegistries.ITEM.get(entry.getTag());
                 tagSet.ifPresent(named -> named.forEach(holders::add));
             } else {
                 Item item = entry.getItem();
                 if (item != null) {
-                    BuiltInRegistries.ITEM.getHolder(BuiltInRegistries.ITEM.getKey(item)).ifPresent(holders::add);
+                    BuiltInRegistries.ITEM.get(BuiltInRegistries.ITEM.getKey(item)).ifPresent(holders::add);
                 }
             }
         }

@@ -64,7 +64,7 @@ public abstract class ItemStackMiningStreakMixin {
             // Restrict streak accumulation to items held in the main hand.
             if (!entry.getKey().value().matchingSlot(EquipmentSlot.MAINHAND)) continue;
 
-            List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.MINING_STREAK);
+            List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.MINING_STREAK.get());
             if (effects != null) {
                 // Lazily instantiate the loot context only on the server and only if an effect exists.
                 if (!isClient && lootContext == null) {
