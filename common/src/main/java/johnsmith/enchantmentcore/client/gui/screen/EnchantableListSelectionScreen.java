@@ -119,7 +119,7 @@ public class EnchantableListSelectionScreen extends Screen {
     }
 
     private void updateAvailable(String query) {
-        double scroll = this.availableList.getScrollAmount();
+        double scroll = this.availableList.scrollAmount();
         this.availableList.clearEntries();
         String lowerQuery = query.toLowerCase(Locale.ROOT);
 
@@ -138,7 +138,7 @@ public class EnchantableListSelectionScreen extends Screen {
     }
 
     private void updateSelected(String query) {
-        double scroll = this.selectedList.getScrollAmount();
+        double scroll = this.selectedList.scrollAmount();
         this.selectedList.clearEntries();
         String lowerQuery = query.toLowerCase(Locale.ROOT);
 
@@ -194,17 +194,14 @@ public class EnchantableListSelectionScreen extends Screen {
         private final Component listTitle;
 
         public ElementList(Minecraft minecraft, int width, int height, int y, int itemHeight, int x, Component listTitle) {
-            super(minecraft, width, height, y, itemHeight);
-            this.setX(x);
+            super(minecraft, width, height, y, itemHeight, 16);
             this.listTitle = listTitle;
-            this.setRenderHeader(true, 16);
         }
 
         public void clearEntries() { super.clearEntries(); }
         public int addEntry(ElementEntry entry) { return super.addEntry(entry); }
         @Override public int getRowTop(int index) { return super.getRowTop(index); }
         @Override public int getRowWidth() { return this.width - 20; }
-        @Override protected int getScrollbarPosition() { return this.getX() + this.width - 6; }
 
         @Override
         protected void renderHeader(GuiGraphics guiGraphics, int x, int y) {

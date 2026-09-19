@@ -69,7 +69,7 @@ public class SlotListSelectionScreen extends Screen {
     }
 
     private void refreshLists() {
-        double availableScroll = this.availableList.getScrollAmount();
+        double availableScroll = this.availableList.scrollAmount();
         this.availableList.clearEntries();
         for (EquipmentSlotGroup element : this.allAvailableItems) {
             if (!this.selectedItems.contains(element)) {
@@ -81,7 +81,7 @@ public class SlotListSelectionScreen extends Screen {
         }
         this.availableList.setScrollAmount(availableScroll);
 
-        double selectedScroll = this.selectedList.getScrollAmount();
+        double selectedScroll = this.selectedList.scrollAmount();
         this.selectedList.clearEntries();
         for (int i = 0; i < this.selectedItems.size(); i++) {
             EquipmentSlotGroup element = this.selectedItems.get(i);
@@ -119,17 +119,14 @@ public class SlotListSelectionScreen extends Screen {
         private final Component listTitle;
 
         public ElementList(Minecraft minecraft, int width, int height, int y, int itemHeight, int x, Component listTitle) {
-            super(minecraft, width, height, y, itemHeight);
-            this.setX(x);
+            super(minecraft, width, height, y, itemHeight, 16);
             this.listTitle = listTitle;
-            this.setRenderHeader(true, 16);
         }
 
         public void clearEntries() { super.clearEntries(); }
         public int addEntry(ElementEntry entry) { return super.addEntry(entry); }
         @Override public int getRowTop(int index) { return super.getRowTop(index); }
         @Override public int getRowWidth() { return this.width - 20; }
-        @Override protected int getScrollbarPosition() { return this.getX() + this.width - 6; }
 
         @Override
         protected void renderHeader(GuiGraphics guiGraphics, int x, int y) {
@@ -145,7 +142,7 @@ public class SlotListSelectionScreen extends Screen {
         private final ResourceLocation sprite;
         private final ResourceLocation highlightedSprite;
         private final Runnable onTransfer;
-        private final ItemStack icon; // Add icon field
+        private final ItemStack icon;
 
         private Runnable onMoveUp;
         private Runnable onMoveDown;
@@ -158,7 +155,7 @@ public class SlotListSelectionScreen extends Screen {
             this.onTransfer = onTransfer;
 
             this.displayName = Component.literal(element.getSerializedName().toUpperCase(Locale.ROOT)).withStyle(ChatFormatting.YELLOW);
-            this.icon = getIconForGroup(element); // Resolve icon on construction
+            this.icon = getIconForGroup(element);
         }
 
         public void setSortable(Runnable onMoveUp, Runnable onMoveDown) {
@@ -172,7 +169,6 @@ public class SlotListSelectionScreen extends Screen {
                 guiGraphics.fill(left, top, left + 32, top + 32, 0x99999999);
             }
 
-            // Render the representative item icon
             guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(left, top, 0);
             guiGraphics.pose().scale(2.0F, 2.0F, 1.0F);
@@ -196,7 +192,6 @@ public class SlotListSelectionScreen extends Screen {
                 guiGraphics.pose().popPose();
             }
 
-            // Shift the text rendering over to account for the 32x32 icon
             guiGraphics.drawString(SlotListSelectionScreen.this.font, this.displayName, left + 36, top + 12, 0xFFFFFFFF, false);
         }
 
