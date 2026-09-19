@@ -1,0 +1,103 @@
+{
+  "description": {
+    "translate": "enchantment.enchantment_core.export_stress_test"
+  },
+  "min_cost": {
+    "base": 15,
+    "per_level_above_first": 9
+  },
+  "max_cost": {
+    "base": 65,
+    "per_level_above_first": 9
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "mainhand",
+    "offhand"
+  ],
+  "supported_items": "#minecraft:enchantable/weapon",
+  "primary_items": "#minecraft:enchantable/sword",
+  "weight": 2,
+  "max_level": 3,
+  "effects": {
+    "minecraft:post_attack": [
+      {
+        "enchanted": "attacker",
+        "affected": "victim",
+        "effect": {
+          "block_effects": [
+            {
+              "block": "minecraft:cobweb",
+              "lifetime": 100.0,
+              "decay_duration": 40.0,
+              "type": "enchantment_core:place_temporary_block"
+            }
+          ],
+          "volume_effects": [
+            {
+              "fuse_variance": 10.0,
+              "spatial_delay": 5.0,
+              "explosion": {
+                "radius": 2.5,
+                "create_fire": true
+              },
+              "count": 3.0,
+              "fuse_ticks": 40.0,
+              "type": "enchantment_core:explode"
+            }
+          ],
+          "visual_effects": [
+            {
+              "speed": 0.15,
+              "distribution": {
+                "sampling_attempts": 10
+              },
+              "particle": {
+                "type": "minecraft:soul_fire_flame"
+              },
+              "count": 64.0,
+              "type": "enchantment_core:vector_field"
+            }
+          ],
+          "volumes": [
+            {
+              "shape": {
+                "x_radius": 8.0,
+                "y_radius": 4.0,
+                "z_radius": 8.0,
+                "type": "enchantment_core:cuboid"
+              },
+              "topology": {
+                "origin_scaling": {
+                  "degree": 2.0,
+                  "type": "enchantment_core:polynomial"
+                },
+                "origin_range": {
+                  "base": 4.0,
+                  "per_level_above_first": 2.0,
+                  "type": "minecraft:linear"
+                }
+              }
+            }
+          ],
+          "entity_effects": [
+            {
+              "damage_type": "minecraft:magic",
+              "amount": 5.0,
+              "type": "enchantment_core:damage_entity"
+            },
+            {
+              "rotation_direction": "clockwise",
+              "attraction_strength": 1.25,
+              "orbital_radius": 3.0,
+              "orbit_velocity": 0.6,
+              "drag_multiplier": 0.85,
+              "type": "enchantment_core:orbit"
+            }
+          ],
+          "type": "enchantment_core:spell_field"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${version}",
+    "name": "${mod_name}",
+    "description": "${description}",
+    "authors": [
+        "${mod_author}"
+    ],
+    "contact": {
+        "homepage": "https://modrinth.com/project/enchantment-core",
+        "sources": "https://github.com/JohnSmith474Mods/Enchantment-Core",
+        "issues": "https://github.com/JohnSmith474Mods/Enchantment-Core/issues"
+    },
+    "license": "${license}",
+    "icon": "${mod_id}.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "johnsmith.enchantmentcore.Fabric"
+        ],
+        "client": [
+            "johnsmith.enchantmentcore.client.FabricClient"
+        ],
+        "modmenu": [
+            "johnsmith.enchantmentcore.client.ModMenuIntegration"
+        ]
+    },
+    "mixins": [
+        "${mod_id}.mixins.json",
+        "${mod_id}.fabric.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=${fabric_loader_version}",
+        "fabric-api": "*",
+        "minecraft": "${minecraft_version}",
+        "java": ">=${java_version}",
+        "config_overhauled": ">=${config_overhauled_version_min} <${config_overhauled_version_max}"
+    },
+    "custom": {
+      "modmenu": {
+        "badges": ["library"]
+      }
+    },
+    "suggests": {
+        "enchanting_overhauled": "https://modrinth.com/mod/enchanting-overhauled"
+    }
+}
+  

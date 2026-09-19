@@ -1,0 +1,125 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.punch"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "punch",
+        "property": "min_cost_base"
+      },
+      "fallback": 12
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "punch",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 20
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "punch",
+        "property": "max_cost_base"
+      },
+      "fallback": 37
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "punch",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 20
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "punch",
+      "property": "anvil_cost"
+    },
+    "fallback": 4
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "punch",
+      "property": "slots"
+    },
+    "fallback": [
+      "mainhand"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "punch",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/bow"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "punch",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "punch",
+      "property": "max_level"
+    },
+    "fallback": 2
+  },
+  "effects": {
+    "minecraft:knockback": [
+      {
+        "effect": {
+          "value": {
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "punch",
+              "property": "value_per_level"
+            },
+            "per_level_default": 1.0,
+            "base_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "punch",
+              "property": "value_base"
+            },
+            "base_default": 1.0,
+            "type": "enchantment_core:configurable_linear"
+          },
+          "type": "minecraft:add"
+        },
+        "requirements": {
+          "predicate": {
+            "type": "#minecraft:arrows"
+          },
+          "entity": "direct_attacker",
+          "condition": "minecraft:entity_properties"
+        }
+      }
+    ]
+  }
+}

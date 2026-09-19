@@ -1,0 +1,195 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.unbreaking"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "unbreaking",
+        "property": "min_cost_base"
+      },
+      "fallback": 5
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "unbreaking",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "unbreaking",
+        "property": "max_cost_base"
+      },
+      "fallback": 55
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "unbreaking",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "unbreaking",
+      "property": "anvil_cost"
+    },
+    "fallback": 2
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "unbreaking",
+      "property": "slots"
+    },
+    "fallback": [
+      "any"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "unbreaking",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/durability"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "unbreaking",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "unbreaking",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
+  "effects": {
+    "minecraft:item_damage": [
+      {
+        "effect": {
+          "chance": {
+            "numerator": {
+              "per_level_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_numerator_per_level"
+              },
+              "per_level_default": 2.0,
+              "base_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_numerator_base"
+              },
+              "base_default": 2.0,
+              "type": "enchantment_core:configurable_linear"
+            },
+            "denominator": {
+              "per_level_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_denominator_per_level"
+              },
+              "per_level_default": 5.0,
+              "base_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_denominator_base"
+              },
+              "base_default": 10.0,
+              "type": "enchantment_core:configurable_linear"
+            },
+            "type": "minecraft:fraction"
+          },
+          "type": "minecraft:remove_binomial"
+        },
+        "requirements": {
+          "predicate": {
+            "items": "#minecraft:enchantable/armor"
+          },
+          "condition": "minecraft:match_tool"
+        }
+      },
+      {
+        "effect": {
+          "chance": {
+            "numerator": {
+              "per_level_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_2_numerator_per_level"
+              },
+              "per_level_default": 1.0,
+              "base_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_2_numerator_base"
+              },
+              "base_default": 1.0,
+              "type": "enchantment_core:configurable_linear"
+            },
+            "denominator": {
+              "per_level_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_2_denominator_per_level"
+              },
+              "per_level_default": 1.0,
+              "base_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_2_denominator_base"
+              },
+              "base_default": 2.0,
+              "type": "enchantment_core:configurable_linear"
+            },
+            "type": "minecraft:fraction"
+          },
+          "type": "minecraft:remove_binomial"
+        },
+        "requirements": {
+          "term": {
+            "predicate": {
+              "items": "#minecraft:enchantable/armor"
+            },
+            "condition": "minecraft:match_tool"
+          },
+          "condition": "minecraft:inverted"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.thorns"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "thorns",
+        "property": "min_cost_base"
+      },
+      "fallback": 10
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "thorns",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 20
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "thorns",
+        "property": "max_cost_base"
+      },
+      "fallback": 60
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "thorns",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 20
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "anvil_cost"
+    },
+    "fallback": 8
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "slots"
+    },
+    "fallback": [
+      "any"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/armor"
+  },
+  "primary_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "primary_items"
+    },
+    "fallback": "#minecraft:enchantable/chest_armor"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "weight"
+    },
+    "fallback": 1
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
+  "effects": {
+    "minecraft:post_attack": [
+      {
+        "enchanted": "victim",
+        "affected": "attacker",
+        "effect": {
+          "effects": [
+            {
+              "min_damage": {
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "thorns",
+                  "property": "min_damage"
+                },
+                "default_value": 1.0,
+                "type": "enchantment_core:configurable_constant"
+              },
+              "max_damage": {
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "thorns",
+                  "property": "max_damage"
+                },
+                "default_value": 5.0,
+                "type": "enchantment_core:configurable_constant"
+              },
+              "damage_type": "minecraft:thorns",
+              "type": "minecraft:damage_entity"
+            },
+            {
+              "amount": {
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "thorns",
+                  "property": "amount"
+                },
+                "default_value": 2.0,
+                "type": "enchantment_core:configurable_constant"
+              },
+              "type": "minecraft:damage_item"
+            }
+          ],
+          "type": "minecraft:all_of"
+        },
+        "requirements": {
+          "chance": {
+            "amount": {
+              "base": 0.15,
+              "per_level_above_first": 0.15,
+              "type": "minecraft:linear"
+            },
+            "type": "minecraft:enchantment_level"
+          },
+          "condition": "minecraft:random_chance"
+        }
+      }
+    ]
+  }
+}

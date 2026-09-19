@@ -1,0 +1,118 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.knockback"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "knockback",
+        "property": "min_cost_base"
+      },
+      "fallback": 5
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "knockback",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 20
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "knockback",
+        "property": "max_cost_base"
+      },
+      "fallback": 55
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "knockback",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 20
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "knockback",
+      "property": "anvil_cost"
+    },
+    "fallback": 2
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "knockback",
+      "property": "slots"
+    },
+    "fallback": [
+      "mainhand"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "knockback",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/sword"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "knockback",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "knockback",
+      "property": "max_level"
+    },
+    "fallback": 2
+  },
+  "effects": {
+    "minecraft:knockback": [
+      {
+        "effect": {
+          "value": {
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "knockback",
+              "property": "value_per_level"
+            },
+            "per_level_default": 1.0,
+            "base_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "knockback",
+              "property": "value_base"
+            },
+            "base_default": 1.0,
+            "type": "enchantment_core:configurable_linear"
+          },
+          "type": "minecraft:add"
+        }
+      }
+    ]
+  }
+}

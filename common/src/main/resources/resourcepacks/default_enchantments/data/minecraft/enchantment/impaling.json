@@ -1,0 +1,126 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.impaling"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "impaling",
+        "property": "min_cost_base"
+      },
+      "fallback": 1
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "impaling",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "impaling",
+        "property": "max_cost_base"
+      },
+      "fallback": 21
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "impaling",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "impaling",
+      "property": "anvil_cost"
+    },
+    "fallback": 4
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "impaling",
+      "property": "slots"
+    },
+    "fallback": [
+      "mainhand"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "impaling",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/trident"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "impaling",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "impaling",
+      "property": "max_level"
+    },
+    "fallback": 5
+  },
+  "exclusive_set": "#minecraft:exclusive_set/damage",
+  "effects": {
+    "minecraft:damage": [
+      {
+        "effect": {
+          "value": {
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "impaling",
+              "property": "value_per_level"
+            },
+            "per_level_default": 2.5,
+            "base_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "impaling",
+              "property": "value_base"
+            },
+            "base_default": 2.5,
+            "type": "enchantment_core:configurable_linear"
+          },
+          "type": "minecraft:add"
+        },
+        "requirements": {
+          "predicate": {
+            "type": "#minecraft:sensitive_to_impaling"
+          },
+          "entity": "this",
+          "condition": "minecraft:entity_properties"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.bane_of_arthropods"
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "bane_of_arthropods",
+        "property": "min_cost_base"
+      },
+      "fallback": 5
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "bane_of_arthropods",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "bane_of_arthropods",
+        "property": "max_cost_base"
+      },
+      "fallback": 25
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "bane_of_arthropods",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "bane_of_arthropods",
+      "property": "anvil_cost"
+    },
+    "fallback": 2
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "bane_of_arthropods",
+      "property": "slots"
+    },
+    "fallback": [
+      "mainhand"
+    ]
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "bane_of_arthropods",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/weapon"
+  },
+  "primary_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "bane_of_arthropods",
+      "property": "primary_items"
+    },
+    "fallback": "#minecraft:enchantable/sword"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "bane_of_arthropods",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "bane_of_arthropods",
+      "property": "max_level"
+    },
+    "fallback": 5
+  },
+  "exclusive_set": "#minecraft:exclusive_set/damage",
+  "effects": {
+    "minecraft:damage": [
+      {
+        "effect": {
+          "value": {
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "bane_of_arthropods",
+              "property": "value_per_level"
+            },
+            "per_level_default": 2.5,
+            "base_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "bane_of_arthropods",
+              "property": "value_base"
+            },
+            "base_default": 2.5,
+            "type": "enchantment_core:configurable_linear"
+          },
+          "type": "minecraft:add"
+        },
+        "requirements": {
+          "predicate": {
+            "type": "#minecraft:sensitive_to_bane_of_arthropods"
+          },
+          "entity": "this",
+          "condition": "minecraft:entity_properties"
+        }
+      }
+    ],
+    "minecraft:post_attack": [
+      {
+        "enchanted": "attacker",
+        "affected": "victim",
+        "effect": {
+          "max_duration": {
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "bane_of_arthropods",
+              "property": "max_duration_per_level"
+            },
+            "per_level_default": 0.5,
+            "base_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "bane_of_arthropods",
+              "property": "max_duration_base"
+            },
+            "base_default": 1.5,
+            "type": "enchantment_core:configurable_linear"
+          },
+          "min_amplifier": {
+            "config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "bane_of_arthropods",
+              "property": "min_amplifier"
+            },
+            "default_value": 3.0,
+            "type": "enchantment_core:configurable_constant"
+          },
+          "max_amplifier": {
+            "config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "bane_of_arthropods",
+              "property": "max_amplifier"
+            },
+            "default_value": 3.0,
+            "type": "enchantment_core:configurable_constant"
+          },
+          "to_apply": "minecraft:slowness",
+          "min_duration": {
+            "config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "bane_of_arthropods",
+              "property": "min_duration"
+            },
+            "default_value": 1.5,
+            "type": "enchantment_core:configurable_constant"
+          },
+          "type": "minecraft:apply_mob_effect"
+        },
+        "requirements": {
+          "terms": [
+            {
+              "predicate": {
+                "type": "#minecraft:sensitive_to_bane_of_arthropods"
+              },
+              "entity": "this",
+              "condition": "minecraft:entity_properties"
+            },
+            {
+              "predicate": {
+                "is_direct": true
+              },
+              "condition": "minecraft:damage_source_properties"
+            }
+          ],
+          "condition": "minecraft:all_of"
+        }
+      }
+    ]
+  }
+}
