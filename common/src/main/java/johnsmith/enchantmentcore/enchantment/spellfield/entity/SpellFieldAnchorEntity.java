@@ -1,5 +1,7 @@
 package johnsmith.enchantmentcore.enchantment.spellfield.entity;
 
+import com.mojang.serialization.Codec;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,8 +11,6 @@ import johnsmith.enchantmentcore.api.entity.SpellFieldAnchor;
 import johnsmith.enchantmentcore.enchantment.spellfield.SpellFieldComponent;
 
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -25,6 +25,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
@@ -161,7 +163,7 @@ public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
                 if (cycleTime % this.tickRate == 0 && this.spellField != null) {
                     Entity owner = null;
                     if (this.ownerUUID != null) {
-                        owner = ((ServerLevel) this.level()).getEntity(this.ownerUUID);
+                        owner = this.level().getEntity(this.ownerUUID);
                     }
                     LivingEntity livingOwner = owner instanceof LivingEntity ? (LivingEntity) owner : null;
                     EnchantedItemInUse context = new EnchantedItemInUse(this.itemStack, this.slot, livingOwner);
@@ -182,51 +184,31 @@ public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
-        this.lifeTime = tag.getInt("LifeTime").orElse(100);
-        this.tickCount = tag.getInt("Age").orElse(0);
-        this.tickRate = Math.max(1, tag.getInt("TickRate").orElse(1));
-        this.activationDelay = tag.getInt("ActivationDelay").orElse(0);
-        this.activePhase = tag.getInt("ActivePhase").orElse(0);
-        this.restPhase = tag.getInt("RestPhase").orElse(0);
-        this.enchantmentLevel = tag.getInt("EnchantmentLevel").orElse(0);
+    protected void readAdditionalSaveData(ValueInput input) {
+        this.lifeTime = input.getIntOr("LifeTime", 100);
+        this.tickCount = input.getIntOr("Age", 0);
+        this.tickRate = Math.max(1, input.getIntOr("TickRate", 1));
+        this.activationDelay = input.getIntOr("ActivationDelay", 0);
+        this.activePhase = input.getIntOr("ActivePhase", 0);
+        this.restPhase = input.getIntOr("RestPhase", 0);
+        this.enchantmentLevel = input.getIntOr("EnchantmentLevel", 0);
 
-        if (tag.contains("VisualConfig")) {
-            AnchorVisualConfig.CODEC.parse(NbtOps.INSTANCE, tag.get("VisualConfig"))
-                    .result()
-                    .ifPresent(this::setVisualConfig);
-        }
-
-        if (tag.contains("OwnerUUID")) {
-            UUIDUtil.CODEC.parse(NbtOps.INSTANCE, tag.get("OwnerUUID"))
-                    .result()
-                    .ifPresent(uuid -> this.ownerUUID = uuid);
-        }
-
-        if (tag.contains("Item")) {
-            ItemStack.OPTIONAL_CODEC.parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), tag.get("Item"))
-                    .result()
-                    .ifPresent(item -> this.itemStack = item);
-        }
-
-        tag.getString("Slot").ifPresent(slotName -> this.slot = EquipmentSlot.byName(slotName));
-
-        if (tag.contains("SpellField")) {
-            SpellFieldComponent.CODEC.codec().parse(NbtOps.INSTANCE, tag.get("SpellField"))
-                    .result()
-                    .ifPresent(field -> this.spellField = field);
-        }
+        input.read("VisualConfig", AnchorVisualConfig.CODEC).ifPresent(this::setVisualConfig);
+        input.read("OwnerUUID", UUIDUtil.CODEC).ifPresent(uuid -> this.ownerUUID = uuid);
+        input.read("Item", ItemStack.OPTIONAL_CODEC).ifPresent(item -> this.itemStack = item);
+        input.read("Slot", Codec.STRING).ifPresent(slotName -> this.slot = EquipmentSlot.byName(slotName));
+        input.read("SpellField", SpellFieldComponent.CODEC.codec()).ifPresent(field -> this.spellField = field);
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
-        tag.putInt("LifeTime", this.lifeTime);
-        tag.putInt("Age", this.tickCount);
-        tag.putInt("TickRate", this.tickRate);
-        tag.putInt("ActivationDelay", this.activationDelay);
-        tag.putInt("ActivePhase", this.activePhase);
-        tag.putInt("RestPhase", this.restPhase);
-        tag.putInt("EnchantmentLevel", this.enchantmentLevel);
+    protected void addAdditionalSaveData(ValueOutput output) {
+        output.putInt("LifeTime", this.lifeTime);
+        output.putInt("Age", this.tickCount);
+        output.putInt("TickRate", this.tickRate);
+        output.putInt("ActivationDelay", this.activationDelay);
+        output.putInt("ActivePhase", this.activePhase);
+        output.putInt("RestPhase", this.restPhase);
+        output.putInt("EnchantmentLevel", this.enchantmentLevel);
 
         String textureStr = this.entityData.get(VISUAL_TEXTURE);
         String modelIdStr = this.entityData.get(MODEL_ID);
@@ -240,28 +222,20 @@ public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
                 this.entityData.get(VISUAL_TINT)
         );
 
-        AnchorVisualConfig.CODEC.encodeStart(NbtOps.INSTANCE, config)
-                .result()
-                .ifPresent(visualNbt -> tag.put("VisualConfig", visualNbt));
+        output.store("VisualConfig", AnchorVisualConfig.CODEC, config);
 
         if (this.ownerUUID != null) {
-            UUIDUtil.CODEC.encodeStart(NbtOps.INSTANCE, this.ownerUUID)
-                    .result()
-                    .ifPresent(uuidNbt -> tag.put("OwnerUUID", uuidNbt));
+            output.store("OwnerUUID", UUIDUtil.CODEC, this.ownerUUID);
         }
 
         if (!this.itemStack.isEmpty()) {
-            ItemStack.OPTIONAL_CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), this.itemStack)
-                    .result()
-                    .ifPresent(itemNbt -> tag.put("Item", itemNbt));
+            output.store("Item", ItemStack.OPTIONAL_CODEC, this.itemStack);
         }
 
-        tag.putString("Slot", this.slot.getName());
+        output.putString("Slot", this.slot.getName());
 
         if (this.spellField != null) {
-            SpellFieldComponent.CODEC.codec().encodeStart(NbtOps.INSTANCE, this.spellField)
-                    .result()
-                    .ifPresent(fieldNbt -> tag.put("SpellField", fieldNbt));
+            output.store("SpellField", SpellFieldComponent.CODEC.codec(), this.spellField);
         }
     }
 

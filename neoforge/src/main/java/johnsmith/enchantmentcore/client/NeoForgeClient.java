@@ -1,6 +1,7 @@
 package johnsmith.enchantmentcore.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import johnsmith.enchantmentcore.Constants;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugRenderer;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugTracker;
@@ -15,34 +16,27 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
+@EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
 public class NeoForgeClient {
 
-    @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
-    public static class ModEvents {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            event.enqueueWork(CommonClient::initialize);
-        }
-
-        @SubscribeEvent
-        public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerEntityRenderer(EnchantmentCoreEntities.SPELL_FIELD_ANCHOR, SpellFieldAnchorRenderer::new);
-        }
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(CommonClient::initialize);
     }
 
-    @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
-    public static class GameEvents {
-        @SubscribeEvent
-        public static void onClientTick(ClientTickEvent.Post event) {
-            SpellFieldDebugTracker.tick();
-        }
+    @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(EnchantmentCoreEntities.SPELL_FIELD_ANCHOR, SpellFieldAnchorRenderer::new);
+    }
 
-        @SubscribeEvent
-        public static void onRenderLevelStage(RenderLevelStageEvent event) {
-            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-                PoseStack poseStack = new PoseStack();
-                SpellFieldDebugRenderer.render(poseStack, event.getCamera(), event.getPartialTick().getGameTimeDeltaPartialTick(true));
-            }
-        }
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        SpellFieldDebugTracker.tick();
+    }
+
+    @SubscribeEvent
+    public static void onRenderLevelStage(RenderLevelStageEvent.AfterEntities event) {
+        PoseStack poseStack = event.getPoseStack();
+        SpellFieldDebugRenderer.render(poseStack, event.getCamera(), event.getPartialTick().getGameTimeDeltaPartialTick(true));
     }
 }

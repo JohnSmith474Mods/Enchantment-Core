@@ -1,5 +1,6 @@
 package johnsmith.enchantmentcore.util;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -14,12 +15,16 @@ import java.util.TreeMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.storage.TagValueInput;
+
+import org.slf4j.Logger;
 
 /**
  * Manages the temporary modification and restoration of block states within a server level.
@@ -27,6 +32,7 @@ import net.minecraft.world.level.saveddata.SavedDataType;
  * expiration tick occurs. Utilizes a time-bucketed schedule map to optimize expiration queries.
  */
 public class TransientBlockTracker extends SavedData {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final String DATA_NAME = "enchantment_core_transient_blocks";
 
     public static final Codec<TransientBlockTracker> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -57,7 +63,7 @@ public class TransientBlockTracker extends SavedData {
         return tracker;
     }));
 
-    public static final SavedDataType<TransientBlockTracker> TYPE = new SavedDataType<TransientBlockTracker>(
+    public static final SavedDataType<TransientBlockTracker> TYPE = new SavedDataType<>(
             DATA_NAME,
             TransientBlockTracker::new,
             CODEC,
@@ -172,7 +178,9 @@ public class TransientBlockTracker extends SavedData {
                     if (block.blockEntityData != null) {
                         BlockEntity be = level.getBlockEntity(pos);
                         if (be != null) {
-                            be.loadWithComponents(block.blockEntityData, level.registryAccess());
+                            try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(be.problemPath(), LOGGER)) {
+                                be.loadWithComponents(TagValueInput.create(reporter, level.registryAccess(), block.blockEntityData));
+                            }
                             be.setChanged();
                         }
                     }

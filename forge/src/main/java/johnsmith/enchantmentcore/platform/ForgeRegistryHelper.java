@@ -12,7 +12,7 @@ import johnsmith.enchantmentcore.platform.services.IRegistryHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryBuilder;
 
@@ -47,7 +47,7 @@ public class ForgeRegistryHelper implements IRegistryHelper {
     /**
      * Registers all active DeferredRegisters to the primary mod event bus.
      */
-    public static void registerAll(IEventBus modEventBus) {
-        DEFERRED_REGISTERS.values().forEach(deferredRegister -> deferredRegister.register(modEventBus));
+    public static void registerAll(BusGroup modBusGroup) {
+        DEFERRED_REGISTERS.values().forEach(deferredRegister -> deferredRegister.register(modBusGroup));
     }
 }

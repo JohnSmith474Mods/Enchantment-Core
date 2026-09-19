@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -112,7 +112,7 @@ public class SlotListSelectionScreen extends Screen {
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
     }
 
     private class ElementList extends ObjectSelectionList<ElementEntry> {
@@ -120,6 +120,7 @@ public class SlotListSelectionScreen extends Screen {
 
         public ElementList(Minecraft minecraft, int width, int height, int y, int itemHeight, int x, Component listTitle) {
             super(minecraft, width, height, y, itemHeight, 16);
+            this.setX(x);
             this.listTitle = listTitle;
         }
 
@@ -127,11 +128,12 @@ public class SlotListSelectionScreen extends Screen {
         public int addEntry(ElementEntry entry) { return super.addEntry(entry); }
         @Override public int getRowTop(int index) { return super.getRowTop(index); }
         @Override public int getRowWidth() { return this.width - 20; }
+        @Override protected int scrollBarX() { return this.getX() + this.width - 6; }
 
         @Override
         protected void renderHeader(GuiGraphics guiGraphics, int x, int y) {
             Component formattedTitle = this.listTitle.copy().withStyle(ChatFormatting.BOLD, ChatFormatting.UNDERLINE);
-            guiGraphics.drawCenteredString(this.minecraft.font, formattedTitle, x + this.getRowWidth() / 2, y + 2, 0xFFFFFF);
+            guiGraphics.drawCenteredString(this.minecraft.font, formattedTitle, x + this.getRowWidth() / 2, y + 2, 0xFFFFFFFF);
         }
     }
 
@@ -169,27 +171,27 @@ public class SlotListSelectionScreen extends Screen {
                 guiGraphics.fill(left, top, left + 32, top + 32, 0x99999999);
             }
 
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(left, top, 0);
-            guiGraphics.pose().scale(2.0F, 2.0F, 1.0F);
+            guiGraphics.pose().pushMatrix();
+            guiGraphics.pose().translate((float)left, (float)top);
+            guiGraphics.pose().scale(2.0F, 2.0F);
             guiGraphics.renderItem(this.icon, 0, 0);
-            guiGraphics.pose().popPose();
+            guiGraphics.pose().popMatrix();
 
             if (isMouseOver) {
                 int relativeX = mouseX - left;
                 int relativeY = mouseY - top;
 
-                guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(0, 0, 200.0F);
+                guiGraphics.pose().pushMatrix();
+                guiGraphics.nextStratum();
 
                 if (this.onMoveUp == null && this.onMoveDown == null) {
-                    guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, relativeX < 32 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
                 } else {
-                    guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 16 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
-                    if (this.onMoveUp != null) guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 && relativeX > 16 && relativeY < 16 ? MOVE_UP_HIGHLIGHTED : MOVE_UP, left, top, 32, 32);
-                    if (this.onMoveDown != null) guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 && relativeX > 16 && relativeY > 16 ? MOVE_DOWN_HIGHLIGHTED : MOVE_DOWN, left, top, 32, 32);
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, relativeX < 16 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
+                    if (this.onMoveUp != null) guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, relativeX < 32 && relativeX > 16 && relativeY < 16 ? MOVE_UP_HIGHLIGHTED : MOVE_UP, left, top, 32, 32);
+                    if (this.onMoveDown != null) guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, relativeX < 32 && relativeX > 16 && relativeY > 16 ? MOVE_DOWN_HIGHLIGHTED : MOVE_DOWN, left, top, 32, 32);
                 }
-                guiGraphics.pose().popPose();
+                guiGraphics.pose().popMatrix();
             }
 
             guiGraphics.drawString(SlotListSelectionScreen.this.font, this.displayName, left + 36, top + 12, 0xFFFFFFFF, false);

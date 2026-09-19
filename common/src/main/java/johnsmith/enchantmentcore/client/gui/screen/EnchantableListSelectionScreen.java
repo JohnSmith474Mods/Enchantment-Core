@@ -16,7 +16,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -46,7 +46,6 @@ public class EnchantableListSelectionScreen extends Screen {
     private EditBox selectedSearchBox;
     private ElementList availableList;
     private ElementList selectedList;
-    private List<Component> deferredTooltip;
 
     public EnchantableListSelectionScreen(Screen parent, Component title, List<ItemOrItems> initialSelection, Consumer<List<ItemOrItems>> onSelect) {
         super(title);
@@ -174,14 +173,8 @@ public class EnchantableListSelectionScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.deferredTooltip = null;
-
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
-
-        if (this.deferredTooltip != null) {
-            guiGraphics.renderTooltip(this.font, this.deferredTooltip, Optional.empty(), mouseX, mouseY);
-        }
     }
 
     private Component trimComponent(Component component, int maxWidth) {
@@ -195,6 +188,7 @@ public class EnchantableListSelectionScreen extends Screen {
 
         public ElementList(Minecraft minecraft, int width, int height, int y, int itemHeight, int x, Component listTitle) {
             super(minecraft, width, height, y, itemHeight, 16);
+            this.setX(x);
             this.listTitle = listTitle;
         }
 
@@ -202,6 +196,7 @@ public class EnchantableListSelectionScreen extends Screen {
         public int addEntry(ElementEntry entry) { return super.addEntry(entry); }
         @Override public int getRowTop(int index) { return super.getRowTop(index); }
         @Override public int getRowWidth() { return this.width - 20; }
+        @Override protected int scrollBarX() { return this.getX() + this.width - 6; }
 
         @Override
         protected void renderHeader(GuiGraphics guiGraphics, int x, int y) {
@@ -222,7 +217,6 @@ public class EnchantableListSelectionScreen extends Screen {
 
         private Runnable onMoveUp;
         private Runnable onMoveDown;
-        private List<Component> tooltipCache;
 
         public ElementEntry(ElementList list, ItemOrItems element, ResourceLocation sprite, ResourceLocation highlightedSprite, Runnable onTransfer) {
             this.list = list;
@@ -278,30 +272,30 @@ public class EnchantableListSelectionScreen extends Screen {
         public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
             if (isMouseOver) guiGraphics.fill(left, top, left + 32, top + 32, 0x99999999); // -1601138544 Equivalent
 
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(left, top, 0);
-            guiGraphics.pose().scale(2.0F, 2.0F, 1.0F);
+            guiGraphics.pose().pushMatrix();
+            guiGraphics.pose().translate((float)left, (float)top);
+            guiGraphics.pose().scale(2.0F, 2.0F);
             guiGraphics.renderItem(this.icon, 0, 0);
-            guiGraphics.pose().popPose();
+            guiGraphics.pose().popMatrix();
 
             if (isMouseOver) {
                 int relativeX = mouseX - left;
                 int relativeY = mouseY - top;
 
-                guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(0, 0, 200.0F);
+                guiGraphics.pose().pushMatrix();
+                guiGraphics.nextStratum();
 
                 if (this.onMoveUp == null && this.onMoveDown == null) {
-                    guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, relativeX < 32 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
                 } else {
-                    guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 16 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
-                    if (this.onMoveUp != null) guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 && relativeX > 16 && relativeY < 16 ? MOVE_UP_HIGHLIGHTED : MOVE_UP, left, top, 32, 32);
-                    if (this.onMoveDown != null) guiGraphics.blitSprite(RenderType::guiTextured, relativeX < 32 && relativeX > 16 && relativeY > 16 ? MOVE_DOWN_HIGHLIGHTED : MOVE_DOWN, left, top, 32, 32);
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, relativeX < 16 ? this.highlightedSprite : this.sprite, left, top, 32, 32);
+                    if (this.onMoveUp != null) guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, relativeX < 32 && relativeX > 16 && relativeY < 16 ? MOVE_UP_HIGHLIGHTED : MOVE_UP, left, top, 32, 32);
+                    if (this.onMoveDown != null) guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, relativeX < 32 && relativeX > 16 && relativeY > 16 ? MOVE_DOWN_HIGHLIGHTED : MOVE_DOWN, left, top, 32, 32);
                 }
-                guiGraphics.pose().popPose();
+                guiGraphics.pose().popMatrix();
 
                 if (relativeX > 32 && this.element.isTag()) {
-                    EnchantableListSelectionScreen.this.deferredTooltip = this.getTooltip();
+                    guiGraphics.setTooltipForNextFrame(EnchantableListSelectionScreen.this.font, this.getTooltip(), Optional.empty(), mouseX, mouseY);
                 }
             }
 

@@ -1,13 +1,15 @@
 package johnsmith.enchantmentcore.mixin.client.render;
 
+import com.llamalad7.mixinextras.sugar.Local;
+
 import java.util.Map;
 
 import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
 import johnsmith.enchantmentcore.enchantment.effect.FluidFogDensityEffect;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.FogParameters;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.fog.FogData;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -19,7 +21,6 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 
-import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,25 +37,16 @@ public abstract class FogRendererMixin {
      * Intercepts the end of the fog setup process to forcefully override the returned parameters.
      * Evaluates the equipped helmet for active FLUID_FOG_DENSITY effects.
      *
-     * @param camera       The player camera instance.
-     * @param fogMode      The active fog rendering mode.
-     * @param fogColor     The evaluated base fog color vector.
-     * @param viewDistance The current configured client view distance.
-     * @param thickFog     Whether the environment enforces thick fog (e.g., Nether).
-     * @param tickDelta    The fractional tick value.
-     * @param cir          The callback information returning the FogParameters record.
+     * @param cir          The callback information returning the mutable FogData struct.
+     * @param camera       The player camera instance resolved via Local capture.
+     * @param viewDistance The current configured client view distance resolved via Local capture.
      */
-    @Inject(method = "setupFog", at = @At("RETURN"), cancellable = true)
-    private static void applyLevelBasedWaterVisibility(
-            Camera camera,
-            FogRenderer.FogMode fogMode,
-            Vector4f fogColor,
-            float viewDistance,
-            boolean thickFog,
-            float tickDelta,
-            CallbackInfoReturnable<FogParameters> cir
+    @Inject(method = "setupFog", at = @At("RETURN"))
+    private void enchantment_core$applyLevelBasedWaterVisibility(
+            CallbackInfoReturnable<FogData> cir,
+            @Local(argsOnly = true) Camera camera,
+            @Local(argsOnly = true) float viewDistance
     ) {
-        // Extract required context directly from the Camera parameter
         FogType fogType = camera.getFluidInCamera();
         Entity entity = camera.getEntity();
 
@@ -76,20 +68,13 @@ public abstract class FogRendererMixin {
                 int level = entry.getValue();
 
                 float start = effect.fogStart().calculate(level);
-                float endMultiplier = effect.fogEndMultiplier().calculate(level);
+                float end = viewDistance * effect.fogEndMultiplier().calculate(level);
 
-                FogParameters original = cir.getReturnValue();
-
-                // Construct a new FogParameters record with modified bounds
-                cir.setReturnValue(new FogParameters(
-                        start,
-                        viewDistance * endMultiplier,
-                        original.shape(),
-                        fogColor.x,
-                        fogColor.y,
-                        fogColor.z,
-                        fogColor.w
-                ));
+                FogData fogData = cir.getReturnValue();
+                fogData.environmentalStart = start;
+                fogData.renderDistanceStart = start;
+                fogData.environmentalEnd = end;
+                fogData.renderDistanceEnd = end;
                 return;
             }
         }

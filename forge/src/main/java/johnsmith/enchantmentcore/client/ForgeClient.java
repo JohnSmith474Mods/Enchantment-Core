@@ -8,7 +8,7 @@ import johnsmith.enchantmentcore.registry.EnchantmentCoreEntities;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
@@ -32,10 +32,8 @@ public class ForgeClient {
     public static class ForgeEvents {
 
         @SubscribeEvent
-        public static void onClientTick(TickEvent.ClientTickEvent event) {
-            if (event.phase == TickEvent.Phase.END) {
-                SpellFieldDebugTracker.tick();
-            }
+        public static void onClientTick(TickEvent.ClientTickEvent.Post event) {
+            SpellFieldDebugTracker.tick();
         }
     }
 }

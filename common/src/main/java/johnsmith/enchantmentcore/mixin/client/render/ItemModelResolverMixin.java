@@ -37,6 +37,8 @@ public class ItemModelResolverMixin {
 
     @Unique
     private void enchantment_core$applyAlpha(ItemStackRenderState state, ItemStack stack) {
+        state.appendModelIdentityElement(TransparencyRenderHelper.calculateAlpha(stack));
+
         if (state instanceof ItemRenderStateAlphaAccessor accessor) {
             accessor.enchantment_core$setAlpha(TransparencyRenderHelper.calculateAlpha(stack));
         }

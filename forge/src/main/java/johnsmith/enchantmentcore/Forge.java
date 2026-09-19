@@ -31,7 +31,7 @@ import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -39,14 +39,13 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegisterEvent;
-import org.jetbrains.annotations.NotNull;
 
-import static net.minecraftforge.common.MinecraftForge.EVENT_BUS;
+import org.jetbrains.annotations.NotNull;
 
 @Mod(Constants.MOD_ID)
 public class Forge {
     public Forge(FMLJavaModLoadingContext context) {
-        IEventBus eventBus = context.getModEventBus();
+        BusGroup modBusGroup = context.getModBusGroup();
 
         // Initialize common classes
         Common.initialize();
@@ -56,17 +55,17 @@ public class Forge {
 
         // Register Library Components
         EnchantmentEffectComponentRegistry.initialize();
-        ForgeRegistryHelper.registerAll(eventBus);
-        eventBus.addListener(this::onRegister);
-        eventBus.addListener(this::onNewRegistry);
-        eventBus.addListener(this::onRegisterRenderers);
+        ForgeRegistryHelper.registerAll(modBusGroup);
 
+        RegisterEvent.getBus(modBusGroup).addListener(this::onRegister);
+        NewRegistryEvent.getBus(modBusGroup).addListener(this::onNewRegistry);
+        EntityRenderersEvent.RegisterRenderers.getBus(modBusGroup).addListener(this::onRegisterRenderers);
 
         // Register Optional Data
-        eventBus.addListener(this::onAddPackFinders);
+        AddPackFindersEvent.getBus(modBusGroup).addListener(this::onAddPackFinders);
 
         // Register Commands
-        EVENT_BUS.addListener(this::onRegisterCommands);
+        RegisterCommandsEvent.BUS.addListener(this::onRegisterCommands);
 
         // Attach Screen
         if (FMLEnvironment.dist == Dist.CLIENT) {

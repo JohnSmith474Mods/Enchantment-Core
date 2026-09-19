@@ -1,5 +1,7 @@
 package johnsmith.enchantmentcore.mixin.enchantment.effect.entity.projectile;
 
+import com.mojang.logging.LogUtils;
+
 import java.util.Comparator;
 import java.util.List;
 
@@ -8,18 +10,23 @@ import johnsmith.enchantmentcore.api.entity.accessor.ProjectileStateAccessor;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -30,6 +37,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(Projectile.class)
 public abstract class ShrapnelMixin {
+
+    @Unique
+    private static final Logger enchantment_core$LOGGER = LogUtils.getLogger();
 
     /**
      * Intercepts the generalized hit resolution event for all projectiles.
@@ -45,14 +55,12 @@ public abstract class ShrapnelMixin {
         int generations = state.enchantment_core$getShrapnelGenerations();
         if (generations <= 0) return;
 
-        // Verify impact conditions align with configured trigger states.
         if (hitResult.getType() == HitResult.Type.BLOCK && !state.enchantment_core$getShrapnelTriggerBlock()) return;
 
         Entity primaryTarget = null;
         if (hitResult.getType() == HitResult.Type.ENTITY) {
             if (!state.enchantment_core$getShrapnelTriggerEntity()) return;
             primaryTarget = ((EntityHitResult) hitResult).getEntity();
-            // Prevent recursive explosions when hitting the shooter.
             if (primaryTarget == projectile.getOwner()) return;
         }
 
@@ -69,14 +77,14 @@ public abstract class ShrapnelMixin {
         double currentSpeed = originalVelocity.length();
         double newSpeed = currentSpeed * velRetention;
 
-        // Serialize the parent projectile to instantiate exact clones.
-        CompoundTag sourceTag = new CompoundTag();
-        projectile.saveWithoutId(sourceTag);
+        CompoundTag sourceTag;
+        try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(projectile.problemPath(), enchantment_core$LOGGER)) {
+            TagValueOutput output = TagValueOutput.createWithContext(reporter, projectile.registryAccess());
+            projectile.saveWithoutId(output);
+            sourceTag = (CompoundTag) output.buildResult();
+        }
 
-        // Scrub the UUID to prevent immediate server collision crashes.
         sourceTag.remove("UUID");
-
-        // Nullify current generations to halt infinite recursive spawning loops on the parent.
         state.enchantment_core$setShrapnelGenerations(0);
 
         Vec3 blockBounceNormal = null;
@@ -85,7 +93,6 @@ public abstract class ShrapnelMixin {
         double entityRadius = 0;
         double entityEyeY = 0;
 
-        // Calculate bounce vectors for block collisions.
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             Vec3 impactPos = hitResult.getLocation();
             Direction.Axis axis = ((BlockHitResult) hitResult).getDirection().getAxis();
@@ -100,13 +107,11 @@ public abstract class ShrapnelMixin {
 
             blockBounceNormal = new Vec3(vx, vy, vz).normalize();
 
-            // Nudge spawn positions outward to prevent instant block collision.
             blockSpawnX = impactPos.x + blockBounceNormal.x * 0.2;
             blockSpawnY = impactPos.y + blockBounceNormal.y * 0.2;
             blockSpawnZ = impactPos.z + blockBounceNormal.z * 0.2;
 
         } else if (primaryTarget != null) {
-            // Locate nearby victims for direct entity impact.
             entityRadius = primaryTarget.getBbWidth() / 2.0 + 0.2;
             entityEyeY = primaryTarget.getY() + primaryTarget.getEyeHeight();
             AABB searchBox = primaryTarget.getBoundingBox().inflate(16.0);
@@ -116,14 +121,15 @@ public abstract class ShrapnelMixin {
             secondaryTargets.sort(Comparator.comparingDouble(a -> a.distanceToSqr(finalPrimaryTarget)));
         }
 
-        // Spawn generation loop.
         for (int i = 0; i < amount; i++) {
             Entity clone = projectile.getType().create(serverLevel, EntitySpawnReason.TRIGGERED);
             if (clone instanceof Projectile child) {
-                child.load(sourceTag);
+                try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(child.problemPath(), enchantment_core$LOGGER)) {
+                    child.load(TagValueInput.create(reporter, child.registryAccess(), sourceTag));
+                }
+
                 ProjectileStateAccessor childState = (ProjectileStateAccessor) child;
 
-                // Assign inherited traits to the sub-munition.
                 childState.enchantment_core$setCalculated(true);
                 childState.enchantment_core$setShrapnelGenerations(generations - 1);
                 childState.enchantment_core$setShrapnelAmount(amount);
@@ -133,7 +139,6 @@ public abstract class ShrapnelMixin {
                 childState.enchantment_core$setShrapnelTriggerBlock(state.enchantment_core$getShrapnelTriggerBlock());
                 childState.enchantment_core$setShrapnelTriggerEntity(state.enchantment_core$getShrapnelTriggerEntity());
 
-                // Constrain arrow clones so players cannot farm them.
                 if (child instanceof AbstractArrow arrow && projectile instanceof AbstractArrow sourceArrow) {
                     arrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
                     double parentDamage = ((AbstractArrowAccessor) sourceArrow).enchantment_core$getBaseDamage();
@@ -148,7 +153,6 @@ public abstract class ShrapnelMixin {
                     Vec3 aimDir;
                     float actualSpread = 0.0f;
 
-                    // Execute targeted dispersion or fallback to radial distribution.
                     if (i < secondaryTargets.size()) {
                         LivingEntity secTarget = secondaryTargets.get(i);
                         Vec3 targetPos = secTarget.getBoundingBox().getCenter();
