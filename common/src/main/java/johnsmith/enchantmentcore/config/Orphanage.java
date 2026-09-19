@@ -50,7 +50,7 @@ public final class Orphanage implements OrphanHandler {
                 .append(Component.literal(" tab.")
                         .withColor(Config.ALERT_COLOR.get()));
 
-        if (player.getServer().isDedicatedServer()) {
+        if (player.level().getServer().isDedicatedServer()) {
             message.append(Component.literal("\nCheck server logs.").withColor(Config.ALERT_COLOR.get()));
         } else {
             String targetDir = new File("logs").getAbsolutePath();

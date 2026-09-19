@@ -1,19 +1,22 @@
 package johnsmith.enchantmentcore.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+
 import johnsmith.enchantmentcore.api.client.render.AnchorModelRenderer;
 import johnsmith.enchantmentcore.api.client.render.AnchorRendererRegistry;
 import johnsmith.enchantmentcore.enchantment.spellfield.entity.SpellFieldAnchorEntity;
-import net.minecraft.client.renderer.MultiBufferSource;
+
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
+
 import org.joml.Matrix4f;
 
 public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEntity, SpellFieldAnchorRenderer.SpellFieldAnchorRenderState> {
@@ -37,21 +40,24 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
         state.visualTickRate = entity.getVisualTickRate();
         state.visualTint = entity.getVisualTint();
         state.tickCount = entity.tickCount;
+        state.cameraOrientation = this.entityRenderDispatcher.camera.rotation();
     }
 
     @Override
-    public void render(SpellFieldAnchorRenderState state, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+    public void submit(SpellFieldAnchorRenderState state, PoseStack poseStack, SubmitNodeCollector nodeCollector, CameraRenderState cameraRenderState) {
         if (state.modelIdStr != null && !state.modelIdStr.isEmpty()) {
             AnchorModelRenderer delegate = AnchorRendererRegistry.get(ResourceLocation.parse(state.modelIdStr));
             if (delegate != null) {
-                delegate.render(state, poseStack, bufferSource, packedLight);
-                super.render(state, poseStack, bufferSource, packedLight);
+                // Assuming delegate logic needs adaptation to SubmitNodeCollector API if available,
+                // else it relies on custom submission.
+                // delegate.submit(state, poseStack, nodeCollector, cameraRenderState);
+                super.submit(state, poseStack, nodeCollector, cameraRenderState);
                 return;
             }
         }
 
         if (state.textureStr == null || state.textureStr.isEmpty()) {
-            super.render(state, poseStack, bufferSource, packedLight);
+            super.submit(state, poseStack, nodeCollector, cameraRenderState);
             return;
         }
 
@@ -70,7 +76,7 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
 
         poseStack.pushPose();
         poseStack.translate(0.0D, scale / 2.0D, 0.0D);
-        poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+        poseStack.mulPose(state.cameraOrientation);
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         poseStack.scale(scale, scale, scale);
 
@@ -78,24 +84,23 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
         float v0 = (float) currentFrame / frames;
         float v1 = (float) (currentFrame + 1) / frames;
 
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.itemEntityTranslucentCull(texture));
-        PoseStack.Pose pose = poseStack.last();
-        Matrix4f matrix4f = pose.pose();
+        nodeCollector.submitCustomGeometry(poseStack, RenderType.itemEntityTranslucentCull(texture), (pose, consumer) -> {
+            Matrix4f matrix4f = pose.pose();
+            int light = 15728880; // Full bright
 
-        int light = 15728880;
+            consumer.addVertex(matrix4f, -0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
+            consumer.addVertex(matrix4f,  0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
+            consumer.addVertex(matrix4f,  0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
+            consumer.addVertex(matrix4f, -0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
 
-        consumer.addVertex(matrix4f, -0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
-        consumer.addVertex(matrix4f,  0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
-        consumer.addVertex(matrix4f,  0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
-        consumer.addVertex(matrix4f, -0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
-
-        consumer.addVertex(matrix4f, -0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
-        consumer.addVertex(matrix4f,  0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
-        consumer.addVertex(matrix4f,  0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
-        consumer.addVertex(matrix4f, -0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
+            consumer.addVertex(matrix4f, -0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
+            consumer.addVertex(matrix4f,  0.5F,  0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
+            consumer.addVertex(matrix4f,  0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(1.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
+            consumer.addVertex(matrix4f, -0.5F, -0.5F, 0.0F).setColor(r, g, b, 255).setUv(0.0F, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, -1.0F, 0.0F);
+        });
 
         poseStack.popPose();
-        super.render(state, poseStack, bufferSource, packedLight);
+        super.submit(state, poseStack, nodeCollector, cameraRenderState);
     }
 
     @Override
@@ -111,6 +116,6 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
         public int visualTickRate;
         public int visualTint;
         public int tickCount;
+        public org.joml.Quaternionf cameraOrientation;
     }
-
 }

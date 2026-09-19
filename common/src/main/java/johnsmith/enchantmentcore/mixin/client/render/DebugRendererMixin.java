@@ -31,6 +31,7 @@ public abstract class DebugRendererMixin {
             double camX,
             double camY,
             double camZ,
+            boolean bool,
             CallbackInfo ci
     ) {
         Minecraft minecraft = Minecraft.getInstance();

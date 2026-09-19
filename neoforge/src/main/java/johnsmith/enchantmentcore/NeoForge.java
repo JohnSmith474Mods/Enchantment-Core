@@ -28,18 +28,19 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
+
 import org.jetbrains.annotations.NotNull;
 
 import static net.neoforged.neoforge.common.NeoForge.EVENT_BUS;
@@ -59,7 +60,7 @@ public class NeoForge {
 
         EVENT_BUS.addListener(this::onRegisterCommands);
 
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             container.registerExtensionPoint(IConfigScreenFactory.class,
                     (client, parent) -> Config.MANAGER.createScreen(parent));
         }
@@ -113,8 +114,17 @@ public class NeoForge {
     }
 
     private void registerBuiltInPack(AddPackFindersEvent event, String namespace, String directory, String name, PackInclusionType inclusionType) {
-        Path path = ModList.get().getModFileById(Constants.MOD_ID).getFile().findResource("resourcepacks", directory);
-        if (Files.exists(path)) {
+        Path path = null;
+
+        for (Path root : ModList.get().getModFileById(Constants.MOD_ID).getFile().getContents().getContentRoots()) {
+            Path resolved = root.resolve("resourcepacks").resolve(directory);
+            if (Files.exists(resolved)) {
+                path = resolved;
+                break;
+            }
+        }
+
+        if (path != null) {
             boolean isRequired = inclusionType == PackInclusionType.REQUIRED;
             boolean isDefaultActive = inclusionType != PackInclusionType.OPTIONAL;
 

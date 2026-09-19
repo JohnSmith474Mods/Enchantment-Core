@@ -41,6 +41,7 @@
   "client": [
     "client.debug.EntityRenderDispatcherMixin",
     "client.item.UseDurationMixin",
+    "client.render.DebugRendererMixin",
     "client.render.EquipmentLayerRendererMixin",
     "client.render.FogRendererMixin",
     "client.render.ItemModelResolverMixin",

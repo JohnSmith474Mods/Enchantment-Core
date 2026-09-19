@@ -14,7 +14,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
 public class NeoForgeClient {
@@ -32,11 +31,5 @@ public class NeoForgeClient {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         SpellFieldDebugTracker.tick();
-    }
-
-    @SubscribeEvent
-    public static void onRenderLevelStage(RenderLevelStageEvent.AfterEntities event) {
-        PoseStack poseStack = event.getPoseStack();
-        SpellFieldDebugRenderer.render(poseStack, event.getCamera(), event.getPartialTick().getGameTimeDeltaPartialTick(true));
     }
 }

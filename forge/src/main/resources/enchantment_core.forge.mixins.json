@@ -4,9 +4,7 @@
   "package": "johnsmith.enchantmentcore.mixin",
   "compatibilityLevel": "JAVA_18",
   "mixins": [],
-  "client": [
-    "client.render.DebugRendererMixin"
-  ],
+  "client": [],
   "server": [],
   "injectors": {
     "defaultRequire": 1

@@ -1,39 +1,49 @@
 package johnsmith.enchantmentcore.client;
 
-import johnsmith.enchantmentcore.Constants;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugTracker;
 import johnsmith.enchantmentcore.client.render.SpellFieldAnchorRenderer;
+import johnsmith.enchantmentcore.config.Config;
 import johnsmith.enchantmentcore.registry.EnchantmentCoreEntities;
 
-import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class ForgeClient {
 
-    @Mod.EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class ModEvents {
+    /**
+     * Executes strict client-side initialization, segregating visual APIs from the dedicated server.
+     *
+     * @param context  The Java FML mod loading context.
+     * @param busGroup The primary Mod bus group required for non-static event mapping.
+     */
+    public static void initialize(FMLJavaModLoadingContext context, BusGroup busGroup) {
+        // Explicitly bind client events to their localized and static buses
+        FMLClientSetupEvent.getBus(busGroup).addListener(ForgeClient::onClientSetup);
+        EntityRenderersEvent.RegisterRenderers.BUS.addListener(ForgeClient::registerRenderers);
+        TickEvent.ClientTickEvent.Post.BUS.addListener(ForgeClient::onClientTick);
 
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            event.enqueueWork(CommonClient::initialize);
-        }
-
-        @SubscribeEvent
-        public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerEntityRenderer(EnchantmentCoreEntities.SPELL_FIELD_ANCHOR, SpellFieldAnchorRenderer::new);
-        }
+        // Attach configuration UI
+        context.registerExtensionPoint(
+                ConfigScreenHandler.ConfigScreenFactory.class,
+                () -> new ConfigScreenHandler.ConfigScreenFactory(
+                        (minecraft, parentScreen) -> Config.MANAGER.createScreen(parentScreen)
+                )
+        );
     }
 
-    @Mod.EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
-    public static class ForgeEvents {
+    private static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(CommonClient::initialize);
+    }
 
-        @SubscribeEvent
-        public static void onClientTick(TickEvent.ClientTickEvent.Post event) {
-            SpellFieldDebugTracker.tick();
-        }
+    private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(EnchantmentCoreEntities.SPELL_FIELD_ANCHOR, SpellFieldAnchorRenderer::new);
+    }
+
+    private static void onClientTick(TickEvent.ClientTickEvent.Post event) {
+        SpellFieldDebugTracker.tick();
     }
 }

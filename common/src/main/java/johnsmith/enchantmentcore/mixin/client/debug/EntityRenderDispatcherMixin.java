@@ -3,11 +3,17 @@ package johnsmith.enchantmentcore.mixin.client.debug;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import java.util.WeakHashMap;
+
 import johnsmith.enchantmentcore.api.entity.accessor.ProjectileStateAccessor;
 
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -16,11 +22,11 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Mixin targeting the entity render dispatcher.
@@ -29,117 +35,127 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EntityRenderDispatcher.class)
 public abstract class EntityRenderDispatcherMixin {
 
-    @Shadow public abstract boolean shouldRenderHitBoxes();
+    @Unique
+    private static final WeakHashMap<EntityRenderState, FrustumRenderData> enchantment_core$frustumDataMap = new WeakHashMap<>();
+
+    @Unique
+    private record FrustumRenderData(
+            double fovLimit,
+            double minDist,
+            double maxDist,
+            float eyeHeight,
+            float lerpedXRot,
+            float lerpedYRot
+    ) {}
 
     /**
-     * Intercepts the standard entity rendering pipeline.
-     * Executes custom rendering for the homing frustum if the entity is a configured projectile and hitbox rendering is active.
-     *
-     * @param entity       The entity currently being rendered.
-     * @param x            The interpolated X coordinate.
-     * @param y            The interpolated Y coordinate.
-     * @param z            The interpolated Z coordinate.
-     * @param partialTick  The fractional tick value for interpolation.
-     * @param poseStack    The active matrix stack.
-     * @param bufferSource The active buffer source.
-     * @param packedLight  The calculated light level.
-     * @param ci           The callback information.
+     * Intercepts the entity extraction pipeline to capture rotation matrices and properties
+     * before the entity reference is decoupled from the render state.
      */
     @Inject(
-            method = "render(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
-            at = @At("TAIL")
+            method = "extractEntity",
+            at = @At("RETURN")
     )
-    private <E extends Entity> void enchantment_core$renderHomingFrustum(E entity, double x, double y, double z, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, CallbackInfo ci) {
-
-        if (this.shouldRenderHitBoxes() && entity instanceof Projectile projectile) {
+    private <E extends Entity> void enchantment_core$extractHomingFrustum(E entity, float partialTick, CallbackInfoReturnable<EntityRenderState> cir) {
+        if (Minecraft.getInstance().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES) && entity instanceof Projectile projectile) {
             ProjectileStateAccessor state = (ProjectileStateAccessor) projectile;
             double fovLimit = Math.min(179.0, state.enchantment_core$getHomingFov()) / 2.0;
 
             if (state.enchantment_core$getHomingStrength() <= 0.0 || fovLimit <= 0) return;
 
-            poseStack.pushPose();
-            poseStack.translate(x, y, z);
+            float lerpedYRot = Mth.lerp(partialTick, projectile.yRotO, projectile.getYRot()) * ((float)Math.PI / 180F);
+            float lerpedXRot = Mth.lerp(partialTick, projectile.xRotO, projectile.getXRot()) * ((float)Math.PI / 180F);
 
-            VertexConsumer builder = bufferSource.getBuffer(RenderType.lines());
-            PoseStack.Pose currentPose = poseStack.last();
-            Matrix4f matrix = currentPose.pose();
-
-            // Interpolate pitch and yaw across the current tick to prevent visual stuttering.
-            float lerpedYRot = Mth.lerp(partialTick, entity.yRotO, entity.getYRot()) * ((float)Math.PI / 180F);
-            float lerpedXRot = Mth.lerp(partialTick, entity.xRotO, entity.getXRot()) * ((float)Math.PI / 180F);
-
-            // Convert spherical coordinates (pitch/yaw) into a normalized Cartesian direction vector.
-            double dirX = Math.sin(lerpedYRot) * Math.cos(lerpedXRot);
-            double dirY = Math.sin(lerpedXRot);
-            double dirZ = Math.cos(lerpedYRot) * Math.cos(lerpedXRot);
-
-            Vec3 forward = new Vec3(dirX, dirY, dirZ).normalize();
-
-            // Establish the local coordinate frame (Forward, Right, Up) relative to the projectile orientation.
-            Vec3 globalUp = new Vec3(0, 1, 0);
-            Vec3 right = forward.cross(globalUp);
-            // Handle edge case where the projectile points exactly straight up or down.
-            if (right.lengthSqr() < 1e-5) right = forward.cross(new Vec3(1, 0, 0));
-            right = right.normalize();
-            Vec3 up = right.cross(forward).normalize();
-
-            double minDist = Math.max(0.1, state.enchantment_core$getHomingMinDistance());
-            double maxDist = state.enchantment_core$getHomingMaxDistance();
-            double tanFov = Math.tan(Math.toRadians(fovLimit));
-
-            Vec3 centerOffset = new Vec3(0, entity.getEyeHeight(), 0);
-
-            // Calculate the lateral expansion of the frustum at the near and far clipping planes.
-            double nearRadius = minDist * tanFov;
-            double farRadius = maxDist * tanFov;
-
-            Vec3[] nearCorners = new Vec3[4];
-            Vec3[] farCorners = new Vec3[4];
-
-            // Define quadrant multiplier combinations for the four corners of the frustum planes.
-            int[][] signs = {{1, 1}, {1, -1}, {-1, -1}, {-1, 1}};
-
-            // Compute the absolute spatial coordinates for the 8 vertices defining the frustum.
-            for (int i = 0; i < 4; i++) {
-                nearCorners[i] = centerOffset.add(forward.scale(minDist))
-                        .add(right.scale(signs[i][0] * nearRadius))
-                        .add(up.scale(signs[i][1] * nearRadius));
-
-                farCorners[i] = centerOffset.add(forward.scale(maxDist))
-                        .add(right.scale(signs[i][0] * farRadius))
-                        .add(up.scale(signs[i][1] * farRadius));
-            }
-
-            // Execute line rendering between the calculated vertices to construct the wireframe.
-            for (int i = 0; i < 4; i++) {
-                int next = (i + 1) % 4;
-
-                // Draw near plane perimeter.
-                enchantment_core$drawLine(builder, matrix, currentPose, nearCorners[i], nearCorners[next], 255, 150, 0);
-                // Draw far plane perimeter.
-                enchantment_core$drawLine(builder, matrix, currentPose, farCorners[i], farCorners[next], 255, 200, 0);
-                // Draw connecting edges between near and far planes.
-                enchantment_core$drawLine(builder, matrix, currentPose, nearCorners[i], farCorners[i], 255, 150, 0);
-            }
-
-            poseStack.popPose();
+            enchantment_core$frustumDataMap.put(cir.getReturnValue(), new FrustumRenderData(
+                    fovLimit,
+                    Math.max(0.1, state.enchantment_core$getHomingMinDistance()),
+                    state.enchantment_core$getHomingMaxDistance(),
+                    projectile.getEyeHeight(),
+                    lerpedXRot,
+                    lerpedYRot
+            ));
         }
     }
 
     /**
+     * Intercepts the render submission pipeline.
+     * Executes custom geometry submission for the homing frustum mapped to the active render state.
+     */
+    @Inject(
+            method = "submit",
+            at = @At("TAIL")
+    )
+    private <S extends EntityRenderState> void enchantment_core$submitHomingFrustum(S state, CameraRenderState cameraRenderState, double x, double y, double z, PoseStack poseStack, SubmitNodeCollector nodeCollector, CallbackInfo ci) {
+        FrustumRenderData data = enchantment_core$frustumDataMap.get(state);
+        if (data == null) return;
+
+        poseStack.pushPose();
+        poseStack.translate(x, y, z);
+
+        // Convert spherical coordinates (pitch/yaw) into a normalized Cartesian direction vector.
+        double dirX = Math.sin(data.lerpedYRot()) * Math.cos(data.lerpedXRot());
+        double dirY = Math.sin(data.lerpedXRot());
+        double dirZ = Math.cos(data.lerpedYRot()) * Math.cos(data.lerpedXRot());
+
+        Vec3 forward = new Vec3(dirX, dirY, dirZ).normalize();
+
+        // Establish the local coordinate frame (Forward, Right, Up) relative to the projectile orientation.
+        Vec3 globalUp = new Vec3(0, 1, 0);
+        Vec3 right = forward.cross(globalUp);
+
+        // Handle edge case where the projectile points exactly straight up or down.
+        if (right.lengthSqr() < 1e-5) right = forward.cross(new Vec3(1, 0, 0));
+
+        right = right.normalize();
+        Vec3 up = right.cross(forward).normalize();
+
+        double tanFov = Math.tan(Math.toRadians(data.fovLimit()));
+        Vec3 centerOffset = new Vec3(0, data.eyeHeight(), 0);
+
+        // Calculate the lateral expansion of the frustum at the near and far clipping planes.
+        double nearRadius = data.minDist() * tanFov;
+        double farRadius = data.maxDist() * tanFov;
+
+        Vec3[] nearCorners = new Vec3[4];
+        Vec3[] farCorners = new Vec3[4];
+
+        // Define quadrant multiplier combinations for the four corners of the frustum planes.
+        int[][] signs = {{1, 1}, {1, -1}, {-1, -1}, {-1, 1}};
+
+        // Compute the absolute spatial coordinates for the 8 vertices defining the frustum.
+        for (int i = 0; i < 4; i++) {
+            nearCorners[i] = centerOffset.add(forward.scale(data.minDist()))
+                    .add(right.scale(signs[i][0] * nearRadius))
+                    .add(up.scale(signs[i][1] * nearRadius));
+
+            farCorners[i] = centerOffset.add(forward.scale(data.maxDist()))
+                    .add(right.scale(signs[i][0] * farRadius))
+                    .add(up.scale(signs[i][1] * farRadius));
+        }
+
+        // Submits directly to the asynchronous pipeline utilizing the CustomGeometryRenderer lambda hook.
+        nodeCollector.submitCustomGeometry(poseStack, RenderType.lines(), (pose, builder) -> {
+            for (int i = 0; i < 4; i++) {
+                int next = (i + 1) % 4;
+
+                // Draw near plane perimeter.
+                enchantment_core$drawLine(builder, pose, nearCorners[i], nearCorners[next], 255, 150, 0);
+                // Draw far plane perimeter.
+                enchantment_core$drawLine(builder, pose, farCorners[i], farCorners[next], 255, 200, 0);
+                // Draw connecting edges between near and far planes.
+                enchantment_core$drawLine(builder, pose, nearCorners[i], farCorners[i], 255, 150, 0);
+            }
+        });
+
+        poseStack.popPose();
+    }
+
+    /**
      * Submits vertex data to draw a single colored line segment.
-     *
-     * @param builder The vertex consumer.
-     * @param matrix  The transformation matrix.
-     * @param pose    The pose state.
-     * @param p1      The starting coordinate.
-     * @param p2      The ending coordinate.
-     * @param r       The red color component (0-255).
-     * @param g       The green color component (0-255).
-     * @param b       The blue color component (0-255).
      */
     @Unique
-    private void enchantment_core$drawLine(VertexConsumer builder, Matrix4f matrix, PoseStack.Pose pose, Vec3 p1, Vec3 p2, int r, int g, int b) {
+    private void enchantment_core$drawLine(VertexConsumer builder, PoseStack.Pose pose, Vec3 p1, Vec3 p2, int r, int g, int b) {
+        Matrix4f matrix = pose.pose();
         float nx = (float) (p2.x - p1.x);
         float ny = (float) (p2.y - p1.y);
         float nz = (float) (p2.z - p1.z);

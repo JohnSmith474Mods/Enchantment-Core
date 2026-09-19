@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -51,10 +52,10 @@ public class SlotListSelectionScreen extends Screen {
     protected void init() {
         int halfWidth = this.width / 2 - 12;
 
-        this.availableList = new ElementList(this.minecraft, halfWidth, this.height - 64, 24, 36, 8, Component.literal("Available Slots"));
+        this.availableList = new ElementList(this.minecraft, halfWidth, this.height - 64, 24, 36, 8);
         this.addRenderableWidget(this.availableList);
 
-        this.selectedList = new ElementList(this.minecraft, halfWidth, this.height - 64, 24, 36, this.width / 2 + 4, Component.literal("Selected Slots"));
+        this.selectedList = new ElementList(this.minecraft, halfWidth, this.height - 64, 24, 36, this.width / 2 + 4);
         this.addRenderableWidget(this.selectedList);
 
         this.refreshLists();
@@ -113,15 +114,24 @@ public class SlotListSelectionScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
+
+        this.drawListHeader(guiGraphics, this.availableList, Component.literal("Available Slots"));
+        this.drawListHeader(guiGraphics, this.selectedList, Component.literal("Selected Slots"));
+    }
+
+    private void drawListHeader(GuiGraphics guiGraphics, ElementList list, Component title) {
+        Component formattedTitle = title.copy()
+                .withStyle(ChatFormatting.BOLD)
+                .withStyle(ChatFormatting.UNDERLINE);
+
+        int headerY = list.getY() - 16;
+        guiGraphics.drawCenteredString(this.minecraft.font, formattedTitle, list.getX() + list.getRowWidth() / 2, headerY + 2, 0xFFFFFFFF);
     }
 
     private class ElementList extends ObjectSelectionList<ElementEntry> {
-        private final Component listTitle;
-
-        public ElementList(Minecraft minecraft, int width, int height, int y, int itemHeight, int x, Component listTitle) {
-            super(minecraft, width, height, y, itemHeight, 16);
+        public ElementList(Minecraft minecraft, int width, int height, int y, int itemHeight, int x) {
+            super(minecraft, width, height, y, itemHeight);
             this.setX(x);
-            this.listTitle = listTitle;
         }
 
         public void clearEntries() { super.clearEntries(); }
@@ -129,12 +139,6 @@ public class SlotListSelectionScreen extends Screen {
         @Override public int getRowTop(int index) { return super.getRowTop(index); }
         @Override public int getRowWidth() { return this.width - 20; }
         @Override protected int scrollBarX() { return this.getX() + this.width - 6; }
-
-        @Override
-        protected void renderHeader(GuiGraphics guiGraphics, int x, int y) {
-            Component formattedTitle = this.listTitle.copy().withStyle(ChatFormatting.BOLD, ChatFormatting.UNDERLINE);
-            guiGraphics.drawCenteredString(this.minecraft.font, formattedTitle, x + this.getRowWidth() / 2, y + 2, 0xFFFFFFFF);
-        }
     }
 
     private class ElementEntry extends ObjectSelectionList.Entry<ElementEntry> {
@@ -166,9 +170,12 @@ public class SlotListSelectionScreen extends Screen {
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
-            if (isMouseOver) {
-                guiGraphics.fill(left, top, left + 32, top + 32, 0x99999999);
+        public void renderContent(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean isHovering, float partialTick) {
+            int left = this.getX();
+            int top = this.getY();
+
+            if (isHovering) {
+                guiGraphics.fill(left, top, left + 32, top + 32, -1601138544);
             }
 
             guiGraphics.pose().pushMatrix();
@@ -177,7 +184,7 @@ public class SlotListSelectionScreen extends Screen {
             guiGraphics.renderItem(this.icon, 0, 0);
             guiGraphics.pose().popMatrix();
 
-            if (isMouseOver) {
+            if (isHovering) {
                 int relativeX = mouseX - left;
                 int relativeY = mouseY - top;
 
@@ -198,17 +205,17 @@ public class SlotListSelectionScreen extends Screen {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            double j = mouseX - (double) this.list.getRowLeft();
-            double k = mouseY - (double) this.list.getRowTop(this.list.children().indexOf(this));
+        public boolean mouseClicked(MouseButtonEvent event, boolean pressed) {
+            double j = event.x() - (double) this.list.getRowLeft();
+            double k = event.y() - (double) this.list.getRowTop(this.list.children().indexOf(this));
 
             if (j <= 32.0D) {
                 if (this.onMoveUp == null && this.onMoveDown == null) {
-                    this.onTransfer.run();
+                    if (this.onTransfer != null) this.onTransfer.run();
                     return true;
                 }
                 if (j < 16.0D) {
-                    this.onTransfer.run();
+                    if (this.onTransfer != null) this.onTransfer.run();
                     return true;
                 }
                 if (j > 16.0D && k < 16.0D && this.onMoveUp != null) {
@@ -221,7 +228,7 @@ public class SlotListSelectionScreen extends Screen {
                 }
             }
             this.list.setSelected(this);
-            return super.mouseClicked(mouseX, mouseY, button);
+            return super.mouseClicked(event, pressed);
         }
 
         @Override

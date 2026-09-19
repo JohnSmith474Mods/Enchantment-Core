@@ -11,6 +11,7 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEnt
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ExplosionParticleInfo;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -18,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
@@ -45,7 +47,7 @@ public record ExplosionDefinition(
     public static final String SMALL_PARTICLES = "small_particles";
     public static final String LARGE_PARTICLES = "large_particles";
     public static final String SOUND = "sound";
-    
+
     public static final LevelBasedKeyProvider KEY_PROVIDER = () -> Set.of(RADIUS);
 
     public static final Codec<ExplosionDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -73,7 +75,24 @@ public record ExplosionDefinition(
             ParticleOptions large = this.largeParticles.orElse(ParticleTypes.EXPLOSION_EMITTER);
             Holder<SoundEvent> snd = this.sound.orElse(SoundEvents.GENERIC_EXPLODE);
 
-            level.explode(source, damageSource, damageCalculator, pos.x(), pos.y(), pos.z(), calculatedRadius, this.createFire, vanillaInteraction, small, large, snd);
+            level.explode(
+                    source,
+                    damageSource,
+                    damageCalculator,
+                    pos.x(),
+                    pos.y(),
+                    pos.z(),
+                    calculatedRadius,
+                    this.createFire,
+                    vanillaInteraction,
+                    small,
+                    large,
+                    WeightedList.<ExplosionParticleInfo>builder()
+                            .add(new ExplosionParticleInfo(ParticleTypes.POOF, 0.5F, 1.0F))
+                            .add(new ExplosionParticleInfo(ParticleTypes.SMOKE, 1.0F, 1.0F))
+                            .build(),
+                    snd
+            );
         } else {
             level.explode(source, damageSource, damageCalculator, pos.x(), pos.y(), pos.z(), calculatedRadius, this.createFire, vanillaInteraction);
         }

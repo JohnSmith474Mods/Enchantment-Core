@@ -16,6 +16,7 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.math.FieldAxis;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.util.Mth;
@@ -33,7 +34,7 @@ public class SpellFieldDebugRenderer {
     public static void render(PoseStack poseStack, Camera camera, float partialTick) {
         if (!Config.ENABLE_DEBUG_RENDERER.get()) return;
 
-        if (!Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) return;
+        if (!Minecraft.getInstance().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES)) return;
 
         Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields = SpellFieldDebugTracker.getActiveShapes();
         if (activeFields.isEmpty()) return;
@@ -91,7 +92,7 @@ public class SpellFieldDebugRenderer {
                 poseStack.pushPose();
                 poseStack.translate(lerpPos.x - cx, lerpPos.y - cy, lerpPos.z - cz);
                 ShapeRenderer.renderLineBox(
-                        poseStack, buffer,
+                        poseStack.last(), buffer,
                         volume.bounds().minX, volume.bounds().minY, volume.bounds().minZ,
                         volume.bounds().maxX, volume.bounds().maxY, volume.bounds().maxZ,
                         bbR, bbG, bbB, bbA
