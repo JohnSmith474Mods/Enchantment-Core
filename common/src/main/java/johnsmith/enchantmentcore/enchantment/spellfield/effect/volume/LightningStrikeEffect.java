@@ -66,7 +66,7 @@ public record LightningStrikeEffect(
 
         Vec3 targetPoint = this.distribution
                 .map(d -> d.samplePoint(level, enchantmentLevel, spatialReference, epicenter, volumes))
-                .orElseGet(() -> ProbabilityDistribution.getUniformPoint(volumes, level.random));
+                .orElseGet(() -> ProbabilityDistribution.getUniformPoint(volumes, level.getRandom()));
 
         this.dispatchStrikes(level, enchantmentLevel, targetPoint, 1.0F);
     }
@@ -77,7 +77,7 @@ public record LightningStrikeEffect(
         float calculatedCount = this.count.calculate(enchantmentLevel) * scalar;
         int totalStrikes = (int) calculatedCount;
 
-        if (level.random.nextFloat() < (calculatedCount - totalStrikes)) {
+        if (level.getRandom().nextFloat() < (calculatedCount - totalStrikes)) {
             totalStrikes++;
         }
 
@@ -87,7 +87,7 @@ public record LightningStrikeEffect(
         int variance = (int) this.delayVariance.calculate(enchantmentLevel);
 
         for (int i = 0; i < totalStrikes; i++) {
-            int timeOffset = baseDelay + (variance > 0 ? level.random.nextInt(variance * 2) - variance : 0);
+            int timeOffset = baseDelay + (variance > 0 ? level.getRandom().nextInt(variance * 2) - variance : 0);
             timeOffset = Math.max(0, timeOffset);
 
             Runnable strikeAction = () -> {

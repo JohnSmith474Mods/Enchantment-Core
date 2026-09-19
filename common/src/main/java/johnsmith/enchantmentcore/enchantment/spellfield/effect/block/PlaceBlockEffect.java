@@ -46,7 +46,7 @@ public record PlaceBlockEffect(
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, BlockPos pos, float scalar, Set<BlockPos> modifiedBlocks) {
         if (modifiedBlocks.contains(pos)) return;
-        if (!this.evaluator.evaluate(scalar, enchantmentLevel, level.random)) return;
+        if (!this.evaluator.evaluate(scalar, enchantmentLevel, level.getRandom())) return;
 
         if (this.requireAir && !level.getBlockState(pos).canBeReplaced()) return;
 

@@ -12,17 +12,19 @@ import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -34,9 +36,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ConditionalEffect;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Provides mechanisms to calculate and apply dynamic alpha transparency across asynchronous rendering pipelines.
@@ -150,7 +155,8 @@ public class TransparencyRenderHelper {
         @Override
         public void submitNameTag(
                 PoseStack poseStack,
-                Vec3 offset, int yOffset,
+                Vec3 offset,
+                int yOffset,
                 Component text,
                 boolean isDiscrete,
                 int light,
@@ -199,9 +205,6 @@ public class TransparencyRenderHelper {
             this.delegate.submitLeash(poseStack, state);
         }
 
-        /**
-         * Intercepts model submissions for entities/armor to dynamically shift their tint color alpha.
-         */
         @Override
         public <S> void submitModel(
                 Model<? super S> model, S state,
@@ -210,9 +213,9 @@ public class TransparencyRenderHelper {
                 int light,
                 int overlay,
                 int color,
-                TextureAtlasSprite sprite,
+                @Nullable TextureAtlasSprite sprite,
                 int outlineColor,
-                ModelFeatureRenderer.CrumblingOverlay crumbling
+                ModelFeatureRenderer.@Nullable CrumblingOverlay crumbling
         ) {
             if (this.alpha <= 0.00004F) return;
             int modifiedColor = applyAlpha(color, this.alpha);
@@ -220,9 +223,6 @@ public class TransparencyRenderHelper {
             this.delegate.submitModel(model, state, poseStack, renderType, light, overlay, modifiedColor, sprite, modifiedOutline, crumbling);
         }
 
-        /**
-         * Intercepts isolated model part submissions to dynamically shift their tint color alpha.
-         */
         @Override
         public void submitModelPart(
                 ModelPart part,
@@ -230,29 +230,17 @@ public class TransparencyRenderHelper {
                 RenderType renderType,
                 int light,
                 int overlay,
-                TextureAtlasSprite sprite,
+                @Nullable TextureAtlasSprite sprite,
                 boolean sheeted,
                 boolean hasFoil,
                 int color,
-                ModelFeatureRenderer.CrumblingOverlay crumbling,
+                ModelFeatureRenderer.@Nullable CrumblingOverlay crumbling,
                 int outlineColor
         ) {
             if (this.alpha <= 0.00004F) return;
             int modifiedColor = applyAlpha(color, this.alpha);
             int modifiedOutline = applyAlpha(outlineColor, this.alpha);
             this.delegate.submitModelPart(part, poseStack, renderType, light, overlay, sprite, sheeted, hasFoil, modifiedColor, crumbling, modifiedOutline);
-        }
-
-        @Override
-        public void submitBlock(
-                PoseStack poseStack,
-                BlockState state,
-                int x,
-                int y,
-                int z
-        ) {
-            if (this.alpha <= 0.00004F) return;
-            this.delegate.submitBlock(poseStack, state, x, y, z);
         }
 
         @Override
@@ -268,10 +256,8 @@ public class TransparencyRenderHelper {
         public void submitBlockModel(
                 PoseStack poseStack,
                 RenderType renderType,
-                BlockStateModel model,
-                float r,
-                float g,
-                float b,
+                List<BlockStateModelPart> parts,
+                int[] tintLayers,
                 int color,
                 int light,
                 int overlay
@@ -279,12 +265,29 @@ public class TransparencyRenderHelper {
             if (this.alpha <= 0.00004F) return;
             RenderType activeType = RenderTypes.entityTranslucent(BLOCKS_ATLAS);
             int modifiedColor = applyAlpha(color, this.alpha);
-            this.delegate.submitBlockModel(poseStack, activeType, model, r, g, b, modifiedColor, light, overlay);
+
+            int[] modifiedTints = new int[tintLayers.length];
+            for (int i = 0; i < tintLayers.length; i++) {
+                modifiedTints[i] = applyAlpha(tintLayers[i] == -1 ? 0xFFFFFFFF : tintLayers[i], this.alpha);
+            }
+
+            this.delegate.submitBlockModel(poseStack, activeType, parts, modifiedTints, modifiedColor, light, overlay);
+        }
+
+        @Override
+        public void submitBreakingBlockModel(
+                PoseStack poseStack,
+                BlockStateModel model,
+                long seed,
+                int destroyProgress
+        ) {
+            if (this.alpha <= 0.00004F) return;
+            this.delegate.submitBreakingBlockModel(poseStack, model, seed, destroyProgress);
         }
 
         /**
-         * Intercepts item model submissions to unpack standard BakedQuad definitions.
-         * Enforces backface culling properly within UI spaces and modifies static vertex alpha arrays.
+         * Intercepts item model submissions to dynamically unroll standard BakedQuad records.
+         * Extracts 26.1 vector data and repackages it with modified alpha into the consumer array.
          */
         @Override
         public void submitItem(
@@ -295,7 +298,6 @@ public class TransparencyRenderHelper {
                 int outlineColor,
                 int[] tintLayers,
                 List<BakedQuad> quads,
-                RenderType renderType,
                 ItemStackRenderState.FoilType foilType
         ) {
             float clampedAlpha = Math.max(0.0F, Math.min(1.0F, this.alpha));
@@ -305,7 +307,7 @@ public class TransparencyRenderHelper {
             }
 
             if (clampedAlpha >= 1.0F) {
-                this.delegate.submitItem(poseStack, context, light, overlay, outlineColor, tintLayers, quads, renderType, foilType);
+                this.delegate.submitItem(poseStack, context, light, overlay, outlineColor, tintLayers, quads, foilType);
                 return;
             }
 
@@ -316,33 +318,54 @@ public class TransparencyRenderHelper {
                 modifiedTints[i] = applyAlpha(tintLayers[i] == -1 ? 0xFFFFFFFF : tintLayers[i], this.alpha);
             }
 
+            // Extract vertices mathematically from the 26.1 BakedQuad records
             this.delegate.submitCustomGeometry(poseStack, translucentType, (pose, consumer) -> {
+                Matrix4f matrix = pose.pose();
                 for (BakedQuad quad : quads) {
-                    int tintIndex = quad.tintIndex();
+                    int tintIndex = quad.materialInfo().tintIndex();
                     int color = (tintIndex != -1 && tintIndex < modifiedTints.length) ? modifiedTints[tintIndex] : applyAlpha(0xFFFFFFFF, this.alpha);
 
-                    float r = ((color >> 16) & 0xFF) / 255.0F;
-                    float g = ((color >> 8) & 0xFF) / 255.0F;
-                    float b = (color & 0xFF) / 255.0F;
-                    float a = (((color >> 24) & 0xFF) / 255.0F) * clampedAlpha;
+                    Vector3fc normalVec = quad.direction().getUnitVec3f();
+                    Vector3f normal = pose.transformNormal(normalVec, new Vector3f());
 
-                    consumer.putBulkData(pose, quad, r, g, b, a, light, overlay);
+                    for (int vertex = 0; vertex < 4; ++vertex) {
+                        Vector3fc position = quad.position(vertex);
+                        long packedUv = quad.packedUV(vertex);
+
+                        Vector3f pos = matrix.transformPosition(position, new Vector3f());
+                        float u = UVPair.unpackU(packedUv);
+                        float v = UVPair.unpackV(packedUv);
+
+                        consumer.addVertex(pos.x(), pos.y(), pos.z(), color, u, v, overlay, light, normal.x(), normal.y(), normal.z());
+                    }
                 }
             });
 
+            // Isolate glint passes
             if (foilType != ItemStackRenderState.FoilType.NONE) {
                 RenderType glintType = foilType == ItemStackRenderState.FoilType.SPECIAL ? RenderTypes.glintTranslucent() : RenderTypes.glint();
+                int glintColor = applyAlpha(0xFFFFFFFF, this.alpha);
                 this.delegate.submitCustomGeometry(poseStack, glintType, (pose, consumer) -> {
+                    Matrix4f matrix = pose.pose();
                     for (BakedQuad quad : quads) {
-                        consumer.putBulkData(pose, quad, 1.0F, 1.0F, 1.0F, clampedAlpha, light, overlay);
+                        Vector3fc normalVec = quad.direction().getUnitVec3f();
+                        Vector3f normal = pose.transformNormal(normalVec, new Vector3f());
+
+                        for (int vertex = 0; vertex < 4; ++vertex) {
+                            Vector3fc position = quad.position(vertex);
+                            long packedUv = quad.packedUV(vertex);
+
+                            Vector3f pos = matrix.transformPosition(position, new Vector3f());
+                            float u = UVPair.unpackU(packedUv);
+                            float v = UVPair.unpackV(packedUv);
+
+                            consumer.addVertex(pos.x(), pos.y(), pos.z(), glintColor, u, v, overlay, light, normal.x(), normal.y(), normal.z());
+                        }
                     }
                 });
             }
         }
 
-        /**
-         * Wraps custom geometry pipelines to intercept and adjust the manual vertex color emissions.
-         */
         @Override
         public void submitCustomGeometry(
                 PoseStack poseStack,
@@ -412,13 +435,6 @@ public class TransparencyRenderHelper {
             this.delegate.submitParticleGroup(renderer);
         }
 
-        /**
-         * Applies the target alpha multiplier to a packed ARGB integer.
-         *
-         * @param packedColor The original packed ARGB color integer.
-         * @param multiplier  The alpha multiplier to apply.
-         * @return The modified packed ARGB color integer.
-         */
         private static int applyAlpha(
                 int packedColor,
                 float multiplier

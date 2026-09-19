@@ -69,7 +69,7 @@ public record SurfaceHazardEffect(
         for (int i = 0; i < totalHazards; i++) {
             Vec3 targetPoint = this.distribution
                     .map(d -> d.samplePoint(level, enchantmentLevel, spatialReference, epicenter, volumes))
-                    .orElseGet(() -> ProbabilityDistribution.getUniformPoint(volumes, level.random));
+                    .orElseGet(() -> ProbabilityDistribution.getUniformPoint(volumes, level.getRandom()));
 
             this.dispatchHazard(level, enchantmentLevel, context.owner(), targetPoint, 1.0F);
         }

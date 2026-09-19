@@ -14,6 +14,7 @@ import java.util.TreeMap;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -33,7 +34,7 @@ import org.slf4j.Logger;
  */
 public class TransientBlockTracker extends SavedData {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final String DATA_NAME = "enchantment_core_transient_blocks";
+    private static final Identifier DATA_NAME = Identifier.withDefaultNamespace("enchantment_core_transient_blocks");
 
     public static final Codec<TransientBlockTracker> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             TransientBlockRecord.CODEC.listOf().optionalFieldOf("blocks", List.of()).forGetter(tracker -> {

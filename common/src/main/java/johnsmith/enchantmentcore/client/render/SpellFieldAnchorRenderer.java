@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
@@ -84,7 +84,7 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
         float v0 = (float) currentFrame / frames;
         float v1 = (float) (currentFrame + 1) / frames;
 
-        nodeCollector.submitCustomGeometry(poseStack, RenderTypes.itemEntityTranslucentCull(texture), (pose, consumer) -> {
+        nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentCullItemTarget(texture), (pose, consumer) -> {
             Matrix4f matrix4f = pose.pose();
             int light = 15728880; // Full bright
 

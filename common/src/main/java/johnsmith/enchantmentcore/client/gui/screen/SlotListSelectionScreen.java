@@ -2,7 +2,7 @@ package johnsmith.enchantmentcore.client.gui.screen;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -111,21 +111,21 @@ public class SlotListSelectionScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
 
         this.drawListHeader(guiGraphics, this.availableList, Component.literal("Available Slots"));
         this.drawListHeader(guiGraphics, this.selectedList, Component.literal("Selected Slots"));
     }
 
-    private void drawListHeader(GuiGraphics guiGraphics, ElementList list, Component title) {
+    private void drawListHeader(GuiGraphicsExtractor guiGraphics, ElementList list, Component title) {
         Component formattedTitle = title.copy()
                 .withStyle(ChatFormatting.BOLD)
                 .withStyle(ChatFormatting.UNDERLINE);
 
         int headerY = list.getY() - 16;
-        guiGraphics.drawCenteredString(this.minecraft.font, formattedTitle, list.getX() + list.getRowWidth() / 2, headerY + 2, 0xFFFFFFFF);
+        guiGraphics.centeredText(this.minecraft.font, formattedTitle, list.getX() + list.getRowWidth() / 2, headerY + 2, 0xFFFFFFFF);
     }
 
     private class ElementList extends ObjectSelectionList<ElementEntry> {
@@ -170,7 +170,7 @@ public class SlotListSelectionScreen extends Screen {
         }
 
         @Override
-        public void renderContent(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean isHovering, float partialTick) {
+        public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean isHovering, float partialTick) {
             int left = this.getX();
             int top = this.getY();
 
@@ -181,7 +181,7 @@ public class SlotListSelectionScreen extends Screen {
             guiGraphics.pose().pushMatrix();
             guiGraphics.pose().translate((float)left, (float)top);
             guiGraphics.pose().scale(2.0F, 2.0F);
-            guiGraphics.renderItem(this.icon, 0, 0);
+            guiGraphics.item(this.icon, 0, 0);
             guiGraphics.pose().popMatrix();
 
             if (isHovering) {
@@ -201,7 +201,7 @@ public class SlotListSelectionScreen extends Screen {
                 guiGraphics.pose().popMatrix();
             }
 
-            guiGraphics.drawString(SlotListSelectionScreen.this.font, this.displayName, left + 36, top + 12, 0xFFFFFFFF, false);
+            guiGraphics.text(SlotListSelectionScreen.this.font, this.displayName, left + 36, top + 12, 0xFFFFFFFF, false);
         }
 
         @Override

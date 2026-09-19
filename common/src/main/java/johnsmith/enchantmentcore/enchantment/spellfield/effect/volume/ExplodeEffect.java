@@ -73,7 +73,7 @@ public record ExplodeEffect(
         for (int i = 0; i < totalExplosions; i++) {
             Vec3 targetPoint = this.distribution
                     .map(d -> d.samplePoint(level, enchantmentLevel, spatialReference, epicenter, volumes))
-                    .orElseGet(() -> ProbabilityDistribution.getUniformPoint(volumes, level.random));
+                    .orElseGet(() -> ProbabilityDistribution.getUniformPoint(volumes, level.getRandom()));
 
             this.dispatchExplosion(level, enchantmentLevel, context.owner(), targetPoint, epicenter, 1.0F);
         }
@@ -88,7 +88,7 @@ public record ExplodeEffect(
         float distance = (float) targetPos.distanceTo(epicenter);
         int spatialOffset = (int) (distance * this.spatialDelay.calculate(enchantmentLevel));
 
-        int fuse = baseFuse + spatialOffset + (variance > 0 ? level.random.nextInt(variance * 2) - variance : 0);
+        int fuse = baseFuse + spatialOffset + (variance > 0 ? level.getRandom().nextInt(variance * 2) - variance : 0);
         fuse = Math.max(0, fuse);
 
         Runnable explodeAction = () -> this.explosion.explode(level, enchantmentLevel, owner, targetPos, scalar);

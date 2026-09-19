@@ -67,18 +67,18 @@ public record AreaGravityDamageEffect(
                     net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT,
                     net.minecraft.sounds.SoundSource.PLAYERS,
                     1.0F,
-                    (level.random.nextFloat() - level.random.nextFloat()) * 0.2F + 1.0F
+                    (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.2F + 1.0F
             );
 
             int particleCount = (int) (r * r * 10);
 
             for (int i = 0; i < particleCount; i++) {
                 // 1. Generate a uniform random point inside a sphere
-                double u = level.random.nextDouble();
-                double v = level.random.nextDouble();
+                double u = level.getRandom().nextDouble();
+                double v = level.getRandom().nextDouble();
                 double theta = u * 2.0 * Math.PI;
                 double phi = Math.acos(2.0 * v - 1.0);
-                double rRand = Math.cbrt(level.random.nextDouble()) * r;
+                double rRand = Math.cbrt(level.getRandom().nextDouble()) * r;
 
                 // 2. Calculate the exact relative offset from the epicenter
                 double dx = rRand * Math.sin(phi) * Math.cos(theta);

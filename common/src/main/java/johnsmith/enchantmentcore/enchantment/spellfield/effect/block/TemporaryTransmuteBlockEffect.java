@@ -66,7 +66,7 @@ public record TemporaryTransmuteBlockEffect(
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, BlockPos pos, float scalar, Set<BlockPos> modifiedBlocks) {
         if (modifiedBlocks.contains(pos)) return;
-        if (!this.evaluator.evaluate(scalar, enchantmentLevel, level.random)) return;
+        if (!this.evaluator.evaluate(scalar, enchantmentLevel, level.getRandom())) return;
 
         BlockState originalState = level.getBlockState(pos);
         if (originalState.isAir() || originalState.getDestroySpeed(level, pos) < 0.0F) return;

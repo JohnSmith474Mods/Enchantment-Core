@@ -131,7 +131,7 @@ public class Forge {
     }
 
     private void registerBuiltInPack(AddPackFindersEvent event, String namespace, String directory, String name, PackInclusionType inclusionType) {
-        Path path = ModList.get().getModFileById(Constants.MOD_ID).getFile().findResource("resourcepacks", directory);
+        Path path = ModList.getModFileById(Constants.MOD_ID).getFile().findResource("resourcepacks", directory);
         if (Files.exists(path)) {
             boolean isRequired = inclusionType == PackInclusionType.REQUIRED;
             boolean isDefaultActive = inclusionType != PackInclusionType.OPTIONAL;

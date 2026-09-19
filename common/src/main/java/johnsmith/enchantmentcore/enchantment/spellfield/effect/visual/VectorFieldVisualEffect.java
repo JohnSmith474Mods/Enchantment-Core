@@ -56,7 +56,7 @@ public record VectorFieldVisualEffect(
 
         for (int i = 0; i < particleCount; i++) {
             Vec3 spawnPos = this.distribution.samplePoint(level, enchantmentLevel, target, epicenter, volumes);
-            FieldAxis resolvedAxis = this.axis.orElseGet(() -> activeAxes.isEmpty() ? null : activeAxes.get(level.random.nextInt(activeAxes.size())));
+            FieldAxis resolvedAxis = this.axis.orElseGet(() -> activeAxes.isEmpty() ? null : activeAxes.get(level.getRandom().nextInt(activeAxes.size())));
 
             double vx, vy, vz;
             if (resolvedAxis != null) {
@@ -65,9 +65,9 @@ public record VectorFieldVisualEffect(
                 vy = velocity.y;
                 vz = velocity.z;
             } else {
-                vx = (level.random.nextDouble() - 0.5) * 2.0;
-                vy = (level.random.nextDouble() - 0.5) * 2.0;
-                vz = (level.random.nextDouble() - 0.5) * 2.0;
+                vx = (level.getRandom().nextDouble() - 0.5) * 2.0;
+                vy = (level.getRandom().nextDouble() - 0.5) * 2.0;
+                vz = (level.getRandom().nextDouble() - 0.5) * 2.0;
             }
 
             level.sendParticles(this.particle, spawnPos.x, spawnPos.y, spawnPos.z, 0, vx, vy, vz, particleSpeed);

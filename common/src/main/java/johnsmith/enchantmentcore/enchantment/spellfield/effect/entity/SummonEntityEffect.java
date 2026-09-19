@@ -46,7 +46,7 @@ public record SummonEntityEffect(
         float calculatedCount = this.count.calculate(enchantmentLevel) * volumeScalar;
         int spawnAmount = (int) calculatedCount;
 
-        if (level.random.nextFloat() < (calculatedCount - spawnAmount)) {
+        if (level.getRandom().nextFloat() < (calculatedCount - spawnAmount)) {
             spawnAmount++;
         }
 

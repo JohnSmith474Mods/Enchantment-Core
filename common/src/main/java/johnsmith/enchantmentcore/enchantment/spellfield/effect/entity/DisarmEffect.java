@@ -56,12 +56,12 @@ public record DisarmEffect(
             ItemStack equipped = living.getItemBySlot(slot);
 
             if (!equipped.isEmpty()) {
-                if (chance >= 1.0F || level.random.nextFloat() <= chance) {
+                if (chance >= 1.0F || level.getRandom().nextFloat() <= chance) {
                     ItemEntity droppedItem = new ItemEntity(level, living.getX(), living.getY() + 1.0D, living.getZ(), equipped.copy());
                     droppedItem.setPickUpDelay(40);
 
-                    float f = level.random.nextFloat() * 0.5F;
-                    float f1 = level.random.nextFloat() * ((float) Math.PI * 2.0F);
+                    float f = level.getRandom().nextFloat() * 0.5F;
+                    float f1 = level.getRandom().nextFloat() * ((float) Math.PI * 2.0F);
                     droppedItem.setDeltaMovement((-Mth.sin(f1) * f), 0.2D, (Mth.cos(f1) * f));
 
                     level.addFreshEntity(droppedItem);

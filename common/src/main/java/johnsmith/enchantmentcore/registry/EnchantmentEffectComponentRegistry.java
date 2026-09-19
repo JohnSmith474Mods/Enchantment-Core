@@ -19,10 +19,12 @@ import johnsmith.enchantmentcore.platform.Services;
 
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.item.enchantment.ConditionalEffect;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.item.enchantment.effects.EnchantmentEntityEffect;
 import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
+import net.minecraft.world.level.storage.loot.Validatable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
 /**
@@ -176,10 +178,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>>> PROJECTILE_VELOCITY = register(
             "projectile_velocity",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentValueEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentValueEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -189,10 +191,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>>> PROJECTILE_DRAG = register(
             "projectile_drag",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentValueEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentValueEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -202,10 +204,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>>> ENTITY_DRAG = register(
             "entity_drag",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentValueEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentValueEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -215,10 +217,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>>> PROJECTILE_ACCURACY = register(
             "projectile_accuracy",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentValueEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentValueEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -228,10 +230,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>>> GRAVITY_MODIFIER = register(
             "gravity_modifier",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentValueEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentValueEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -242,10 +244,10 @@ public class EnchantmentEffectComponentRegistry {
             HomingProjectileEffect.KEY,
             HomingProjectileEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            HomingProjectileEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(HomingProjectileEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -256,10 +258,10 @@ public class EnchantmentEffectComponentRegistry {
             RicochetProjectileEffect.KEY,
             RicochetProjectileEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            RicochetProjectileEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(RicochetProjectileEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -270,10 +272,10 @@ public class EnchantmentEffectComponentRegistry {
             MagneticProjectileEffect.KEY,
             MagneticProjectileEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            MagneticProjectileEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(MagneticProjectileEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -284,10 +286,10 @@ public class EnchantmentEffectComponentRegistry {
             ShrapnelProjectileEffect.KEY,
             ShrapnelProjectileEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            ShrapnelProjectileEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(ShrapnelProjectileEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -298,10 +300,10 @@ public class EnchantmentEffectComponentRegistry {
             AutoSmeltEffect.KEY,
             AutoSmeltEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            AutoSmeltEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(AutoSmeltEffect.CODEC),
                             LootContextParamSets.BLOCK
-                    ).listOf()
+                    )
             )
     );
 
@@ -312,10 +314,10 @@ public class EnchantmentEffectComponentRegistry {
             ExperienceYieldEffect.KEY,
             ExperienceYieldEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            ExperienceYieldEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(ExperienceYieldEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ITEM
-                    ).listOf()
+                    )
             )
     );
 
@@ -326,10 +328,10 @@ public class EnchantmentEffectComponentRegistry {
             FluidWalkerEffect.KEY,
             FluidWalkerEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            FluidWalkerEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(FluidWalkerEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -340,10 +342,10 @@ public class EnchantmentEffectComponentRegistry {
             BuoyancyEffect.KEY,
             BuoyancyEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            BuoyancyEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(BuoyancyEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -353,10 +355,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<BonusLootEffect>>>> BONUS_LOOT = register(
             BonusLootEffect.KEY,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            BonusLootEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(BonusLootEffect.CODEC),
                             LootContextParamSets.BLOCK
-                    ).listOf()
+                    )
             )
     );
 
@@ -366,10 +368,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>>> POST_MINE = register(
             "post_mine",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentEntityEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentEntityEffect.CODEC),
                             LootContextParamSets.BLOCK
-                    ).listOf()
+                    )
             )
     );
 
@@ -379,10 +381,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>>> FATAL_DAMAGE = register(
             "fatal_damage",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentEntityEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentEntityEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -392,10 +394,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>>> ON_JUMP = register(
             "on_jump",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentEntityEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentEntityEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -405,10 +407,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>>> SHIELD_BLOCK = register(
             "shield_block",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentEntityEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentEntityEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -418,10 +420,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>>> ITEM_USE_START = register(
             "item_use_start",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentEntityEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentEntityEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -431,10 +433,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>>> ITEM_USE_TICK = register(
             "item_use_tick",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentEntityEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentEntityEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -444,10 +446,10 @@ public class EnchantmentEffectComponentRegistry {
     public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentEntityEffect>>>> INVENTORY_TICK = register(
             "inventory_tick",
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            EnchantmentEntityEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(EnchantmentEntityEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -458,10 +460,10 @@ public class EnchantmentEffectComponentRegistry {
             MultiJumpEffect.KEY,
             MultiJumpEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            MultiJumpEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(MultiJumpEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -472,10 +474,10 @@ public class EnchantmentEffectComponentRegistry {
             DamageHealingEffect.KEY,
             DamageHealingEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            DamageHealingEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(DamageHealingEffect.CODEC),
                             LootContextParamSets.ENCHANTED_DAMAGE
-                    ).listOf()
+                    )
             )
     );
 
@@ -486,10 +488,10 @@ public class EnchantmentEffectComponentRegistry {
             ClimbingEffect.KEY,
             ClimbingEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            ClimbingEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(ClimbingEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ENTITY
-                    ).listOf()
+                    )
             )
     );
 
@@ -500,10 +502,10 @@ public class EnchantmentEffectComponentRegistry {
             TransparencyEffect.KEY,
             TransparencyEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            TransparencyEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(TransparencyEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ITEM
-                    ).listOf()
+                    )
             )
     );
 
@@ -514,10 +516,10 @@ public class EnchantmentEffectComponentRegistry {
             StreakEffect.MINING_STREAK_KEY,
             StreakEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            StreakEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(StreakEffect.CODEC),
                             LootContextParamSets.ENCHANTED_ITEM
-                    ).listOf()
+                    )
             )
     );
 
@@ -528,12 +530,19 @@ public class EnchantmentEffectComponentRegistry {
             StreakEffect.DAMAGE_STREAK_KEY,
             StreakEffect.KEY_PROVIDER,
             builder -> builder.persistent(
-                    ConditionalEffect.codec(
-                            StreakEffect.CODEC,
+                    validatedListCodec(
+                            ConditionalEffect.codec(StreakEffect.CODEC),
                             LootContextParamSets.ENCHANTED_DAMAGE
-                    ).listOf()
+                    )
             )
     );
+
+    /**
+     * Helper to validate lists of ConditionalEffects using 26.1 contextual param sets.
+     */
+    private static <T extends Validatable> Codec<List<T>> validatedListCodec(Codec<T> elementCodec, ContextKeySet paramSet) {
+        return elementCodec.listOf().validate(Validatable.listValidatorForContext(paramSet));
+    }
 
     /**
      * Helper to register a custom {@link DataComponentType} into the {@code ENCHANTMENT_EFFECT_COMPONENT_TYPE} registry

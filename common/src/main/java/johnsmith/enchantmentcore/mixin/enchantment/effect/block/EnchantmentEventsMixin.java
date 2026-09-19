@@ -24,6 +24,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -67,21 +68,22 @@ public abstract class EnchantmentEventsMixin {
      * Intercepts the generated list of item drops immediately before it is returned to the caller.
      * Evaluates and applies Auto-Smelt, Bonus Loot, and Experience Yield Multiplier effects.
      *
-     * @param state       The block state being broken.
-     * @param level       The server level.
-     * @param pos         The block coordinate.
-     * @param blockEntity The block entity data, if applicable.
-     * @param entity      The entity breaking the block.
-     * @param tool        The item stack used to break the block.
-     * @param cir         The callback information containing the modifiable drop list.
+     * @param state        The block state being broken.
+     * @param level        The server level.
+     * @param pos          The block coordinate.
+     * @param blockEntity  The block entity data, if applicable.
+     * @param entity       The entity breaking the block.
+     * @param toolInstance The read-only item instance used to break the block.
+     * @param cir          The callback information containing the modifiable drop list.
      */
     @Inject(
-        method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)Ljava/util/List;",
-        at = @At("RETURN"),
-        cancellable = true
+            method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemInstance;)Ljava/util/List;",
+            at = @At("RETURN"),
+            cancellable = true
     )
-    private static void enchantment_core$processDropModifiers(BlockState state, ServerLevel level, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack tool, CallbackInfoReturnable<List<ItemStack>> cir) {
-        if (tool == null || tool.isEmpty()) return;
+    private static void enchantment_core$processDropModifiers(BlockState state, ServerLevel level, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemInstance toolInstance, CallbackInfoReturnable<List<ItemStack>> cir) {
+        // Safely downcast to ItemStack to allow mutation of durability and stored experience components
+        if (!(toolInstance instanceof ItemStack tool) || tool.isEmpty()) return;
 
         ItemEnchantments enchantments = tool.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         if (enchantments.isEmpty()) return;
@@ -185,23 +187,23 @@ public abstract class EnchantmentEventsMixin {
                 BonusLootEffect effect = activeBonusEffects.get(i);
                 int levelValue = bonusLevels.get(i);
 
-                if (!effect.targetBlocks().contains(state.getBlockHolder())) continue;
+                if (!effect.targetBlocks().contains(state.typeHolder())) continue;
 
                 float chance = effect.chance().calculate(levelValue);
-                if (level.random.nextFloat() >= chance) continue;
+                if (level.getRandom().nextFloat() >= chance) continue;
 
-                Optional<Holder<Item>> randomReward = effect.rewardItems().getRandomElement(level.random);
+                Optional<Holder<Item>> randomReward = effect.rewardItems().getRandomElement(level.getRandom());
                 if (randomReward.isPresent()) {
                     int count = 1;
                     // Apply Fortune scaling to bonus item generation if present.
                     if (fortuneLevel > 0) {
-                        count = Math.max(1, level.random.nextInt(fortuneLevel + 2));
+                        count = Math.max(1, level.getRandom().nextInt(fortuneLevel + 2));
                     }
                     drops.add(new ItemStack(randomReward.get().value(), count));
                 }
 
                 if (effect.rewardExperience()) {
-                    generatedXp += (level.random.nextInt(3) + 1);
+                    generatedXp += (level.getRandom().nextInt(3) + 1);
                 }
             }
         }
@@ -222,7 +224,7 @@ public abstract class EnchantmentEventsMixin {
 
                 if (recipeOpt.isPresent()) {
                     RecipeHolder<SmeltingRecipe> recipeHolder = recipeOpt.get();
-                    ItemStack result = recipeHolder.value().assemble(input, level.registryAccess()).copy();
+                    ItemStack result = recipeHolder.value().assemble(input).copy();
                     // Maintain original drop counts (e.g., 3 iron ore -> 3 iron ingots).
                     result.setCount(drop.getCount() * result.getCount());
                     smeltedDrops.add(result);
@@ -309,7 +311,7 @@ public abstract class EnchantmentEventsMixin {
 
         if (totalMultiplier > 1.0F) {
             // Re-sample the provider to calculate the exact differential intended for this drop instance.
-            int sampledAmount = amountProvider.sample(level.random);
+            int sampledAmount = amountProvider.sample(level.getRandom());
             if (sampledAmount > 0) {
                 int additional = Math.round(sampledAmount * totalMultiplier) - sampledAmount;
                 if (additional > 0) this.popExperience(level, pos, additional);

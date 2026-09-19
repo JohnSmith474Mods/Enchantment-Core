@@ -48,7 +48,7 @@ public record BurstBlockVisualEffect(
 
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, BlockPos pos, float scalar, Set<BlockPos> modifiedBlocks) {
-        if (!this.evaluator.evaluate(scalar, enchantmentLevel, level.random)) return;
+        if (!this.evaluator.evaluate(scalar, enchantmentLevel, level.getRandom())) return;
 
         int particleCount = (int) (this.count.calculate(enchantmentLevel) * scalar);
         if (particleCount <= 0) return;

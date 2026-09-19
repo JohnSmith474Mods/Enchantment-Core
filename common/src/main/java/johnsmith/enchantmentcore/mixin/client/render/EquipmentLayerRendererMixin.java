@@ -80,7 +80,7 @@ public abstract class EquipmentLayerRendererMixin {
     )
     private RenderType enchantment_core$switchToTranslucent(Identifier location, Operation<RenderType> original) {
         if (TransparencyRenderHelper.isAlphaActive()) {
-            return RenderTypes.itemEntityTranslucentCull(location);
+            return RenderTypes.entityTranslucentCullItemTarget(location);
         }
         return original.call(location);
     }

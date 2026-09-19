@@ -58,10 +58,10 @@ public class Fabric implements ModInitializer {
         });
 
         // Register SpellFieldTaskScheduler
-        ServerTickEvents.END_WORLD_TICK.register(SpellFieldTaskScheduler::tick);
+        ServerTickEvents.END_LEVEL_TICK.register(SpellFieldTaskScheduler::tick);
 
         // Register TransientBlockTracker
-        ServerTickEvents.END_WORLD_TICK.register(level -> {
+        ServerTickEvents.END_LEVEL_TICK.register(level -> {
             SpellFieldTaskScheduler.tick(level);
             TransientBlockTracker.get(level).tick(level);
         });

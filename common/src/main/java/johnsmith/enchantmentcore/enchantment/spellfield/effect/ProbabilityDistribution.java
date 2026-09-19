@@ -27,24 +27,24 @@ public record ProbabilityDistribution(
         if (volumes.isEmpty()) return epicenter;
 
         for (int i = 0; i < this.samplingAttempts; i++) {
-            GlobalVolume vol = volumes.get(level.random.nextInt(volumes.size()));
+            GlobalVolume vol = volumes.get(level.getRandom().nextInt(volumes.size()));
             AABB box = vol.bounds();
 
-            double x = Mth.lerp(level.random.nextDouble(), box.minX, box.maxX);
-            double y = Mth.lerp(level.random.nextDouble(), box.minY, box.maxY);
-            double z = Mth.lerp(level.random.nextDouble(), box.minZ, box.maxZ);
+            double x = Mth.lerp(level.getRandom().nextDouble(), box.minX, box.maxX);
+            double y = Mth.lerp(level.getRandom().nextDouble(), box.minY, box.maxY);
+            double z = Mth.lerp(level.getRandom().nextDouble(), box.minZ, box.maxZ);
             Vec3 candidate = new Vec3(x, y, z);
 
             if (vol.topology() == null) return candidate;
 
             float prob = vol.topology().evaluateMultiplier(enchantmentLevel, spatialReference, vol.volumeCenter(), candidate);
 
-            if (prob >= 1.0F || level.random.nextFloat() <= prob) {
+            if (prob >= 1.0F || level.getRandom().nextFloat() <= prob) {
                 return candidate;
             }
         }
 
-        return getUniformPoint(volumes, level.random);
+        return getUniformPoint(volumes, level.getRandom());
     }
 
     public static Vec3 getUniformPoint(List<GlobalVolume> volumes, RandomSource random) {

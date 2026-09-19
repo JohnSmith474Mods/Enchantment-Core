@@ -11,7 +11,7 @@ import johnsmith.enchantmentcore.api.config.data.ItemOrItems;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -171,22 +171,22 @@ public class EnchantableListSelectionScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
+        guiGraphics.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
 
         this.drawListHeader(guiGraphics, this.availableList, Component.translatable("pack.available.title"));
         this.drawListHeader(guiGraphics, this.selectedList, Component.translatable("pack.selected.title"));
     }
 
-    private void drawListHeader(GuiGraphics guiGraphics, ElementList list, Component title) {
+    private void drawListHeader(GuiGraphicsExtractor guiGraphics, ElementList list, Component title) {
         Component formattedTitle = title.copy()
                 .withStyle(ChatFormatting.BOLD)
                 .withStyle(ChatFormatting.UNDERLINE);
 
         int headerY = list.getY() - 16;
-        guiGraphics.drawCenteredString(this.minecraft.font, formattedTitle, list.getX() + list.getRowWidth() / 2, headerY + 2, 0xFFFFFFFF);
+        guiGraphics.centeredText(this.minecraft.font, formattedTitle, list.getX() + list.getRowWidth() / 2, headerY + 2, 0xFFFFFFFF);
     }
 
     private Component trimComponent(Component component, int maxWidth) {
@@ -235,7 +235,8 @@ public class EnchantableListSelectionScreen extends Screen {
                 this.subText = "Item Tag";
             } else {
                 this.icon = new ItemStack(element.getItem());
-                this.displayName = element.getItem().getName();
+                // Mincraft 26.1 requires the ItemStack to evaluate component-based names
+                this.displayName = element.getItem().getName(this.icon);
                 Identifier key = BuiltInRegistries.ITEM.getKey(element.getItem());
                 this.subText = key != null ? key.toString() : "";
             }
@@ -256,8 +257,10 @@ public class EnchantableListSelectionScreen extends Screen {
                     int maxDisplay = 8;
                     for (Holder<Item> holder : tagSet.get()) {
                         if (count < maxDisplay) {
+                            Item item = holder.value();
+                            // Utilize getDefaultInstance() to satisfy the 26.1 name fetching
                             tooltip.add(Component.literal("   ").withStyle(ChatFormatting.DARK_GRAY)
-                                    .append(holder.value().getName().copy().withStyle(ChatFormatting.GRAY)));
+                                    .append(item.getName(item.getDefaultInstance()).copy().withStyle(ChatFormatting.GRAY)));
                         }
                         count++;
                     }
@@ -273,7 +276,7 @@ public class EnchantableListSelectionScreen extends Screen {
         }
 
         @Override
-        public void renderContent(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean isHovering, float partialTick) {
+        public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean isHovering, float partialTick) {
             int left = this.getX() + 2;
             int top = this.getY() + 2;
 
@@ -284,7 +287,7 @@ public class EnchantableListSelectionScreen extends Screen {
             guiGraphics.pose().pushMatrix();
             guiGraphics.pose().translate((float)left, (float)top);
             guiGraphics.pose().scale(2.0F, 2.0F);
-            guiGraphics.renderItem(this.icon, 0, 0);
+            guiGraphics.item(this.icon, 0, 0);
             guiGraphics.pose().popMatrix();
 
             if (isHovering) {
@@ -308,8 +311,8 @@ public class EnchantableListSelectionScreen extends Screen {
                 }
             }
 
-            guiGraphics.drawString(EnchantableListSelectionScreen.this.font, trimComponent(this.displayName, 203), left + 34, top + 1, 0xFFFFFFFF, false);
-            guiGraphics.drawString(EnchantableListSelectionScreen.this.font, this.subText, left + 34, top + 12, 0xFF888888, false);
+            guiGraphics.text(EnchantableListSelectionScreen.this.font, trimComponent(this.displayName, 203), left + 34, top + 1, 0xFFFFFFFF, false);
+            guiGraphics.text(EnchantableListSelectionScreen.this.font, this.subText, left + 34, top + 12, 0xFF888888, false);
         }
 
         @Override

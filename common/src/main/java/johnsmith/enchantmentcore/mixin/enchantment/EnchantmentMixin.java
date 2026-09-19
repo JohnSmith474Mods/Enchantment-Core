@@ -260,6 +260,6 @@ public abstract class EnchantmentMixin implements ConfigurableEnchantmentDefinit
      */
     @Inject(method = "canEnchant", at = @At("HEAD"), cancellable = true)
     private void onCanEnchant(net.minecraft.world.item.ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(((Enchantment) (Object) this).definition().supportedItems().contains(stack.getItemHolder()));
+        cir.setReturnValue(((Enchantment) (Object) this).definition().supportedItems().contains(stack.typeHolder()));
     }
 }
