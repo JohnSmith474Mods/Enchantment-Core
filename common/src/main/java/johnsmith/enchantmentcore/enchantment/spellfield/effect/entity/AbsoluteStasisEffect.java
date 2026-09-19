@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
-import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.predicates.ContextAwarePredicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;

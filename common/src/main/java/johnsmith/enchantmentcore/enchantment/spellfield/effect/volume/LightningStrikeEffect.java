@@ -15,12 +15,9 @@ import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 import johnsmith.enchantmentcore.enchantment.spellfield.effect.ProbabilityDistribution;
 import johnsmith.enchantmentcore.util.SpellFieldTaskScheduler;
 
-import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.predicates.ContextAwarePredicate;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.phys.Vec3;
@@ -91,7 +88,7 @@ public record LightningStrikeEffect(
             timeOffset = Math.max(0, timeOffset);
 
             Runnable strikeAction = () -> {
-                LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
+                LightningBolt lightning = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
                 if (lightning != null) {
                     lightning.snapTo(targetPos);
                     lightning.setVisualOnly(this.visualOnly);

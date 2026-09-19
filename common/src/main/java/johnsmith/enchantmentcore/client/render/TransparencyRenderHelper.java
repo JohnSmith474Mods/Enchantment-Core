@@ -11,7 +11,6 @@ import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -19,12 +18,13 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.gizmos.DrawableGizmoPrimitives;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -37,6 +37,8 @@ import net.minecraft.world.item.enchantment.ConditionalEffect;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
+
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -155,16 +157,15 @@ public class TransparencyRenderHelper {
         @Override
         public void submitNameTag(
                 PoseStack poseStack,
-                Vec3 offset,
+                @Nullable Vec3 offset,
                 int yOffset,
                 Component text,
                 boolean isDiscrete,
                 int light,
-                double distanceSq,
                 CameraRenderState cameraState
         ) {
             if (this.alpha <= 0.00004F) return;
-            this.delegate.submitNameTag(poseStack, offset, yOffset, text, isDiscrete, light, distanceSq, cameraState);
+            this.delegate.submitNameTag(poseStack, offset, yOffset, text, isDiscrete, light, cameraState);
         }
 
         @Override
@@ -224,32 +225,13 @@ public class TransparencyRenderHelper {
         }
 
         @Override
-        public void submitModelPart(
-                ModelPart part,
-                PoseStack poseStack,
-                RenderType renderType,
-                int light,
-                int overlay,
-                @Nullable TextureAtlasSprite sprite,
-                boolean sheeted,
-                boolean hasFoil,
-                int color,
-                ModelFeatureRenderer.@Nullable CrumblingOverlay crumbling,
-                int outlineColor
-        ) {
-            if (this.alpha <= 0.00004F) return;
-            int modifiedColor = applyAlpha(color, this.alpha);
-            int modifiedOutline = applyAlpha(outlineColor, this.alpha);
-            this.delegate.submitModelPart(part, poseStack, renderType, light, overlay, sprite, sheeted, hasFoil, modifiedColor, crumbling, modifiedOutline);
-        }
-
-        @Override
         public void submitMovingBlock(
                 PoseStack poseStack,
-                MovingBlockRenderState state
+                MovingBlockRenderState state,
+                int overlay
         ) {
             if (this.alpha <= 0.00004F) return;
-            this.delegate.submitMovingBlock(poseStack, state);
+            this.delegate.submitMovingBlock(poseStack, state, overlay);
         }
 
         @Override
@@ -277,17 +259,30 @@ public class TransparencyRenderHelper {
         @Override
         public void submitBreakingBlockModel(
                 PoseStack poseStack,
-                BlockStateModel model,
-                long seed,
+                List<BlockStateModelPart> parts,
                 int destroyProgress
         ) {
             if (this.alpha <= 0.00004F) return;
-            this.delegate.submitBreakingBlockModel(poseStack, model, seed, destroyProgress);
+            this.delegate.submitBreakingBlockModel(poseStack, parts, destroyProgress);
+        }
+
+        @Override
+        public void submitShapeOutline(
+                PoseStack poseStack,
+                VoxelShape shape,
+                RenderType renderType,
+                int color,
+                float lineWidth,
+                boolean alwaysOnTop
+        ) {
+            if (this.alpha <= 0.00004F) return;
+            int modifiedColor = applyAlpha(color, this.alpha);
+            this.delegate.submitShapeOutline(poseStack, shape, renderType, modifiedColor, lineWidth, alwaysOnTop);
         }
 
         /**
          * Intercepts item model submissions to dynamically unroll standard BakedQuad records.
-         * Extracts 26.1 vector data and repackages it with modified alpha into the consumer array.
+         * Extracts vector data and repackages it with modified alpha into the consumer array.
          */
         @Override
         public void submitItem(
@@ -318,7 +313,6 @@ public class TransparencyRenderHelper {
                 modifiedTints[i] = applyAlpha(tintLayers[i] == -1 ? 0xFFFFFFFF : tintLayers[i], this.alpha);
             }
 
-            // Extract vertices mathematically from the 26.1 BakedQuad records
             this.delegate.submitCustomGeometry(poseStack, translucentType, (pose, consumer) -> {
                 Matrix4f matrix = pose.pose();
                 for (BakedQuad quad : quads) {
@@ -341,10 +335,9 @@ public class TransparencyRenderHelper {
                 }
             });
 
-            // Isolate glint passes
             if (foilType != ItemStackRenderState.FoilType.NONE) {
-                RenderType glintType = foilType == ItemStackRenderState.FoilType.SPECIAL ? RenderTypes.glintTranslucent() : RenderTypes.glint();
-                int glintColor = applyAlpha(0xFFFFFFFF, this.alpha);
+                RenderType glintType = foilType == ItemStackRenderState.FoilType.SPECIAL ? RenderTypes.glintTranslucent() : RenderTypes.entityGlint();
+                int glintColor = 0xFFFFFFFF;
                 this.delegate.submitCustomGeometry(poseStack, glintType, (pose, consumer) -> {
                     Matrix4f matrix = pose.pose();
                     for (BakedQuad quad : quads) {
@@ -428,11 +421,21 @@ public class TransparencyRenderHelper {
         }
 
         @Override
-        public void submitParticleGroup(
-                ParticleGroupRenderer renderer
+        public void submitQuadParticleGroup(
+                QuadParticleRenderState state
         ) {
             if (this.alpha <= 0.00004F) return;
-            this.delegate.submitParticleGroup(renderer);
+            this.delegate.submitQuadParticleGroup(state);
+        }
+
+        @Override
+        public void submitGizmoPrimitives(
+                DrawableGizmoPrimitives.Group group,
+                CameraRenderState cameraState,
+                boolean alwaysOnTop
+        ) {
+            if (this.alpha <= 0.00004F) return;
+            this.delegate.submitGizmoPrimitives(group, cameraState, alwaysOnTop);
         }
 
         private static int applyAlpha(

@@ -30,7 +30,7 @@ public class SlotListEntry extends OptionEntry<List<EquipmentSlotGroup>, Button>
     private void openSelectionScreen() {
         List<EquipmentSlotGroup> initialSelection = new ArrayList<>(this.property.get());
 
-        this.minecraft.setScreen(new SlotListSelectionScreen(
+        this.minecraft.gui.setScreen(new SlotListSelectionScreen(
                 (Screen) this.parentScreen,
                 Component.translatable(this.property.translationKey()),
                 initialSelection,

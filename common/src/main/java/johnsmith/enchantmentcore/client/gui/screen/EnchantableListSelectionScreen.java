@@ -85,12 +85,12 @@ public class EnchantableListSelectionScreen extends Screen {
 
         this.refreshLists();
 
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, b -> this.minecraft.setScreen(this.parent))
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, b -> this.minecraft.gui.setScreen(this.parent))
                 .bounds(this.width / 2 - 154, this.height - 26, 150, 20).build());
 
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> {
             this.onSelect.accept(new ArrayList<>(this.selectedItems));
-            this.minecraft.setScreen(this.parent);
+            this.minecraft.gui.setScreen(this.parent);
         }).bounds(this.width / 2 + 4, this.height - 26, 150, 20).build());
     }
 

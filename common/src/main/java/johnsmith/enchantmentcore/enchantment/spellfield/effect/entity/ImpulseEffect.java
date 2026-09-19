@@ -11,7 +11,7 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.DirectionalSp
 import johnsmith.enchantmentcore.api.enchantment.spellfield.math.FieldAxis;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.predicates.ContextAwarePredicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;

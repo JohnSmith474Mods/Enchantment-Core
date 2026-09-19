@@ -9,7 +9,7 @@ import johnsmith.enchantmentcore.mixin.enchantment.accessor.ItemEntityAccessor;
 
 import java.util.Optional;
 
-import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.predicates.ContextAwarePredicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;

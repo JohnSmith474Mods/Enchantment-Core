@@ -141,7 +141,7 @@
             {
               "term": {
                 "predicate": {
-                  "vehicle": {}
+                  "minecraft:vehicle": {}
                 },
                 "entity": "this",
                 "condition": "minecraft:entity_properties"
@@ -158,7 +158,7 @@
                     },
                     {
                       "predicate": {
-                        "flags": {
+                        "minecraft:flags": {
                           "is_flying": false
                         }
                       },
@@ -169,7 +169,7 @@
                       "terms": [
                         {
                           "predicate": {
-                            "movement_affected_by": {
+                            "minecraft:movement_affected_by": {
                               "block": {
                                 "blocks": "#minecraft:soul_speed_blocks"
                               }
@@ -180,7 +180,7 @@
                         },
                         {
                           "predicate": {
-                            "flags": {
+                            "minecraft:flags": {
                               "is_on_ground": false
                             }
                           },
@@ -201,13 +201,13 @@
                     },
                     {
                       "predicate": {
-                        "movement_affected_by": {
+                        "minecraft:flags": {
+                          "is_flying": false
+                        },
+                        "minecraft:movement_affected_by": {
                           "block": {
                             "blocks": "#minecraft:soul_speed_blocks"
                           }
-                        },
-                        "flags": {
-                          "is_flying": false
                         }
                       },
                       "entity": "this",
@@ -248,13 +248,13 @@
             },
             {
               "predicate": {
-                "movement_affected_by": {
+                "minecraft:flags": {
+                  "is_on_ground": true
+                },
+                "minecraft:movement_affected_by": {
                   "block": {
                     "blocks": "#minecraft:soul_speed_blocks"
                   }
-                },
-                "flags": {
-                  "is_on_ground": true
                 }
               },
               "entity": "this",
@@ -289,21 +289,21 @@
         },
         "requirements": {
           "predicate": {
-            "movement": {
+            "minecraft:flags": {
+              "is_on_ground": true,
+              "is_flying": false
+            },
+            "minecraft:movement": {
               "horizontal_speed": {
                 "min": 9.999999747378752E-6
               }
             },
-            "movement_affected_by": {
+            "minecraft:movement_affected_by": {
               "block": {
                 "blocks": "#minecraft:soul_speed_blocks"
               }
             },
-            "flags": {
-              "is_on_ground": true,
-              "is_flying": false
-            },
-            "periodic_tick": 5
+            "minecraft:periodic_tick": 5
           },
           "entity": "this",
           "condition": "minecraft:entity_properties"
@@ -328,21 +328,21 @@
             },
             {
               "predicate": {
-                "movement": {
+                "minecraft:flags": {
+                  "is_on_ground": true,
+                  "is_flying": false
+                },
+                "minecraft:movement": {
                   "horizontal_speed": {
                     "min": 9.999999747378752E-6
                   }
                 },
-                "movement_affected_by": {
+                "minecraft:movement_affected_by": {
                   "block": {
                     "blocks": "#minecraft:soul_speed_blocks"
                   }
                 },
-                "flags": {
-                  "is_on_ground": true,
-                  "is_flying": false
-                },
-                "periodic_tick": 5
+                "minecraft:periodic_tick": 5
               },
               "entity": "this",
               "condition": "minecraft:entity_properties"

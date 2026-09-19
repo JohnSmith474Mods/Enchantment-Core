@@ -15,8 +15,8 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    api "maven.modrinth:config-overhauled:1.0.1+26.1-fabric"
-    implementation "maven.modrinth:modmenu:18.0.1"
+    api "maven.modrinth:config-overhauled:1.0.1+26.2-fabric"
+    implementation "maven.modrinth:modmenu:20.0.2"
 
     implementation "com.electronwill.night-config:toml:3.8.3"
     implementation "com.electronwill.night-config:core:3.8.3"

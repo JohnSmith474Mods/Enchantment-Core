@@ -48,9 +48,7 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
         if (state.modelIdStr != null && !state.modelIdStr.isEmpty()) {
             AnchorModelRenderer delegate = AnchorRendererRegistry.get(Identifier.parse(state.modelIdStr));
             if (delegate != null) {
-                // Assuming delegate logic needs adaptation to SubmitNodeCollector API if available,
-                // else it relies on custom submission.
-                // delegate.submit(state, poseStack, nodeCollector, cameraRenderState);
+                delegate.submit(state, poseStack, nodeCollector, cameraRenderState);
                 super.submit(state, poseStack, nodeCollector, cameraRenderState);
                 return;
             }

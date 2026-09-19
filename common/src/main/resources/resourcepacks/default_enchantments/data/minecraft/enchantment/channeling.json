@@ -115,7 +115,7 @@
             },
             {
               "predicate": {
-                "type": "minecraft:trident"
+                "minecraft:entity_type": "minecraft:trident"
               },
               "entity": "this",
               "condition": "minecraft:entity_properties"
@@ -161,7 +161,7 @@
             },
             {
               "predicate": {
-                "location": {
+                "minecraft:location": {
                   "can_see_sky": true
                 }
               },
@@ -170,7 +170,7 @@
             },
             {
               "predicate": {
-                "type": "minecraft:trident"
+                "minecraft:entity_type": "minecraft:trident"
               },
               "entity": "direct_attacker",
               "condition": "minecraft:entity_properties"

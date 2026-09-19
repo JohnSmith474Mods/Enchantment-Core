@@ -163,7 +163,7 @@
             {
               "term": {
                 "predicate": {
-                  "vehicle": {}
+                  "minecraft:vehicle": {}
                 },
                 "entity": "this",
                 "condition": "minecraft:entity_properties"
@@ -172,7 +172,7 @@
             },
             {
               "predicate": {
-                "flags": {
+                "minecraft:flags": {
                   "is_fall_flying": false
                 }
               },
@@ -181,7 +181,7 @@
             },
             {
               "predicate": {
-                "flags": {
+                "minecraft:flags": {
                   "is_in_water": false
                 }
               },
@@ -193,9 +193,7 @@
                 {
                   "term": {
                     "predicate": {
-                      "type_specific": {
-                        "type": "minecraft:player"
-                      }
+                      "minecraft:type_specific/player": {}
                     },
                     "entity": "this",
                     "condition": "minecraft:entity_properties"
@@ -204,11 +202,10 @@
                 },
                 {
                   "predicate": {
-                    "type_specific": {
+                    "minecraft:type_specific/player": {
                       "gamemode": [
                         "creative"
-                      ],
-                      "type": "minecraft:player"
+                      ]
                     }
                   },
                   "entity": "this",
@@ -216,13 +213,12 @@
                 },
                 {
                   "predicate": {
-                    "type_specific": {
+                    "minecraft:type_specific/player": {
                       "food": {
                         "level": {
                           "min": 7
                         }
-                      },
-                      "type": "minecraft:player"
+                      }
                     }
                   },
                   "entity": "this",

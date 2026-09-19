@@ -15,7 +15,7 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.math.FieldAxis;
 import johnsmith.enchantmentcore.enchantment.spellfield.type.RotationDirection;
 import johnsmith.enchantmentcore.registry.EnchantmentCoreRegistries;
 
-import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.predicates.ContextAwarePredicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;

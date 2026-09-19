@@ -38,7 +38,7 @@ public class EnchantableListEntry extends AbstractRegistryEntry<Item, List<ItemO
     protected void openSelectionScreen() {
         List<ItemOrItems> initialSelection = new ArrayList<>(this.property.get());
 
-        this.minecraft.setScreen(new EnchantableListSelectionScreen(
+        this.minecraft.gui.setScreen(new EnchantableListSelectionScreen(
                 (Screen) this.parentScreen,
                 Component.translatable(this.property.translationKey()),
                 initialSelection,

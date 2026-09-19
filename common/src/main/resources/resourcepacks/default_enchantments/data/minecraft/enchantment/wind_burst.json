@@ -143,13 +143,13 @@
         },
         "requirements": {
           "predicate": {
-            "movement": {
+            "minecraft:flags": {
+              "is_flying": false
+            },
+            "minecraft:movement": {
               "fall_distance": {
                 "min": 1.5
               }
-            },
-            "flags": {
-              "is_flying": false
             }
           },
           "entity": "direct_attacker",

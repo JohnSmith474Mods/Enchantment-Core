@@ -1,8 +1,5 @@
 package johnsmith.enchantmentcore.client.debug;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,10 +14,8 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.math.FieldAxis;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.debug.DebugRenderer;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.gizmos.GizmoStyle;
 import net.minecraft.gizmos.Gizmos;
 import net.minecraft.util.Mth;
@@ -30,26 +25,21 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
  * Primary debug renderer for Enchantment Core spell fields.
- * Implements a hybrid rendering architecture compatible with Minecraft 1.21.11.
- * Bounding boxes are delegated to the native {@link Gizmos} API.
- * Complex mathematical surfaces, origin axes, and vector fields are simulated as 3D quad volumes
- * and batched via {@link MultiBufferSource} to bypass hardware line shader restrictions.
+ * Implements the Minecraft 26.2 Gizmos rendering architecture.
  */
 public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
     /**
-     * Entry point for the 1.21.11 debug rendering pipeline.
-     * Executes the hybrid drawing routine for all active spell fields.
+     * Entry point for the 26.2 debug rendering pipeline.
      *
-     * @param cx               Camera X translation.
-     * @param cy               Camera Y translation.
-     * @param cz               Camera Z translation.
+     * @param cx               Camera X translation (Unused by Gizmos).
+     * @param cy               Camera Y translation (Unused by Gizmos).
+     * @param cz               Camera Z translation (Unused by Gizmos).
      * @param debugValueAccess System debug value access instance.
      * @param frustum          Active camera culling frustum.
      * @param partialTick      Engine partial tick for coordinate interpolation.
@@ -68,25 +58,15 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
         if (level == null) return;
 
         renderGizmos(level, partialTick, activeFields);
-
-        PoseStack poseStack = new PoseStack();
-        MultiBufferSource.BufferSource bufferSource = minecraft.renderBuffers().bufferSource();
-
-        VertexConsumer quadBuffer = bufferSource.getBuffer(RenderTypes.debugQuads());
-
-        renderOriginAxes(poseStack, level, partialTick, cx, cy, cz, activeFields, quadBuffer);
-        renderVectorFields(poseStack, level, partialTick, cx, cy, cz, activeFields, quadBuffer);
-        renderSurfaces(poseStack, level, partialTick, cx, cy, cz, activeFields, quadBuffer);
-        renderFieldPoints(poseStack, level, partialTick, cx, cy, cz, activeFields, quadBuffer);
+        renderOriginAxes(level, partialTick, activeFields);
+        renderVectorFields(level, partialTick, activeFields);
+        renderFieldPoints(level, partialTick, activeFields);
+        renderSurfaces(level, partialTick, activeFields);
     }
 
     /**
      * Prevents configuration parsing errors from producing invisible geometry.
      * Overrides the alpha channel if it evaluates to 0.
-     *
-     * @param color         The parsed ARGB color integer.
-     * @param fallbackColor The backup ARGB color integer.
-     * @return A visible ARGB color integer.
      */
     private static int enforceAlpha(int color, int fallbackColor) {
         if ((color & 0xFF000000) == 0) {
@@ -95,9 +75,6 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
         return color;
     }
 
-    /**
-     * Renders AABB boundaries utilizing the native Gizmos pipeline.
-     */
     private static void renderGizmos(Level level, float partialTick, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
         int bbCol = enforceAlpha(Config.BOUNDING_BOX_COLOR.get(), 0xFFFFFF00);
         GizmoStyle style = GizmoStyle.stroke(bbCol);
@@ -119,18 +96,11 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
         }
     }
 
-    /**
-     * Renders the XYZ coordinate origin cross as volumetric quads.
-     */
-    private static void renderOriginAxes(PoseStack poseStack, Level level, float partialTick, double cx, double cy, double cz, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields, VertexConsumer buffer) {
+    private static void renderOriginAxes(Level level, float partialTick, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
         int xCol = enforceAlpha(Config.ORIGIN_X_COLOR.get(), 0xFFFF0000);
-        int xr = (xCol >> 16) & 0xFF; int xg = (xCol >> 8) & 0xFF; int xb = xCol & 0xFF;
-
         int yCol = enforceAlpha(Config.ORIGIN_Y_COLOR.get(), 0xFF00FF00);
-        int yr = (yCol >> 16) & 0xFF; int yg = (yCol >> 8) & 0xFF; int yb = yCol & 0xFF;
-
         int zCol = enforceAlpha(Config.ORIGIN_Z_COLOR.get(), 0xFF0000FF);
-        int zr = (zCol >> 16) & 0xFF; int zg = (zCol >> 8) & 0xFF; int zb = zCol & 0xFF;
+        int aCol = enforceAlpha(Config.AXIS_LINE_COLOR.get(), 0xFFFF00FF);
 
         for (Map.Entry<Integer, SpellFieldDebugTracker.TrackedSpellField> entry : activeFields.entrySet()) {
             SpellFieldDebugTracker.TrackedSpellField trackedField = entry.getValue();
@@ -152,30 +122,29 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
                 Vec3 absVolumeCenter = lerpPos.add(volume.volumeCenter());
                 Vec3 absOrigin = topology.getOrigin(trackedField.enchantmentLevel, anchorEntity, absVolumeCenter);
 
-                poseStack.pushPose();
-                poseStack.translate(absOrigin.x - cx, absOrigin.y - cy, absOrigin.z - cz);
-                Matrix4f pose = poseStack.last().pose();
-
                 float s = 0.5F;
 
-                drawThickLine(buffer, pose, new Vec3(-s, 0, 0), new Vec3(s, 0, 0), 0.015F, xr, xg, xb, 255);
-                drawThickLine(buffer, pose, new Vec3(0, -s, 0), new Vec3(0, s, 0), 0.015F, yr, yg, yb, 255);
-                drawThickLine(buffer, pose, new Vec3(0, 0, -s), new Vec3(0, 0, s), 0.015F, zr, zg, zb, 255);
+                Gizmos.line(absOrigin.add(-s, 0, 0), absOrigin.add(s, 0, 0), xCol, 2.0F);
+                Gizmos.line(absOrigin.add(0, -s, 0), absOrigin.add(0, s, 0), yCol, 2.0F);
+                Gizmos.line(absOrigin.add(0, 0, -s), absOrigin.add(0, 0, s), zCol, 2.0F);
 
-                poseStack.popPose();
+                if (topology.axis().isPresent()) {
+                    Vec3 dir = topology.axis().get().resolve(trackedField.enchantmentLevel, anchorEntity);
+                    if (dir.lengthSqr() > 0.0001D) {
+                        dir = dir.normalize();
+                        float axialRange = topology.axialRange().map(v -> v.calculate(trackedField.enchantmentLevel)).orElse(originRange);
+                        Vec3 axisEnd = absOrigin.add(dir.scale(axialRange));
+
+                        Gizmos.line(absOrigin, axisEnd, aCol, 3.0F);
+                    }
+                }
             }
         }
     }
 
-    /**
-     * Evaluates and renders directional impulse vectors as thick 3D quads.
-     */
-    private static void renderVectorFields(PoseStack poseStack, Level level, float partialTick, double cx, double cy, double cz, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields, VertexConsumer buffer) {
+    private static void renderVectorFields(Level level, float partialTick, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
         int stemCol = enforceAlpha(Config.VECTOR_STEM_COLOR.get(), 0x96FFFFFF);
-        int sr = (stemCol >> 16) & 0xFF, sg = (stemCol >> 8) & 0xFF, sb = stemCol & 0xFF, sa = (stemCol >> 24) & 0xFF;
-
         int tipCol = enforceAlpha(Config.VECTOR_TIP_COLOR.get(), 0xFFFFFF00);
-        int tr = (tipCol >> 16) & 0xFF, tg = (tipCol >> 8) & 0xFF, tb = tipCol & 0xFF, ta = (tipCol >> 24) & 0xFF;
 
         for (Map.Entry<Integer, SpellFieldDebugTracker.TrackedSpellField> entry : activeFields.entrySet()) {
             SpellFieldDebugTracker.TrackedSpellField trackedField = entry.getValue();
@@ -190,14 +159,9 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
             Vec3 lerpPos = anchorEntity.getPosition(partialTick);
             Vec3 absEpicenter = lerpPos.add(0, anchorEntity.getBbHeight() / 2.0, 0);
 
-            poseStack.pushPose();
-            poseStack.translate(lerpPos.x - cx, lerpPos.y - cy, lerpPos.z - cz);
-            Matrix4f pose = poseStack.last().pose();
-
             for (LocalVolume volume : trackedField.volumes) {
                 double maxDim = Math.max(volume.bounds().maxX - volume.bounds().minX, Math.max(volume.bounds().maxY - volume.bounds().minY, volume.bounds().maxZ - volume.bounds().minZ));
                 double step = Math.max(1.0, maxDim / 6.0);
-
                 Vec3 absVolumeCenter = lerpPos.add(volume.volumeCenter());
 
                 for (double x = volume.bounds().minX; x <= volume.bounds().maxX; x += step) {
@@ -216,30 +180,73 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
                                 direction = direction.normalize();
 
                                 float length = 0.4F;
-                                Vec3 start = new Vec3(x, y, z);
+                                Vec3 start = targetPos;
                                 Vec3 end = start.add(direction.scale(length));
                                 Vec3 tipEnd = end.add(direction.scale(length * 0.2F));
 
-                                drawThickLine(buffer, pose, start, end, 0.015F, sr, sg, sb, sa);
-                                drawThickLine(buffer, pose, end, tipEnd, 0.045F, tr, tg, tb, ta);
+                                Gizmos.line(start, end, stemCol, 2.0F);
+                                Gizmos.line(end, tipEnd, tipCol, 4.0F);
                             }
                         }
                     }
                 }
             }
-            poseStack.popPose();
         }
     }
 
-    /**
-     * Renders mathematical boundaries and geometric plane intersections utilizing parametric equations.
-     */
-    private static void renderSurfaces(PoseStack poseStack, Level level, float partialTick, double cx, double cy, double cz, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields, VertexConsumer buffer) {
-        int planeCol = enforceAlpha(Config.TOPOLOGY_PLANE_COLOR.get(), 0x40FFFFFF);
-        int pr = (planeCol >> 16) & 0xFF; int pg = (planeCol >> 8) & 0xFF; int pb = planeCol & 0xFF; int pa = (planeCol >> 24) & 0xFF;
+    private static void renderFieldPoints(Level level, float partialTick, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
+        int highCol = enforceAlpha(Config.FIELD_POINT_HIGH_COLOR.get(), 0xC8FF0000);
+        int hr = (highCol >> 16) & 0xFF, hg = (highCol >> 8) & 0xFF, hb = highCol & 0xFF, ha = (highCol >> 24) & 0xFF;
 
+        int lowCol = enforceAlpha(Config.FIELD_POINT_LOW_COLOR.get(), 0xC800FF00);
+        int lr = (lowCol >> 16) & 0xFF, lg = (lowCol >> 8) & 0xFF, lb = lowCol & 0xFF, la = (lowCol >> 24) & 0xFF;
+
+        for (Map.Entry<Integer, SpellFieldDebugTracker.TrackedSpellField> entry : activeFields.entrySet()) {
+            SpellFieldDebugTracker.TrackedSpellField trackedField = entry.getValue();
+            Entity anchorEntity = trackedField.anchorEntity;
+            if (anchorEntity == null) continue;
+
+            Entity clientEntity = level.getEntity(anchorEntity.getId());
+            if (clientEntity != null) anchorEntity = clientEntity;
+
+            Vec3 lerpPos = anchorEntity.getPosition(partialTick);
+
+            for (LocalVolume volume : trackedField.volumes) {
+                Topology topology = volume.topology();
+                if (topology == null) continue;
+
+                double maxDim = Math.max(volume.bounds().maxX - volume.bounds().minX, Math.max(volume.bounds().maxY - volume.bounds().minY, volume.bounds().maxZ - volume.bounds().minZ));
+                double step = Math.max(0.5, maxDim / 20.0);
+                Vec3 absVolumeCenter = lerpPos.add(volume.volumeCenter());
+
+                for (double x = volume.bounds().minX; x <= volume.bounds().maxX; x += step) {
+                    for (double y = volume.bounds().minY; y <= volume.bounds().maxY; y += step) {
+                        for (double z = volume.bounds().minZ; z <= volume.bounds().maxZ; z += step) {
+                            Vec3 targetPos = lerpPos.add(x, y, z);
+                            float scalar = topology.evaluateMultiplier(trackedField.enchantmentLevel, anchorEntity, absVolumeCenter, targetPos);
+
+                            if (scalar > 0.05F) {
+                                float size = 0.02F + (0.08F * scalar);
+
+                                int r = (int) Mth.lerp(scalar, lr, hr);
+                                int g = (int) Mth.lerp(scalar, lg, hg);
+                                int b = (int) Mth.lerp(scalar, lb, hb);
+                                int a = (int) Mth.lerp(scalar, la, ha);
+
+                                int color = (a << 24) | (r << 16) | (g << 8) | b;
+                                AABB pointBox = AABB.ofSize(targetPos, size * 2, size * 2, size * 2);
+                                Gizmos.cuboid(pointBox, GizmoStyle.fill(color));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void renderSurfaces(Level level, float partialTick, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields) {
+        int planeCol = enforceAlpha(Config.TOPOLOGY_PLANE_COLOR.get(), 0x40FFFFFF);
         int sphCol = enforceAlpha(Config.TOPOLOGY_SPHERE_COLOR.get(), 0x40FFFFFF);
-        int sr = (sphCol >> 16) & 0xFF; int sg = (sphCol >> 8) & 0xFF; int sb = sphCol & 0xFF; int sa = (sphCol >> 24) & 0xFF;
 
         for (Map.Entry<Integer, SpellFieldDebugTracker.TrackedSpellField> entry : activeFields.entrySet()) {
             SpellFieldDebugTracker.TrackedSpellField trackedField = entry.getValue();
@@ -288,28 +295,17 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
                         poly = clipPolygon(poly, volume.bounds());
 
                         if (poly.size() >= 3) {
-                            poseStack.pushPose();
-                            poseStack.translate(lerpPos.x - cx, lerpPos.y - cy, lerpPos.z - cz);
-                            Matrix4f pose = poseStack.last().pose();
-
-                            Vec3 v0 = poly.getFirst();
+                            Vec3 v0 = poly.getFirst().add(lerpPos);
                             for (int i = 1; i < poly.size() - 1; i++) {
-                                Vec3 v1 = poly.get(i);
-                                Vec3 v2 = poly.get(i + 1);
-
-                                buffer.addVertex(pose, (float) v0.x, (float) v0.y, (float) v0.z).setColor(pr, pg, pb, pa);
-                                buffer.addVertex(pose, (float) v1.x, (float) v1.y, (float) v1.z).setColor(pr, pg, pb, pa);
-                                buffer.addVertex(pose, (float) v2.x, (float) v2.y, (float) v2.z).setColor(pr, pg, pb, pa);
-                                buffer.addVertex(pose, (float) v2.x, (float) v2.y, (float) v2.z).setColor(pr, pg, pb, pa);
+                                Vec3 v1 = poly.get(i).add(lerpPos);
+                                Vec3 v2 = poly.get(i + 1).add(lerpPos);
+                                Gizmos.line(v0, v1, planeCol, 1.0F);
+                                Gizmos.line(v1, v2, planeCol, 1.0F);
+                                Gizmos.line(v2, v0, planeCol, 1.0F);
                             }
-                            poseStack.popPose();
                         }
                     }
                 } else {
-                    poseStack.pushPose();
-                    poseStack.translate(lerpPos.x - cx, lerpPos.y - cy, lerpPos.z - cz);
-                    Matrix4f pose = poseStack.last().pose();
-
                     int stacks = 24;
                     int slices = 24;
 
@@ -339,34 +335,27 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
                             quad = clipPolygon(quad, volume.bounds());
 
                             if (quad.size() >= 3) {
-                                Vec3 v0 = quad.get(0);
+                                Vec3 v0 = quad.get(0).add(lerpPos);
                                 for (int k = 1; k < quad.size() - 1; k++) {
-                                    Vec3 vk1 = quad.get(k);
-                                    Vec3 vk2 = quad.get(k + 1);
-
-                                    buffer.addVertex(pose, (float) v0.x, (float) v0.y, (float) v0.z).setColor(sr, sg, sb, sa);
-                                    buffer.addVertex(pose, (float) vk1.x, (float) vk1.y, (float) vk1.z).setColor(sr, sg, sb, sa);
-                                    buffer.addVertex(pose, (float) vk2.x, (float) vk2.y, (float) vk2.z).setColor(sr, sg, sb, sa);
-                                    buffer.addVertex(pose, (float) vk2.x, (float) vk2.y, (float) vk2.z).setColor(sr, sg, sb, sa);
+                                    Vec3 vk1 = quad.get(k).add(lerpPos);
+                                    Vec3 vk2 = quad.get(k + 1).add(lerpPos);
+                                    Gizmos.line(v0, vk1, sphCol, 1.0F);
+                                    Gizmos.line(vk1, vk2, sphCol, 1.0F);
+                                    Gizmos.line(vk2, v0, sphCol, 1.0F);
                                 }
                             }
                         }
                     }
 
                     for (int face = 0; face < 6; face++) {
-                        drawIntersectionCap(buffer, pose, volume.bounds(), localOrigin, originRange, topology.metric(), pr, pg, pb, pa, face);
+                        drawIntersectionCap(lerpPos, volume.bounds(), localOrigin, originRange, topology.metric(), planeCol, face);
                     }
-
-                    poseStack.popPose();
                 }
             }
         }
     }
 
-    /**
-     * Clips the volumetric mathematical sphere against the AABB walls to create precise boundary intersections.
-     */
-    private static void drawIntersectionCap(VertexConsumer buffer, Matrix4f pose, AABB box, Vec3 center, float radius, DistanceMetric metric, int r, int g, int b, int a, int face) {
+    private static void drawIntersectionCap(Vec3 lerpPos, AABB box, Vec3 center, float radius, DistanceMetric metric, int color, int face) {
         double planeVal;
         double dist;
 
@@ -411,22 +400,17 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
         poly = clipPolygon(poly, box.inflate(0.001));
 
         if (poly.size() >= 3) {
-            Vec3 v0 = poly.getFirst();
+            Vec3 v0 = poly.getFirst().add(lerpPos);
             for (int i = 1; i < poly.size() - 1; i++) {
-                Vec3 v1 = poly.get(i);
-                Vec3 v2 = poly.get(i + 1);
-
-                buffer.addVertex(pose, (float) v0.x, (float) v0.y, (float) v0.z).setColor(r, g, b, a);
-                buffer.addVertex(pose, (float) v1.x, (float) v1.y, (float) v1.z).setColor(r, g, b, a);
-                buffer.addVertex(pose, (float) v2.x, (float) v2.y, (float) v2.z).setColor(r, g, b, a);
-                buffer.addVertex(pose, (float) v2.x, (float) v2.y, (float) v2.z).setColor(r, g, b, a);
+                Vec3 v1 = poly.get(i).add(lerpPos);
+                Vec3 v2 = poly.get(i + 1).add(lerpPos);
+                Gizmos.line(v0, v1, color, 1.0F);
+                Gizmos.line(v1, v2, color, 1.0F);
+                Gizmos.line(v2, v0, color, 1.0F);
             }
         }
     }
 
-    /**
-     * Executes Sutherland-Hodgman polygon clipping against all 6 planes of the AABB bounding box.
-     */
     private static List<Vec3> clipPolygon(List<Vec3> poly, AABB box) {
         poly = clipAgainstPlane(poly, 1, 0, 0, box.minX);
         poly = clipAgainstPlane(poly, -1, 0, 0, -box.maxX);
@@ -437,9 +421,6 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
         return poly;
     }
 
-    /**
-     * Evaluates spatial coordinates against a specific geometric plane to discard out-of-bounds geometry.
-     */
     private static List<Vec3> clipAgainstPlane(List<Vec3> poly, double nx, double ny, double nz, double d) {
         if (poly.isEmpty()) return poly;
         List<Vec3> out = new ArrayList<>();
@@ -466,118 +447,5 @@ public class SpellFieldDebugRenderer implements DebugRenderer.SimpleDebugRendere
             sInside = eInside;
         }
         return out;
-    }
-
-    /**
-     * Evaluates matrix offsets and plots cubic point clusters matching spatial intensity values.
-     */
-    private static void renderFieldPoints(PoseStack poseStack, Level level, float partialTick, double cx, double cy, double cz, Map<Integer, SpellFieldDebugTracker.TrackedSpellField> activeFields, VertexConsumer buffer) {
-        int highCol = enforceAlpha(Config.FIELD_POINT_HIGH_COLOR.get(), 0xC8FF0000);
-        int hr = (highCol >> 16) & 0xFF, hg = (highCol >> 8) & 0xFF, hb = highCol & 0xFF, ha = (highCol >> 24) & 0xFF;
-
-        int lowCol = enforceAlpha(Config.FIELD_POINT_LOW_COLOR.get(), 0xC800FF00);
-        int lr = (lowCol >> 16) & 0xFF, lg = (lowCol >> 8) & 0xFF, lb = lowCol & 0xFF, la = (lowCol >> 24) & 0xFF;
-
-        for (Map.Entry<Integer, SpellFieldDebugTracker.TrackedSpellField> entry : activeFields.entrySet()) {
-            SpellFieldDebugTracker.TrackedSpellField trackedField = entry.getValue();
-            Entity anchorEntity = trackedField.anchorEntity;
-            if (anchorEntity == null) continue;
-
-            Entity clientEntity = level.getEntity(anchorEntity.getId());
-            if (clientEntity != null) anchorEntity = clientEntity;
-
-            Vec3 lerpPos = anchorEntity.getPosition(partialTick);
-
-            poseStack.pushPose();
-            poseStack.translate(lerpPos.x - cx, lerpPos.y - cy, lerpPos.z - cz);
-            Matrix4f pose = poseStack.last().pose();
-
-            for (LocalVolume volume : trackedField.volumes) {
-                Topology topology = volume.topology();
-                if (topology == null) continue;
-
-                AABB box = volume.bounds();
-                double maxDim = Math.max(box.maxX - box.minX, Math.max(box.maxY - box.minY, box.maxZ - box.minZ));
-                double step = Math.max(0.5, maxDim / 20.0);
-
-                Vec3 absVolumeCenter = lerpPos.add(volume.volumeCenter());
-
-                for (double x = box.minX; x <= box.maxX; x += step) {
-                    for (double y = box.minY; y <= box.maxY; y += step) {
-                        for (double z = box.minZ; z <= box.maxZ; z += step) {
-                            Vec3 targetPos = lerpPos.add(x, y, z);
-                            float scalar = topology.evaluateMultiplier(trackedField.enchantmentLevel, anchorEntity, absVolumeCenter, targetPos);
-
-                            if (scalar > 0.05F) {
-                                float size = 0.02F + (0.08F * scalar);
-
-                                int r = (int) Mth.lerp(scalar, lr, hr);
-                                int g = (int) Mth.lerp(scalar, lg, hg);
-                                int b = (int) Mth.lerp(scalar, lb, hb);
-                                int a = (int) Mth.lerp(scalar, la, ha);
-
-                                Vec3 pt = new Vec3(x, y, z);
-                                Vec3 p0 = pt.add(new Vec3(-size, size, -size));
-                                Vec3 p1 = pt.add(new Vec3(-size, size, size));
-                                Vec3 p2 = pt.add(new Vec3(size, size, size));
-                                Vec3 p3 = pt.add(new Vec3(size, size, -size));
-                                Vec3 p4 = pt.add(new Vec3(-size, -size, -size));
-                                Vec3 p5 = pt.add(new Vec3(-size, -size, size));
-                                Vec3 p6 = pt.add(new Vec3(size, -size, size));
-                                Vec3 p7 = pt.add(new Vec3(size, -size, -size));
-
-                                addQuad(buffer, pose, p0, p1, p2, p3, r, g, b, a);
-                                addQuad(buffer, pose, p4, p7, p6, p5, r, g, b, a);
-                                addQuad(buffer, pose, p5, p6, p2, p1, r, g, b, a);
-                                addQuad(buffer, pose, p4, p0, p3, p7, r, g, b, a);
-                                addQuad(buffer, pose, p4, p5, p1, p0, r, g, b, a);
-                                addQuad(buffer, pose, p7, p3, p2, p6, r, g, b, a);
-                            }
-                        }
-                    }
-                }
-            }
-            poseStack.popPose();
-        }
-    }
-
-    /**
-     * Replaces standard 1D lines with 3D quad tubes to bypass hardware line shader limitations.
-     */
-    private static void drawThickLine(VertexConsumer buffer, Matrix4f pose, Vec3 p1, Vec3 p2, float thickness, int r, int g, int b, int a) {
-        Vec3 dir = p2.subtract(p1);
-        if (dir.lengthSqr() < 1e-5) return;
-        dir = dir.normalize();
-
-        Vec3 up = new Vec3(0, 1, 0);
-        if (Math.abs(dir.dot(up)) > 0.99) up = new Vec3(1, 0, 0);
-        Vec3 right = dir.cross(up).normalize().scale(thickness / 2.0);
-        up = right.cross(dir).normalize().scale(thickness / 2.0);
-
-        Vec3 v0 = p1.add(right).add(up);
-        Vec3 v1 = p1.subtract(right).add(up);
-        Vec3 v2 = p1.subtract(right).subtract(up);
-        Vec3 v3 = p1.add(right).subtract(up);
-        Vec3 v4 = p2.add(right).add(up);
-        Vec3 v5 = p2.subtract(right).add(up);
-        Vec3 v6 = p2.subtract(right).subtract(up);
-        Vec3 v7 = p2.add(right).subtract(up);
-
-        addQuad(buffer, pose, v0, v1, v2, v3, r, g, b, a);
-        addQuad(buffer, pose, v7, v6, v5, v4, r, g, b, a);
-        addQuad(buffer, pose, v4, v5, v1, v0, r, g, b, a);
-        addQuad(buffer, pose, v3, v2, v6, v7, r, g, b, a);
-        addQuad(buffer, pose, v0, v3, v7, v4, r, g, b, a);
-        addQuad(buffer, pose, v5, v6, v2, v1, r, g, b, a);
-    }
-
-    /**
-     * Submits an isolated quad face to the active vertex buffer.
-     */
-    private static void addQuad(VertexConsumer buffer, Matrix4f pose, Vec3 v1, Vec3 v2, Vec3 v3, Vec3 v4, int r, int g, int b, int a) {
-        buffer.addVertex(pose, (float)v1.x, (float)v1.y, (float)v1.z).setColor(r, g, b, a);
-        buffer.addVertex(pose, (float)v2.x, (float)v2.y, (float)v2.z).setColor(r, g, b, a);
-        buffer.addVertex(pose, (float)v3.x, (float)v3.y, (float)v3.z).setColor(r, g, b, a);
-        buffer.addVertex(pose, (float)v4.x, (float)v4.y, (float)v4.z).setColor(r, g, b, a);
     }
 }

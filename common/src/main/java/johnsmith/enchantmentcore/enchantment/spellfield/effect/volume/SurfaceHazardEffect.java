@@ -13,7 +13,7 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.math.GlobalVolume;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 import johnsmith.enchantmentcore.enchantment.spellfield.effect.ProbabilityDistribution;
 
-import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.predicates.ContextAwarePredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
