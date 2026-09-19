@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.density"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "density",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/mace"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "density",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "density",
+      "property": "max_level"
+    },
+    "fallback": 5
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "mainhand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "density",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/mace"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "density",
-      "property": "weight"
-    },
-    "fallback": 5
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "density",
-      "property": "max_level"
-    },
-    "fallback": 5
-  },
   "exclusive_set": "#minecraft:exclusive_set/damage",
   "effects": {
     "minecraft:smash_damage_per_fallen_block": [
       {
         "effect": {
           "value": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "density",
-              "property": "value_per_level"
-            },
-            "per_level_default": 0.5,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -109,6 +102,13 @@
               "property": "value_base"
             },
             "base_default": 0.5,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "density",
+              "property": "value_per_level"
+            },
+            "per_level_default": 0.5,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:add"

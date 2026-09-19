@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.unbreaking"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "unbreaking",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/durability"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "unbreaking",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "unbreaking",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "any"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "unbreaking",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/durability"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "unbreaking",
-      "property": "weight"
-    },
-    "fallback": 5
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "unbreaking",
-      "property": "max_level"
-    },
-    "fallback": 3
-  },
   "effects": {
     "minecraft:item_damage": [
       {
         "effect": {
           "chance": {
             "numerator": {
-              "per_level_config": {
-                "mod_id": "enchantment_core",
-                "category": "enchantment",
-                "group": "unbreaking",
-                "property": "chance_numerator_per_level"
-              },
-              "per_level_default": 2.0,
               "base_config": {
                 "mod_id": "enchantment_core",
                 "category": "enchantment",
@@ -109,16 +102,16 @@
                 "property": "chance_numerator_base"
               },
               "base_default": 2.0,
-              "type": "enchantment_core:configurable_linear"
-            },
-            "denominator": {
               "per_level_config": {
                 "mod_id": "enchantment_core",
                 "category": "enchantment",
                 "group": "unbreaking",
-                "property": "chance_denominator_per_level"
+                "property": "chance_numerator_per_level"
               },
-              "per_level_default": 5.0,
+              "per_level_default": 2.0,
+              "type": "enchantment_core:configurable_linear"
+            },
+            "denominator": {
               "base_config": {
                 "mod_id": "enchantment_core",
                 "category": "enchantment",
@@ -126,6 +119,13 @@
                 "property": "chance_denominator_base"
               },
               "base_default": 10.0,
+              "per_level_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_denominator_per_level"
+              },
+              "per_level_default": 5.0,
               "type": "enchantment_core:configurable_linear"
             },
             "type": "minecraft:fraction"
@@ -143,13 +143,6 @@
         "effect": {
           "chance": {
             "numerator": {
-              "per_level_config": {
-                "mod_id": "enchantment_core",
-                "category": "enchantment",
-                "group": "unbreaking",
-                "property": "chance_2_numerator_per_level"
-              },
-              "per_level_default": 1.0,
               "base_config": {
                 "mod_id": "enchantment_core",
                 "category": "enchantment",
@@ -157,16 +150,16 @@
                 "property": "chance_2_numerator_base"
               },
               "base_default": 1.0,
-              "type": "enchantment_core:configurable_linear"
-            },
-            "denominator": {
               "per_level_config": {
                 "mod_id": "enchantment_core",
                 "category": "enchantment",
                 "group": "unbreaking",
-                "property": "chance_2_denominator_per_level"
+                "property": "chance_2_numerator_per_level"
               },
               "per_level_default": 1.0,
+              "type": "enchantment_core:configurable_linear"
+            },
+            "denominator": {
               "base_config": {
                 "mod_id": "enchantment_core",
                 "category": "enchantment",
@@ -174,6 +167,13 @@
                 "property": "chance_2_denominator_base"
               },
               "base_default": 2.0,
+              "per_level_config": {
+                "mod_id": "enchantment_core",
+                "category": "enchantment",
+                "group": "unbreaking",
+                "property": "chance_2_denominator_per_level"
+              },
+              "per_level_default": 1.0,
               "type": "enchantment_core:configurable_linear"
             },
             "type": "minecraft:fraction"

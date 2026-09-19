@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.breach"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "breach",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/mace"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "breach",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "breach",
+      "property": "max_level"
+    },
+    "fallback": 4
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "mainhand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "breach",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/mace"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "breach",
-      "property": "weight"
-    },
-    "fallback": 2
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "breach",
-      "property": "max_level"
-    },
-    "fallback": 4
-  },
   "exclusive_set": "#minecraft:exclusive_set/damage",
   "effects": {
     "minecraft:armor_effectiveness": [
       {
         "effect": {
           "value": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "breach",
-              "property": "value_per_level"
-            },
-            "per_level_default": -0.15,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -109,6 +102,13 @@
               "property": "value_base"
             },
             "base_default": -0.15,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "breach",
+              "property": "value_per_level"
+            },
+            "per_level_default": -0.15,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:add"

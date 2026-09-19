@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.sweeping_edge"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "sweeping_edge",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/sweeping"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "sweeping_edge",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "sweeping_edge",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,33 +89,6 @@
       "mainhand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "sweeping_edge",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/sword"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "sweeping_edge",
-      "property": "weight"
-    },
-    "fallback": 2
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "sweeping_edge",
-      "property": "max_level"
-    },
-    "fallback": 3
-  },
   "effects": {
     "minecraft:attributes": [
       {
@@ -96,13 +96,6 @@
         "attribute": "minecraft:sweeping_damage_ratio",
         "amount": {
           "numerator": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "sweeping_edge",
-              "property": "amount_numerator_per_level"
-            },
-            "per_level_default": 1.0,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -110,16 +103,16 @@
               "property": "amount_numerator_base"
             },
             "base_default": 1.0,
-            "type": "enchantment_core:configurable_linear"
-          },
-          "denominator": {
             "per_level_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
               "group": "sweeping_edge",
-              "property": "amount_denominator_per_level"
+              "property": "amount_numerator_per_level"
             },
             "per_level_default": 1.0,
+            "type": "enchantment_core:configurable_linear"
+          },
+          "denominator": {
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -127,6 +120,13 @@
               "property": "amount_denominator_base"
             },
             "base_default": 2.0,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "sweeping_edge",
+              "property": "amount_denominator_per_level"
+            },
+            "per_level_default": 1.0,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:fraction"

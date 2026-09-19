@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.quick_charge"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "quick_charge",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/crossbow"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "quick_charge",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "quick_charge",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -63,43 +90,9 @@
       "offhand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "quick_charge",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/crossbow"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "quick_charge",
-      "property": "weight"
-    },
-    "fallback": 5
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "quick_charge",
-      "property": "max_level"
-    },
-    "fallback": 3
-  },
   "effects": {
     "minecraft:crossbow_charge_time": {
       "value": {
-        "per_level_config": {
-          "mod_id": "enchantment_core",
-          "category": "enchantment",
-          "group": "quick_charge",
-          "property": "value_per_level"
-        },
-        "per_level_default": -0.25,
         "base_config": {
           "mod_id": "enchantment_core",
           "category": "enchantment",
@@ -107,6 +100,13 @@
           "property": "value_base"
         },
         "base_default": -0.25,
+        "per_level_config": {
+          "mod_id": "enchantment_core",
+          "category": "enchantment",
+          "group": "quick_charge",
+          "property": "value_per_level"
+        },
+        "per_level_default": -0.25,
         "type": "enchantment_core:configurable_linear"
       },
       "type": "minecraft:add"

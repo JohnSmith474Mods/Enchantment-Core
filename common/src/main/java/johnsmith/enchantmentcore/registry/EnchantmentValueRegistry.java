@@ -11,7 +11,7 @@ import johnsmith.enchantmentcore.enchantment.value.configurable.*;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 
 /**
@@ -45,6 +45,6 @@ public class EnchantmentValueRegistry {
      * @param codec The specific map codec implementation for the formula structure.
      */
     private static void register(String name, MapCodec<? extends LevelBasedValue> codec) {
-        Registry.register(BuiltInRegistries.ENCHANTMENT_LEVEL_BASED_VALUE_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name), codec);
+        Registry.register(BuiltInRegistries.ENCHANTMENT_LEVEL_BASED_VALUE_TYPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, name), codec);
     }
 }

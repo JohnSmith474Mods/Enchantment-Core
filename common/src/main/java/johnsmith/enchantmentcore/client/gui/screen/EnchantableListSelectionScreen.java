@@ -23,20 +23,20 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class EnchantableListSelectionScreen extends Screen {
-    private static final ResourceLocation SELECT_HIGHLIGHTED = ResourceLocation.withDefaultNamespace("transferable_list/select_highlighted");
-    private static final ResourceLocation SELECT = ResourceLocation.withDefaultNamespace("transferable_list/select");
-    private static final ResourceLocation UNSELECT_HIGHLIGHTED = ResourceLocation.withDefaultNamespace("transferable_list/unselect_highlighted");
-    private static final ResourceLocation UNSELECT = ResourceLocation.withDefaultNamespace("transferable_list/unselect");
-    private static final ResourceLocation MOVE_UP = ResourceLocation.withDefaultNamespace("transferable_list/move_up");
-    private static final ResourceLocation MOVE_UP_HIGHLIGHTED = ResourceLocation.withDefaultNamespace("transferable_list/move_up_highlighted");
-    private static final ResourceLocation MOVE_DOWN = ResourceLocation.withDefaultNamespace("transferable_list/move_down");
-    private static final ResourceLocation MOVE_DOWN_HIGHLIGHTED = ResourceLocation.withDefaultNamespace("transferable_list/move_down_highlighted");
+    private static final Identifier SELECT_HIGHLIGHTED = Identifier.withDefaultNamespace("transferable_list/select_highlighted");
+    private static final Identifier SELECT = Identifier.withDefaultNamespace("transferable_list/select");
+    private static final Identifier UNSELECT_HIGHLIGHTED = Identifier.withDefaultNamespace("transferable_list/unselect_highlighted");
+    private static final Identifier UNSELECT = Identifier.withDefaultNamespace("transferable_list/unselect");
+    private static final Identifier MOVE_UP = Identifier.withDefaultNamespace("transferable_list/move_up");
+    private static final Identifier MOVE_UP_HIGHLIGHTED = Identifier.withDefaultNamespace("transferable_list/move_up_highlighted");
+    private static final Identifier MOVE_DOWN = Identifier.withDefaultNamespace("transferable_list/move_down");
+    private static final Identifier MOVE_DOWN_HIGHLIGHTED = Identifier.withDefaultNamespace("transferable_list/move_down_highlighted");
 
     private final Screen parent;
     private final Consumer<List<ItemOrItems>> onSelect;
@@ -215,14 +215,14 @@ public class EnchantableListSelectionScreen extends Screen {
         private final Component displayName;
         private final String subText;
         private final ItemStack icon;
-        private final ResourceLocation sprite;
-        private final ResourceLocation highlightedSprite;
+        private final Identifier sprite;
+        private final Identifier highlightedSprite;
         private final Runnable onTransfer;
 
         private Runnable onMoveUp;
         private Runnable onMoveDown;
 
-        public ElementEntry(ElementList list, ItemOrItems element, ResourceLocation sprite, ResourceLocation highlightedSprite, Runnable onTransfer) {
+        public ElementEntry(ElementList list, ItemOrItems element, Identifier sprite, Identifier highlightedSprite, Runnable onTransfer) {
             this.list = list;
             this.element = element;
             this.sprite = sprite;
@@ -236,7 +236,7 @@ public class EnchantableListSelectionScreen extends Screen {
             } else {
                 this.icon = new ItemStack(element.getItem());
                 this.displayName = element.getItem().getName();
-                ResourceLocation key = BuiltInRegistries.ITEM.getKey(element.getItem());
+                Identifier key = BuiltInRegistries.ITEM.getKey(element.getItem());
                 this.subText = key != null ? key.toString() : "";
             }
         }

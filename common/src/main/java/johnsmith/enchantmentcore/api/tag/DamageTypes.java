@@ -3,7 +3,7 @@ package johnsmith.enchantmentcore.api.tag;
 import johnsmith.enchantmentcore.Constants;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
 
@@ -22,7 +22,7 @@ public final class DamageTypes {
     public static final TagKey<DamageType> IS_MAGIC_DAMAGE = create("is_magic_damage");
 
     private static TagKey<net.minecraft.world.damagesource.DamageType> create(String name) {
-        return TagKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name));
+        return TagKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, name));
     }
 
     private DamageTypes() {}

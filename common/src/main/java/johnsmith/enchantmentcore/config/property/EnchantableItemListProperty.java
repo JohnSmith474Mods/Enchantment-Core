@@ -16,7 +16,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
 public class EnchantableItemListProperty extends DefaultProperty.List<ItemOrItems> {
@@ -28,14 +28,14 @@ public class EnchantableItemListProperty extends DefaultProperty.List<ItemOrItem
         java.util.List<net.minecraft.world.item.Item> items = new ArrayList<>();
         for (java.lang.String entry : entries) {
             if (entry.startsWith("#")) {
-                ResourceLocation tagLoc = ResourceLocation.tryParse(entry.substring(1));
+                Identifier tagLoc = Identifier.tryParse(entry.substring(1));
                 if (tagLoc != null) {
                     TagKey<net.minecraft.world.item.Item> tagKey = TagKey.create(Registries.ITEM, tagLoc);
                     Optional<HolderSet.Named<net.minecraft.world.item.Item>> tagSet = BuiltInRegistries.ITEM.get(tagKey);
                     tagSet.ifPresent(named -> named.forEach(holder -> items.add(holder.value())));
                 }
             } else {
-                ResourceLocation itemLoc = ResourceLocation.tryParse(entry);
+                Identifier itemLoc = Identifier.tryParse(entry);
                 if (itemLoc != null && BuiltInRegistries.ITEM.containsKey(itemLoc)) {
                     items.add(BuiltInRegistries.ITEM.get(itemLoc).get().value());
                 }
@@ -47,7 +47,7 @@ public class EnchantableItemListProperty extends DefaultProperty.List<ItemOrItem
     public static java.util.List<java.lang.String> collapseToKeys(java.util.List<net.minecraft.world.item.Item> items) {
         java.util.List<java.lang.String> keys = new ArrayList<>();
         for (net.minecraft.world.item.Item item : items) {
-            ResourceLocation loc = BuiltInRegistries.ITEM.getKey(item);
+            Identifier loc = BuiltInRegistries.ITEM.getKey(item);
             if (loc != null) {
                 keys.add(loc.toString());
             }

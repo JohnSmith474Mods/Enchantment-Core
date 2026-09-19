@@ -3,7 +3,7 @@ package johnsmith.enchantmentcore.mixin.enchantment.effect.entity.projectile;
 import johnsmith.enchantmentcore.api.entity.accessor.ProjectileStateAccessor;
 
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -58,7 +58,7 @@ public abstract class RicochetMixin {
             entity.xRotO = entity.getXRot();
 
             // Flag to the engine that the entity requires an immediate network position update.
-            entity.hasImpulse = true;
+            entity.needsSync = true;
 
             // Halt the original routine so the arrow does not embed itself in the block.
             ci.cancel();

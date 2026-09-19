@@ -9,7 +9,7 @@ import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class FabricRegistryHelper implements IRegistryHelper {
     @Override
@@ -20,7 +20,7 @@ public class FabricRegistryHelper implements IRegistryHelper {
 
     @Override
     public <T, R extends T> Supplier<R> register(Registry<T> registry, String name, Supplier<R> supplier) {
-        R registered = Registry.register(registry, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name), supplier.get());
+        R registered = Registry.register(registry, Identifier.fromNamespaceAndPath(Constants.MOD_ID, name), supplier.get());
         return () -> registered;
     }
 }

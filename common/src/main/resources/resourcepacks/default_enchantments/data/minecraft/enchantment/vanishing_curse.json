@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.vanishing_curse"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "vanishing_curse",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/vanishing"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "vanishing_curse",
+      "property": "weight"
+    },
+    "fallback": 1
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "vanishing_curse",
+      "property": "max_level"
+    },
+    "fallback": 1
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -61,33 +88,6 @@
     "fallback": [
       "any"
     ]
-  },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "vanishing_curse",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/vanishing"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "vanishing_curse",
-      "property": "weight"
-    },
-    "fallback": 1
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "vanishing_curse",
-      "property": "max_level"
-    },
-    "fallback": 1
   },
   "effects": {
     "minecraft:prevent_equipment_drop": {}

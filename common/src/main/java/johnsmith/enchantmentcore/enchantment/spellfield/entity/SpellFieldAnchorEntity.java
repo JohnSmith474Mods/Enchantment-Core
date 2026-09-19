@@ -14,7 +14,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -214,8 +214,8 @@ public class SpellFieldAnchorEntity extends Entity implements SpellFieldAnchor {
         String modelIdStr = this.entityData.get(MODEL_ID);
 
         AnchorVisualConfig config = new AnchorVisualConfig(
-                textureStr.isEmpty() ? Optional.empty() : Optional.of(ResourceLocation.parse(textureStr)),
-                modelIdStr.isEmpty() ? Optional.empty() : Optional.of(ResourceLocation.parse(modelIdStr)),
+                textureStr.isEmpty() ? Optional.empty() : Optional.of(Identifier.parse(textureStr)),
+                modelIdStr.isEmpty() ? Optional.empty() : Optional.of(Identifier.parse(modelIdStr)),
                 this.entityData.get(VISUAL_SCALE),
                 this.entityData.get(VISUAL_FRAMES),
                 this.entityData.get(VISUAL_TICK_RATE),

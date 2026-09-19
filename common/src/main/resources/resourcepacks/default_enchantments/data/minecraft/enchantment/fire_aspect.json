@@ -2,6 +2,42 @@
   "description": {
     "translate": "enchantment.minecraft.fire_aspect"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/fire_aspect"
+  },
+  "primary_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "primary_items"
+    },
+    "fallback": "#minecraft:enchantable/melee_weapon"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fire_aspect",
+      "property": "max_level"
+    },
+    "fallback": 2
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,42 +98,6 @@
       "mainhand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "fire_aspect",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/fire_aspect"
-  },
-  "primary_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "fire_aspect",
-      "property": "primary_items"
-    },
-    "fallback": "#minecraft:enchantable/sword"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "fire_aspect",
-      "property": "weight"
-    },
-    "fallback": 2
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "fire_aspect",
-      "property": "max_level"
-    },
-    "fallback": 2
-  },
   "effects": {
     "minecraft:post_attack": [
       {
@@ -105,13 +105,6 @@
         "affected": "victim",
         "effect": {
           "duration": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "fire_aspect",
-              "property": "duration_per_level"
-            },
-            "per_level_default": 4.0,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -119,6 +112,13 @@
               "property": "duration_base"
             },
             "base_default": 4.0,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "fire_aspect",
+              "property": "duration_per_level"
+            },
+            "per_level_default": 4.0,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:ignite"

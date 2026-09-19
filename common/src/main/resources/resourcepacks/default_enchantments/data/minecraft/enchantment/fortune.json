@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.fortune"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fortune",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/mining_loot"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fortune",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "fortune",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -61,33 +88,6 @@
     "fallback": [
       "mainhand"
     ]
-  },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "fortune",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/mining_loot"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "fortune",
-      "property": "weight"
-    },
-    "fallback": 2
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "fortune",
-      "property": "max_level"
-    },
-    "fallback": 3
   },
   "exclusive_set": "#minecraft:exclusive_set/mining"
 }

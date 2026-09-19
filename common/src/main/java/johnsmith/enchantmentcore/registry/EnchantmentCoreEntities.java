@@ -7,7 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -40,7 +40,7 @@ public class EnchantmentCoreEntities {
      * @return The registered entity type.
      */
     public static <T extends Entity> EntityType<T> register(String name, EntityType.Builder<T> builder) {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
+        Identifier id = Identifier.fromNamespaceAndPath(Constants.MOD_ID, name);
         ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, id);
         return Registry.register(BuiltInRegistries.ENTITY_TYPE, key, builder.build(key));
     }

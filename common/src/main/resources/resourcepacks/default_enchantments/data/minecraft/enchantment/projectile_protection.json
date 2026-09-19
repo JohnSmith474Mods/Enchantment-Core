@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.projectile_protection"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "projectile_protection",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/armor"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "projectile_protection",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "projectile_protection",
+      "property": "max_level"
+    },
+    "fallback": 4
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "armor"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "projectile_protection",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/armor"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "projectile_protection",
-      "property": "weight"
-    },
-    "fallback": 5
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "projectile_protection",
-      "property": "max_level"
-    },
-    "fallback": 4
-  },
   "exclusive_set": "#minecraft:exclusive_set/armor",
   "effects": {
     "minecraft:damage_protection": [
       {
         "effect": {
           "value": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "projectile_protection",
-              "property": "value_per_level"
-            },
-            "per_level_default": 2.0,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -109,6 +102,13 @@
               "property": "value_base"
             },
             "base_default": 2.0,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "projectile_protection",
+              "property": "value_per_level"
+            },
+            "per_level_default": 2.0,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:add"

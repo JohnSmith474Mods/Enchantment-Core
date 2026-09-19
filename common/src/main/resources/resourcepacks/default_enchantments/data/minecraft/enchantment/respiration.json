@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.respiration"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "respiration",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/head_armor"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "respiration",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "respiration",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "head"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "respiration",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/head_armor"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "respiration",
-      "property": "weight"
-    },
-    "fallback": 2
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "respiration",
-      "property": "max_level"
-    },
-    "fallback": 3
-  },
   "effects": {
     "minecraft:attributes": [
       {
         "id": "minecraft:enchantment.respiration",
         "attribute": "minecraft:oxygen_bonus",
         "amount": {
-          "per_level_config": {
-            "mod_id": "enchantment_core",
-            "category": "enchantment",
-            "group": "respiration",
-            "property": "amount_per_level"
-          },
-          "per_level_default": 1.0,
           "base_config": {
             "mod_id": "enchantment_core",
             "category": "enchantment",
@@ -109,6 +102,13 @@
             "property": "amount_base"
           },
           "base_default": 1.0,
+          "per_level_config": {
+            "mod_id": "enchantment_core",
+            "category": "enchantment",
+            "group": "respiration",
+            "property": "amount_per_level"
+          },
+          "per_level_default": 1.0,
           "type": "enchantment_core:configurable_linear"
         },
         "operation": "add_value"

@@ -13,13 +13,13 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.entity.state.HitboxesRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
@@ -27,7 +27,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +47,7 @@ public class TransparencyRenderHelper {
      * Thread-local storage for the active alpha multiplier. Default value is 1.0F.
      */
     private static final ThreadLocal<Float> CURRENT_ALPHA = ThreadLocal.withInitial(() -> 1.0F);
-    private static final ResourceLocation BLOCKS_ATLAS = ResourceLocation.withDefaultNamespace("textures/atlas/blocks.png");
+    private static final Identifier BLOCKS_ATLAS = Identifier.withDefaultNamespace("textures/atlas/items.png");
 
     /**
      * Sets the active alpha multiplier for the current thread.
@@ -135,16 +135,6 @@ public class TransparencyRenderHelper {
         @Override
         public OrderedSubmitNodeCollector order(int index) {
             return new AlphaNodeCollector(this.root.order(index), this.root, this.alpha);
-        }
-
-        @Override
-        public void submitHitbox(
-                PoseStack poseStack,
-                EntityRenderState state,
-                HitboxesRenderState hitboxes
-        ) {
-            if (this.alpha <= 0.00004F) return;
-            this.delegate.submitHitbox(poseStack, state, hitboxes);
         }
 
         @Override
@@ -241,8 +231,8 @@ public class TransparencyRenderHelper {
                 int light,
                 int overlay,
                 TextureAtlasSprite sprite,
+                boolean sheeted,
                 boolean hasFoil,
-                boolean isDiscrete,
                 int color,
                 ModelFeatureRenderer.CrumblingOverlay crumbling,
                 int outlineColor
@@ -250,7 +240,7 @@ public class TransparencyRenderHelper {
             if (this.alpha <= 0.00004F) return;
             int modifiedColor = applyAlpha(color, this.alpha);
             int modifiedOutline = applyAlpha(outlineColor, this.alpha);
-            this.delegate.submitModelPart(part, poseStack, renderType, light, overlay, sprite, hasFoil, isDiscrete, modifiedColor, crumbling, modifiedOutline);
+            this.delegate.submitModelPart(part, poseStack, renderType, light, overlay, sprite, sheeted, hasFoil, modifiedColor, crumbling, modifiedOutline);
         }
 
         @Override
@@ -287,7 +277,7 @@ public class TransparencyRenderHelper {
                 int overlay
         ) {
             if (this.alpha <= 0.00004F) return;
-            RenderType activeType = RenderType.entityTranslucent(BLOCKS_ATLAS);
+            RenderType activeType = RenderTypes.entityTranslucent(BLOCKS_ATLAS);
             int modifiedColor = applyAlpha(color, this.alpha);
             this.delegate.submitBlockModel(poseStack, activeType, model, r, g, b, modifiedColor, light, overlay);
         }
@@ -319,7 +309,7 @@ public class TransparencyRenderHelper {
                 return;
             }
 
-            RenderType translucentType = RenderType.entityTranslucent(BLOCKS_ATLAS);
+            RenderType translucentType = RenderTypes.entityTranslucent(BLOCKS_ATLAS);
             int[] modifiedTints = new int[tintLayers.length];
 
             for (int i = 0; i < tintLayers.length; i++) {
@@ -328,25 +318,20 @@ public class TransparencyRenderHelper {
 
             this.delegate.submitCustomGeometry(poseStack, translucentType, (pose, consumer) -> {
                 for (BakedQuad quad : quads) {
-                    int tint = 0xFFFFFFFF;
-                    if (quad.tintIndex() != -1 && quad.tintIndex() < tintLayers.length) {
-                        int layerTint = tintLayers[quad.tintIndex()];
-                        if (layerTint != -1) {
-                            tint = layerTint;
-                        }
-                    }
+                    int tintIndex = quad.tintIndex();
+                    int color = (tintIndex != -1 && tintIndex < modifiedTints.length) ? modifiedTints[tintIndex] : applyAlpha(0xFFFFFFFF, this.alpha);
 
-                    float r = ((tint >> 16) & 0xFF) / 255.0F;
-                    float g = ((tint >> 8) & 0xFF) / 255.0F;
-                    float b = (tint & 0xFF) / 255.0F;
-                    float a = (((tint >> 24) & 0xFF) / 255.0F) * clampedAlpha;
+                    float r = ((color >> 16) & 0xFF) / 255.0F;
+                    float g = ((color >> 8) & 0xFF) / 255.0F;
+                    float b = (color & 0xFF) / 255.0F;
+                    float a = (((color >> 24) & 0xFF) / 255.0F) * clampedAlpha;
 
                     consumer.putBulkData(pose, quad, r, g, b, a, light, overlay);
                 }
             });
 
             if (foilType != ItemStackRenderState.FoilType.NONE) {
-                RenderType glintType = foilType == ItemStackRenderState.FoilType.SPECIAL ? RenderType.glintTranslucent() : RenderType.glint();
+                RenderType glintType = foilType == ItemStackRenderState.FoilType.SPECIAL ? RenderTypes.glintTranslucent() : RenderTypes.glint();
                 this.delegate.submitCustomGeometry(poseStack, glintType, (pose, consumer) -> {
                     for (BakedQuad quad : quads) {
                         consumer.putBulkData(pose, quad, 1.0F, 1.0F, 1.0F, clampedAlpha, light, overlay);
@@ -368,60 +353,50 @@ public class TransparencyRenderHelper {
             this.delegate.submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
                 VertexConsumer wrappedConsumer = new VertexConsumer() {
                     @Override
-                    public VertexConsumer addVertex(
-                            float x,
-                            float y,
-                            float z
-                    ) {
+                    public VertexConsumer addVertex(float x, float y, float z) {
                         consumer.addVertex(x, y, z);
                         return this;
                     }
 
                     @Override
-                    public VertexConsumer setColor(
-                            int r,
-                            int g,
-                            int b,
-                            int a
-                    ) {
+                    public VertexConsumer setColor(int r, int g, int b, int a) {
                         consumer.setColor(r, g, b, (int) (a * alpha));
                         return this;
                     }
 
                     @Override
-                    public VertexConsumer setUv(
-                            float u,
-                            float v
-                    ) {
+                    public VertexConsumer setColor(int color) {
+                        consumer.setColor(applyAlpha(color, alpha));
+                        return this;
+                    }
+
+                    @Override
+                    public VertexConsumer setUv(float u, float v) {
                         consumer.setUv(u, v);
                         return this;
                     }
 
                     @Override
-                    public VertexConsumer setUv1(
-                            int u,
-                            int v
-                    ) {
+                    public VertexConsumer setUv1(int u, int v) {
                         consumer.setUv1(u, v);
                         return this;
                     }
 
                     @Override
-                    public VertexConsumer setUv2(
-                            int u,
-                            int v
-                    ) {
+                    public VertexConsumer setUv2(int u, int v) {
                         consumer.setUv2(u, v);
                         return this;
                     }
 
                     @Override
-                    public VertexConsumer setNormal(
-                            float x,
-                            float y,
-                            float z
-                    ) {
+                    public VertexConsumer setNormal(float x, float y, float z) {
                         consumer.setNormal(x, y, z);
+                        return this;
+                    }
+
+                    @Override
+                    public VertexConsumer setLineWidth(float width) {
+                        consumer.setLineWidth(width);
                         return this;
                     }
                 };

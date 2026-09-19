@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.aqua_affinity"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "aqua_affinity",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/head_armor"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "aqua_affinity",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "aqua_affinity",
+      "property": "max_level"
+    },
+    "fallback": 1
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "head"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "aqua_affinity",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/head_armor"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "aqua_affinity",
-      "property": "weight"
-    },
-    "fallback": 2
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "aqua_affinity",
-      "property": "max_level"
-    },
-    "fallback": 1
-  },
   "effects": {
     "minecraft:attributes": [
       {
         "id": "minecraft:enchantment.aqua_affinity",
         "attribute": "minecraft:submerged_mining_speed",
         "amount": {
-          "per_level_config": {
-            "mod_id": "enchantment_core",
-            "category": "enchantment",
-            "group": "aqua_affinity",
-            "property": "amount_per_level"
-          },
-          "per_level_default": 4.0,
           "base_config": {
             "mod_id": "enchantment_core",
             "category": "enchantment",
@@ -109,6 +102,13 @@
             "property": "amount_base"
           },
           "base_default": 4.0,
+          "per_level_config": {
+            "mod_id": "enchantment_core",
+            "category": "enchantment",
+            "group": "aqua_affinity",
+            "property": "amount_per_level"
+          },
+          "per_level_default": 4.0,
           "type": "enchantment_core:configurable_linear"
         },
         "operation": "add_multiplied_total"

@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.looting"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "looting",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/melee_weapon"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "looting",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "looting",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "mainhand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "looting",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/sword"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "looting",
-      "property": "weight"
-    },
-    "fallback": 2
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "looting",
-      "property": "max_level"
-    },
-    "fallback": 3
-  },
   "effects": {
     "minecraft:equipment_drops": [
       {
         "enchanted": "attacker",
         "effect": {
           "value": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "looting",
-              "property": "value_per_level"
-            },
-            "per_level_default": 0.01,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -109,6 +102,13 @@
               "property": "value_base"
             },
             "base_default": 0.01,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "looting",
+              "property": "value_per_level"
+            },
+            "per_level_default": 0.01,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:add"

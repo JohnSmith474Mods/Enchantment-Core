@@ -27,7 +27,7 @@ import johnsmith.enchantmentcore.enchantment.spellfield.shape.CuboidShape;
 import johnsmith.enchantmentcore.enchantment.spellfield.shape.DeepCuboidShape;
 import johnsmith.enchantmentcore.enchantment.spellfield.shape.WideCuboidShape;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * A centralized registration utility specifically for binding spell field implementations to their identifier codecs.
@@ -40,7 +40,7 @@ public class SpellFieldRegistrar {
      *
      * @param registrar A consumer capturing the evaluated resource location and its associated scaling map codec.
      */
-    public static void registerFunctions(BiConsumer<ResourceLocation, MapCodec<? extends DistanceScalingFunction>> registrar) {
+    public static void registerFunctions(BiConsumer<Identifier, MapCodec<? extends DistanceScalingFunction>> registrar) {
         registrar.accept(id(ConstantScalingFunction.KEY), ConstantScalingFunction.CODEC);
         registrar.accept(id(LinearScalingFunction.KEY), LinearScalingFunction.CODEC);
         registrar.accept(id(PolynomialScalingFunction.KEY), PolynomialScalingFunction.CODEC);
@@ -55,7 +55,7 @@ public class SpellFieldRegistrar {
      *
      * @param registrar A consumer capturing the evaluated resource location and its associated shape map codec.
      */
-    public static void registerShapes(BiConsumer<ResourceLocation, MapCodec<? extends SpellFieldShape>> registrar) {
+    public static void registerShapes(BiConsumer<Identifier, MapCodec<? extends SpellFieldShape>> registrar) {
         registerShape(registrar, CubeShape.KEY, CubeShape.CODEC, CubeShape.KEY_PROVIDER);
         registerShape(registrar, CuboidShape.KEY, CuboidShape.CODEC, CuboidShape.KEY_PROVIDER);
         registerShape(registrar, DeepCuboidShape.KEY, DeepCuboidShape.CODEC, DeepCuboidShape.KEY_PROVIDER);
@@ -68,7 +68,7 @@ public class SpellFieldRegistrar {
      *
      * @param registrar A consumer capturing the evaluated resource location and its associated effect map codec.
      */
-    public static void registerEffects(BiConsumer<ResourceLocation, MapCodec<? extends SpellFieldEffect>> registrar) {
+    public static void registerEffects(BiConsumer<Identifier, MapCodec<? extends SpellFieldEffect>> registrar) {
         registerEffect(registrar, PlaySoundVolumeEffect.KEY, PlaySoundVolumeEffect.CODEC, PlaySoundVolumeEffect.KEY_PROVIDER);
         registerEffect(registrar, PlaySoundEntityEffect.KEY, PlaySoundEntityEffect.CODEC, PlaySoundEntityEffect.KEY_PROVIDER);
         registerEffect(registrar, PlaySoundBlockEffect.KEY, PlaySoundBlockEffect.CODEC, PlaySoundBlockEffect.KEY_PROVIDER);
@@ -107,7 +107,7 @@ public class SpellFieldRegistrar {
     }
 
     private static void registerShape(
-            BiConsumer<ResourceLocation, MapCodec<? extends SpellFieldShape>> registrar,
+            BiConsumer<Identifier, MapCodec<? extends SpellFieldShape>> registrar,
             String path,
             MapCodec<? extends SpellFieldShape> codec,
             LevelBasedKeyProvider keyProvider
@@ -121,7 +121,7 @@ public class SpellFieldRegistrar {
     }
 
     private static void registerEffect(
-            BiConsumer<ResourceLocation, MapCodec<? extends SpellFieldEffect>> registrar,
+            BiConsumer<Identifier, MapCodec<? extends SpellFieldEffect>> registrar,
             String path,
             MapCodec<? extends SpellFieldEffect> codec,
             LevelBasedKeyProvider keyProvider
@@ -134,14 +134,14 @@ public class SpellFieldRegistrar {
     }
 
     private static void registerEffect(
-            BiConsumer<ResourceLocation, MapCodec<? extends SpellFieldEffect>> registrar,
+            BiConsumer<Identifier, MapCodec<? extends SpellFieldEffect>> registrar,
             String path,
             MapCodec<? extends SpellFieldEffect> codec
     ) {
         registrar.accept(id(path), codec);
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, path);
     }
 }

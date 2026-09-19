@@ -33,7 +33,8 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public class ImportCommand {
@@ -42,7 +43,7 @@ public class ImportCommand {
     private static final SuggestionProvider<CommandSourceStack> SOURCE_SUGGESTIONS = (context, builder) -> {
         Registry<Enchantment> registry = context.getSource().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         Set<String> namespaces = registry.keySet().stream()
-                .map(ResourceLocation::getNamespace)
+                .map(Identifier::getNamespace)
                 .collect(Collectors.toSet());
         return SharedSuggestionProvider.suggest(namespaces, builder);
     };
@@ -52,7 +53,7 @@ public class ImportCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(Constants.MOD_ID)
-                .requires(source -> source.hasPermission(2))
+                .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_ADMIN))
                 .then(Commands.literal("import")
                         .then(Commands.argument("source_namespace", StringArgumentType.word())
                                 .suggests(SOURCE_SUGGESTIONS)
@@ -82,7 +83,7 @@ public class ImportCommand {
 
         int processedCount = 0;
         for (Map.Entry<ResourceKey<Enchantment>, Enchantment> entry : registry.entrySet()) {
-            ResourceLocation id = entry.getKey().location();
+            Identifier id = entry.getKey().identifier();
             if (!id.getNamespace().equals(sourceNamespace)) {
                 continue;
             }

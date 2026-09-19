@@ -48,7 +48,7 @@ public abstract class FogRendererMixin {
             @Local(argsOnly = true) float viewDistance
     ) {
         FogType fogType = camera.getFluidInCamera();
-        Entity entity = camera.getEntity();
+        Entity entity = camera.entity();
 
         if (fogType == FogType.NONE || !(entity instanceof LivingEntity livingEntity)) {
             return;
@@ -59,7 +59,7 @@ public abstract class FogRendererMixin {
 
         if (enchantments.isEmpty()) return;
 
-        FluidState fluidState = livingEntity.level().getFluidState(camera.getBlockPosition());
+        FluidState fluidState = livingEntity.level().getFluidState(camera.blockPosition());
 
         for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
             FluidFogDensityEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.FLUID_FOG_DENSITY.get());

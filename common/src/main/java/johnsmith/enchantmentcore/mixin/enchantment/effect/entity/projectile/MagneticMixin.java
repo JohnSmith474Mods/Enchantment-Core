@@ -71,7 +71,7 @@ public abstract class MagneticMixin {
             Vec3 newVelocity = velocity.add(toTarget.scale(strength)).normalize().scale(speed);
 
             projectile.setDeltaMovement(newVelocity);
-            projectile.hasImpulse = true;
+            projectile.needsSync = true;
         }
     }
 

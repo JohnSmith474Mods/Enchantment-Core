@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.soul_speed"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "soul_speed",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/foot_armor"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "soul_speed",
+      "property": "weight"
+    },
+    "fallback": 1
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "soul_speed",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,33 +89,6 @@
       "feet"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "soul_speed",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/foot_armor"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "soul_speed",
-      "property": "weight"
-    },
-    "fallback": 1
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "soul_speed",
-      "property": "max_level"
-    },
-    "fallback": 3
-  },
   "effects": {
     "minecraft:location_changed": [
       {
@@ -98,13 +98,6 @@
               "id": "minecraft:enchantment.soul_speed",
               "attribute": "minecraft:movement_speed",
               "amount": {
-                "per_level_config": {
-                  "mod_id": "enchantment_core",
-                  "category": "enchantment",
-                  "group": "soul_speed",
-                  "property": "amount_per_level"
-                },
-                "per_level_default": 0.0105,
                 "base_config": {
                   "mod_id": "enchantment_core",
                   "category": "enchantment",
@@ -112,6 +105,13 @@
                   "property": "amount_base"
                 },
                 "base_default": 0.0405,
+                "per_level_config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "soul_speed",
+                  "property": "amount_per_level"
+                },
+                "per_level_default": 0.0105,
                 "type": "enchantment_core:configurable_linear"
               },
               "operation": "add_value",
@@ -268,13 +268,6 @@
     "minecraft:tick": [
       {
         "effect": {
-          "horizontal_velocity": {
-            "movement_scale": -0.2
-          },
-          "vertical_velocity": {
-            "base": 0.1
-          },
-          "speed": 1.0,
           "particle": {
             "type": "minecraft:soul"
           },
@@ -285,25 +278,32 @@
             "type": "entity_position",
             "offset": 0.1
           },
+          "horizontal_velocity": {
+            "movement_scale": -0.2
+          },
+          "vertical_velocity": {
+            "base": 0.1
+          },
+          "speed": 1.0,
           "type": "minecraft:spawn_particles"
         },
         "requirements": {
           "predicate": {
-            "periodic_tick": 5,
+            "movement": {
+              "horizontal_speed": {
+                "min": 9.999999747378752E-6
+              }
+            },
             "movement_affected_by": {
               "block": {
                 "blocks": "#minecraft:soul_speed_blocks"
               }
             },
             "flags": {
-              "is_flying": false,
-              "is_on_ground": true
+              "is_on_ground": true,
+              "is_flying": false
             },
-            "movement": {
-              "horizontal_speed": {
-                "min": 9.999999747378752E-6
-              }
-            }
+            "periodic_tick": 5
           },
           "entity": "this",
           "condition": "minecraft:entity_properties"
@@ -328,21 +328,21 @@
             },
             {
               "predicate": {
-                "periodic_tick": 5,
+                "movement": {
+                  "horizontal_speed": {
+                    "min": 9.999999747378752E-6
+                  }
+                },
                 "movement_affected_by": {
                   "block": {
                     "blocks": "#minecraft:soul_speed_blocks"
                   }
                 },
                 "flags": {
-                  "is_flying": false,
-                  "is_on_ground": true
+                  "is_on_ground": true,
+                  "is_flying": false
                 },
-                "movement": {
-                  "horizontal_speed": {
-                    "min": 9.999999747378752E-6
-                  }
-                }
+                "periodic_tick": 5
               },
               "entity": "this",
               "condition": "minecraft:entity_properties"

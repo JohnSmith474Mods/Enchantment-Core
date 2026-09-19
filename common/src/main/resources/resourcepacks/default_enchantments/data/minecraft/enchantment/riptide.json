@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.riptide"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "riptide",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/trident"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "riptide",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "riptide",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,33 +89,6 @@
       "hand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "riptide",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/trident"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "riptide",
-      "property": "weight"
-    },
-    "fallback": 2
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "riptide",
-      "property": "max_level"
-    },
-    "fallback": 3
-  },
   "exclusive_set": "#minecraft:exclusive_set/riptide",
   "effects": {
     "minecraft:trident_sound": [
@@ -98,13 +98,6 @@
     ],
     "minecraft:trident_spin_attack_strength": {
       "value": {
-        "per_level_config": {
-          "mod_id": "enchantment_core",
-          "category": "enchantment",
-          "group": "riptide",
-          "property": "value_per_level"
-        },
-        "per_level_default": 0.75,
         "base_config": {
           "mod_id": "enchantment_core",
           "category": "enchantment",
@@ -112,6 +105,13 @@
           "property": "value_base"
         },
         "base_default": 1.5,
+        "per_level_config": {
+          "mod_id": "enchantment_core",
+          "category": "enchantment",
+          "group": "riptide",
+          "property": "value_per_level"
+        },
+        "per_level_default": 0.75,
         "type": "enchantment_core:configurable_linear"
       },
       "type": "minecraft:add"

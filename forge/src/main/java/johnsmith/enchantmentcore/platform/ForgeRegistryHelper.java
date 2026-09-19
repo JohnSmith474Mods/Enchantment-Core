@@ -27,11 +27,11 @@ public class ForgeRegistryHelper implements IRegistryHelper {
     @Override
     public <T> Supplier<Registry<T>> createCustomRegistry(ResourceKey<Registry<T>> key) {
         // .hasTags() is critical: it forces Forge to inject this registry into BuiltInRegistries.REGISTRY
-        RegistryBuilder<T> builder = RegistryBuilder.<T>of(key.location()).hasTags();
+        RegistryBuilder<T> builder = RegistryBuilder.<T>of(key.identifier()).hasTags();
         PENDING_BUILDERS.add(builder);
 
         // Return a lazy supplier that fetches the vanilla-mapped registry AFTER the event fires
-        return () -> (Registry<T>) BuiltInRegistries.REGISTRY.get(key.location()).get().value();
+        return () -> (Registry<T>) BuiltInRegistries.REGISTRY.get(key.identifier()).get().value();
     }
 
     @Override

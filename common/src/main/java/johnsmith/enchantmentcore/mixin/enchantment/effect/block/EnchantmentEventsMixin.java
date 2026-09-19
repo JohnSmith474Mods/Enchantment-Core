@@ -36,7 +36,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.effects.EnchantmentEntityEffect;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -281,7 +281,7 @@ public abstract class EnchantmentEventsMixin {
      */
     @Inject(method = "tryDropExperience", at = @At("TAIL"))
     private void enchantment_core$multiplyBlockExperience(ServerLevel level, BlockPos pos, ItemStack tool, IntProvider amountProvider, CallbackInfo ci) {
-        if (tool == null || tool.isEmpty() || !level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) return;
+        if (tool == null || tool.isEmpty() || !level.getGameRules().get(GameRules.BLOCK_DROPS)) return;
 
         ItemEnchantments enchantments = tool.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         if (enchantments.isEmpty()) return;

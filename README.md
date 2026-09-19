@@ -4,7 +4,7 @@ Enchantment Core is a data-driven enchantment library for Minecraft mod developm
 
 The framework replaces hard-coded enchantment behaviors with a declarative, JSON-driven architecture. Components are governed by [DataFixerUpper](https://github.com/Mojang/DataFixerUpper) (DFU) compliant transformers that intercept and convert static primitive values into dynamic, configurable properties at runtime.
 
-## Quickstart Guide 1.21.9 - 1.21.10
+## Quickstart Guide 1.21.11
 
 ### Installation
 

@@ -9,10 +9,10 @@ import johnsmith.enchantmentcore.api.entity.accessor.ProjectileStateAccessor;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -134,7 +134,7 @@ public abstract class EntityRenderDispatcherMixin {
         }
 
         // Submits directly to the asynchronous pipeline utilizing the CustomGeometryRenderer lambda hook.
-        nodeCollector.submitCustomGeometry(poseStack, RenderType.lines(), (pose, builder) -> {
+        nodeCollector.submitCustomGeometry(poseStack, RenderTypes.lines(), (pose, builder) -> {
             for (int i = 0; i < 4; i++) {
                 int next = (i + 1) % 4;
 

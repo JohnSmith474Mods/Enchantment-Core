@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
+import net.minecraft.advancements.criterion.ContextAwarePredicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
@@ -32,7 +32,7 @@ public record AbsoluteStasisEffect(
         victim.fallDistance = 0.0F;
 
         // 3. Force the server to synchronize the frozen state to the client
-        victim.hasImpulse = true;
+        victim.needsSync = true;
         victim.hurtMarked = true;
     }
 

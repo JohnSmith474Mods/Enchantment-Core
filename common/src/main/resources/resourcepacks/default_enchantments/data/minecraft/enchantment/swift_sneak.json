@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.swift_sneak"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "swift_sneak",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/leg_armor"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "swift_sneak",
+      "property": "weight"
+    },
+    "fallback": 1
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "swift_sneak",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "legs"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "swift_sneak",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/leg_armor"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "swift_sneak",
-      "property": "weight"
-    },
-    "fallback": 1
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "swift_sneak",
-      "property": "max_level"
-    },
-    "fallback": 3
-  },
   "effects": {
     "minecraft:attributes": [
       {
         "id": "minecraft:enchantment.swift_sneak",
         "attribute": "minecraft:sneaking_speed",
         "amount": {
-          "per_level_config": {
-            "mod_id": "enchantment_core",
-            "category": "enchantment",
-            "group": "swift_sneak",
-            "property": "amount_per_level"
-          },
-          "per_level_default": 0.15,
           "base_config": {
             "mod_id": "enchantment_core",
             "category": "enchantment",
@@ -109,6 +102,13 @@
             "property": "amount_base"
           },
           "base_default": 0.15,
+          "per_level_config": {
+            "mod_id": "enchantment_core",
+            "category": "enchantment",
+            "group": "swift_sneak",
+            "property": "amount_per_level"
+          },
+          "per_level_default": 0.15,
           "type": "enchantment_core:configurable_linear"
         },
         "operation": "add_value"

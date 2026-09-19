@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.infinity"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "infinity",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/bow"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "infinity",
+      "property": "weight"
+    },
+    "fallback": 1
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "infinity",
+      "property": "max_level"
+    },
+    "fallback": 1
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -61,33 +88,6 @@
     "fallback": [
       "mainhand"
     ]
-  },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "infinity",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/bow"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "infinity",
-      "property": "weight"
-    },
-    "fallback": 1
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "infinity",
-      "property": "max_level"
-    },
-    "fallback": 1
   },
   "exclusive_set": "#minecraft:exclusive_set/bow",
   "effects": {

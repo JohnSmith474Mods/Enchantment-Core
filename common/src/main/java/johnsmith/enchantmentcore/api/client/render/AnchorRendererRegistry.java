@@ -3,7 +3,7 @@ package johnsmith.enchantmentcore.api.client.render;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -14,27 +14,27 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class AnchorRendererRegistry {
 
-    private static final Map<ResourceLocation, AnchorModelRenderer> RENDERERS = new HashMap<>();
+    private static final Map<Identifier, AnchorModelRenderer> RENDERERS = new HashMap<>();
 
     private AnchorRendererRegistry() {}
 
     /**
      * Registers a custom model renderer under the specified identifier.
      *
-     * @param modelId  The unique {@link ResourceLocation} matching the anchor's model data configuration.
+     * @param modelId  The unique {@link Identifier} matching the anchor's model data configuration.
      * @param renderer The {@link AnchorModelRenderer} delegate responsible for rendering the model.
      */
-    public static void register(ResourceLocation modelId, AnchorModelRenderer renderer) {
+    public static void register(Identifier modelId, AnchorModelRenderer renderer) {
         RENDERERS.put(modelId, renderer);
     }
 
     /**
      * Retrieves the registered model renderer associated with the given identifier.
      *
-     * @param modelId The unique {@link ResourceLocation} identifier.
+     * @param modelId The unique {@link Identifier} identifier.
      * @return The bound {@link AnchorModelRenderer}, or {@code null} if no renderer matches the identifier.
      */
-    public static @Nullable AnchorModelRenderer get(ResourceLocation modelId) {
+    public static @Nullable AnchorModelRenderer get(Identifier modelId) {
         return RENDERERS.get(modelId);
     }
 }

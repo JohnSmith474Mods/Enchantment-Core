@@ -9,9 +9,9 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.DirectionalSpellFieldEffect;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.math.FieldAxis;
-
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
+
+import net.minecraft.advancements.criterion.ContextAwarePredicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
@@ -55,7 +55,7 @@ public record ImpulseEffect(
 
         victim.setDeltaMovement(victim.getDeltaMovement().add(impulse.x, impulse.y + frictionBump, impulse.z));
         victim.hurtMarked = true;
-        victim.hasImpulse = true;
+        victim.needsSync = true;
     }
 
     @Override

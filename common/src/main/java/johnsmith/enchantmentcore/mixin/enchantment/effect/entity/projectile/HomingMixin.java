@@ -91,7 +91,7 @@ public abstract class HomingMixin {
                     Vec3 newDir = currentDir.scale(Math.cos(actualTurn)).add(up.scale(Math.sin(actualTurn))).normalize();
 
                     entity.setDeltaMovement(newDir.scale(speed));
-                    entity.hasImpulse = true; // Flags the engine to smooth the visual client interpolation.
+                    entity.needsSync = true; // Flags the engine to smooth the visual client interpolation.
                 }
             }
         }

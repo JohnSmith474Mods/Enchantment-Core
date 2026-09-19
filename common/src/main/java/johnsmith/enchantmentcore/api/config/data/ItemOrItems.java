@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
@@ -73,7 +73,7 @@ public class ItemOrItems {
         if (this.isTag()) {
             return "#" + this.tag.location();
         } else {
-            ResourceLocation key = BuiltInRegistries.ITEM.getKey(this.item);
+            Identifier key = BuiltInRegistries.ITEM.getKey(this.item);
             return key != null ? key.toString() : "minecraft:air";
         }
     }
@@ -97,9 +97,9 @@ public class ItemOrItems {
     public static final Codec<ItemOrItems> CODEC = Codec.STRING.xmap(
             str -> {
                 if (str.startsWith("#")) {
-                    return new ItemOrItems(TagKey.create(Registries.ITEM, ResourceLocation.parse(str.substring(1))));
+                    return new ItemOrItems(TagKey.create(Registries.ITEM, Identifier.parse(str.substring(1))));
                 } else {
-                    return new ItemOrItems(BuiltInRegistries.ITEM.get(ResourceLocation.parse(str)).get().value());
+                    return new ItemOrItems(BuiltInRegistries.ITEM.get(Identifier.parse(str)).get().value());
                 }
             },
             ItemOrItems::asString

@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.silk_touch"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "silk_touch",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/mining_loot"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "silk_touch",
+      "property": "weight"
+    },
+    "fallback": 1
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "silk_touch",
+      "property": "max_level"
+    },
+    "fallback": 1
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -61,33 +88,6 @@
     "fallback": [
       "mainhand"
     ]
-  },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "silk_touch",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/mining_loot"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "silk_touch",
-      "property": "weight"
-    },
-    "fallback": 1
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "silk_touch",
-      "property": "max_level"
-    },
-    "fallback": 1
   },
   "exclusive_set": "#minecraft:exclusive_set/mining",
   "effects": {

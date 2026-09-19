@@ -7,14 +7,14 @@ import johnsmith.enchantmentcore.api.client.render.AnchorModelRenderer;
 import johnsmith.enchantmentcore.api.client.render.AnchorRendererRegistry;
 import johnsmith.enchantmentcore.enchantment.spellfield.entity.SpellFieldAnchorEntity;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 
 import org.joml.Matrix4f;
@@ -46,7 +46,7 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
     @Override
     public void submit(SpellFieldAnchorRenderState state, PoseStack poseStack, SubmitNodeCollector nodeCollector, CameraRenderState cameraRenderState) {
         if (state.modelIdStr != null && !state.modelIdStr.isEmpty()) {
-            AnchorModelRenderer delegate = AnchorRendererRegistry.get(ResourceLocation.parse(state.modelIdStr));
+            AnchorModelRenderer delegate = AnchorRendererRegistry.get(Identifier.parse(state.modelIdStr));
             if (delegate != null) {
                 // Assuming delegate logic needs adaptation to SubmitNodeCollector API if available,
                 // else it relies on custom submission.
@@ -61,7 +61,7 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
             return;
         }
 
-        ResourceLocation texture = ResourceLocation.parse(state.textureStr);
+        Identifier texture = Identifier.parse(state.textureStr);
         float scale = state.visualScale;
 
         if (scale <= 0.01F) scale = 1.0F;
@@ -84,7 +84,7 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
         float v0 = (float) currentFrame / frames;
         float v1 = (float) (currentFrame + 1) / frames;
 
-        nodeCollector.submitCustomGeometry(poseStack, RenderType.itemEntityTranslucentCull(texture), (pose, consumer) -> {
+        nodeCollector.submitCustomGeometry(poseStack, RenderTypes.itemEntityTranslucentCull(texture), (pose, consumer) -> {
             Matrix4f matrix4f = pose.pose();
             int light = 15728880; // Full bright
 

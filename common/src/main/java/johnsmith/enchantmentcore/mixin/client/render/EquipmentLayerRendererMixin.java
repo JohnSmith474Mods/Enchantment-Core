@@ -6,10 +6,11 @@ import com.llamalad7.mixinextras.sugar.Local;
 
 import johnsmith.enchantmentcore.client.render.TransparencyRenderHelper;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,7 +29,7 @@ public abstract class EquipmentLayerRendererMixin {
 
     // Define the type-erased target descriptor constant for clarity and reuse.
     @Unique
-    private static final String TARGET_METHOD = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/ResourceLocation;II)V";
+    private static final String TARGET_METHOD = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V";
 
     /**
      * Intercepts the SubmitNodeCollector parameter before it is processed by the renderer.
@@ -75,11 +76,11 @@ public abstract class EquipmentLayerRendererMixin {
      */
     @WrapOperation(
             method = TARGET_METHOD,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;armorCutoutNoCull(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;armorCutoutNoCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;")
     )
-    private RenderType enchantment_core$switchToTranslucent(ResourceLocation location, Operation<RenderType> original) {
+    private RenderType enchantment_core$switchToTranslucent(Identifier location, Operation<RenderType> original) {
         if (TransparencyRenderHelper.isAlphaActive()) {
-            return RenderType.itemEntityTranslucentCull(location);
+            return RenderTypes.itemEntityTranslucentCull(location);
         }
         return original.call(location);
     }

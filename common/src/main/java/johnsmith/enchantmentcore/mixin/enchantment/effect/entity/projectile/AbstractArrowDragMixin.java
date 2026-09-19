@@ -1,7 +1,7 @@
 package johnsmith.enchantmentcore.mixin.enchantment.effect.entity.projectile;
 
 import johnsmith.enchantmentcore.api.entity.accessor.ProjectileStateAccessor;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;

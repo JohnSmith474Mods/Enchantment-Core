@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.efficiency"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "efficiency",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/mining"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "efficiency",
+      "property": "weight"
+    },
+    "fallback": 10
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "efficiency",
+      "property": "max_level"
+    },
+    "fallback": 5
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -61,33 +88,6 @@
     "fallback": [
       "mainhand"
     ]
-  },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "efficiency",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/mining"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "efficiency",
-      "property": "weight"
-    },
-    "fallback": 10
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "efficiency",
-      "property": "max_level"
-    },
-    "fallback": 5
   },
   "effects": {
     "minecraft:attributes": [

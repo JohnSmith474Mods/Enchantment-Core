@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 public final class Orphanage implements OrphanHandler {
     private static final Set<ConfigDescription> UNNOTIFIED_ORPHANS = ConcurrentHashMap.newKeySet();
@@ -33,7 +34,7 @@ public final class Orphanage implements OrphanHandler {
     }
 
     public static void notifyPlayerIfPrivileged(ServerPlayer player) {
-        if (UNNOTIFIED_ORPHANS.isEmpty() || !player.hasPermissions(2)) {
+        if (UNNOTIFIED_ORPHANS.isEmpty() || !player.permissions().hasPermission(Permissions.COMMANDS_ADMIN)) {
             return;
         }
 

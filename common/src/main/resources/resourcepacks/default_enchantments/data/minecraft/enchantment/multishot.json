@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.multishot"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "multishot",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/crossbow"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "multishot",
+      "property": "weight"
+    },
+    "fallback": 2
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "multishot",
+      "property": "max_level"
+    },
+    "fallback": 1
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "mainhand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "multishot",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/crossbow"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "multishot",
-      "property": "weight"
-    },
-    "fallback": 2
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "multishot",
-      "property": "max_level"
-    },
-    "fallback": 1
-  },
   "exclusive_set": "#minecraft:exclusive_set/crossbow",
   "effects": {
     "minecraft:projectile_count": [
       {
         "effect": {
           "value": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "multishot",
-              "property": "value_per_level"
-            },
-            "per_level_default": 2.0,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -109,6 +102,13 @@
               "property": "value_base"
             },
             "base_default": 2.0,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "multishot",
+              "property": "value_per_level"
+            },
+            "per_level_default": 2.0,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:add"
@@ -119,13 +119,6 @@
       {
         "effect": {
           "value": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "multishot",
-              "property": "value_2_per_level"
-            },
-            "per_level_default": 10.0,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -133,6 +126,13 @@
               "property": "value_2_base"
             },
             "base_default": 10.0,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "multishot",
+              "property": "value_2_per_level"
+            },
+            "per_level_default": 10.0,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:add"

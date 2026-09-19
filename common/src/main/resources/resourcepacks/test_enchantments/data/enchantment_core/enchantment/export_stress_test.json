@@ -15,8 +15,8 @@
     "mainhand",
     "offhand"
   ],
-  "supported_items": "#minecraft:enchantable/weapon",
-  "primary_items": "#minecraft:enchantable/sword",
+  "supported_items": "#minecraft:enchantable/melee_weapon",
+  "primary_items": "#minecraft:enchantable/sweeping",
   "weight": 2,
   "max_level": 3,
   "effects": {

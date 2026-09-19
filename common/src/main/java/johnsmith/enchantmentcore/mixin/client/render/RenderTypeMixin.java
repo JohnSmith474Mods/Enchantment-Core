@@ -2,8 +2,9 @@ package johnsmith.enchantmentcore.mixin.client.render;
 
 import johnsmith.enchantmentcore.client.render.TransparencyRenderHelper;
 
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Intercepts static factory methods in the RenderType class.
  * Substitutes opaque and cutout render pipelines with translucent equivalents if an alpha multiplier is active.
  */
-@Mixin(RenderType.class)
+@Mixin(RenderTypes.class)
 public class RenderTypeMixin {
 
     /**
@@ -24,10 +25,10 @@ public class RenderTypeMixin {
      * @param location The resource location of the texture.
      * @param cir      The callback information returnable.
      */
-    @Inject(method = "entitySolid(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;", at = @At("HEAD"), cancellable = true)
-    private static void enchantment_core$upgradeEntitySolid(ResourceLocation location, CallbackInfoReturnable<RenderType> cir) {
+    @Inject(method = "entitySolid(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", at = @At("HEAD"), cancellable = true)
+    private static void enchantment_core$upgradeEntitySolid(Identifier location, CallbackInfoReturnable<RenderType> cir) {
         if (TransparencyRenderHelper.isAlphaActive()) {
-            cir.setReturnValue(RenderType.itemEntityTranslucentCull(location));
+            cir.setReturnValue(RenderTypes.itemEntityTranslucentCull(location));
         }
     }
 
@@ -38,10 +39,10 @@ public class RenderTypeMixin {
      * @param location The resource location of the texture.
      * @param cir      The callback information returnable.
      */
-    @Inject(method = "entityCutout(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;", at = @At("HEAD"), cancellable = true)
-    private static void enchantment_core$upgradeEntityCutout(ResourceLocation location, CallbackInfoReturnable<RenderType> cir) {
+    @Inject(method = "entityCutout(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", at = @At("HEAD"), cancellable = true)
+    private static void enchantment_core$upgradeEntityCutout(Identifier location, CallbackInfoReturnable<RenderType> cir) {
         if (TransparencyRenderHelper.isAlphaActive()) {
-            cir.setReturnValue(RenderType.itemEntityTranslucentCull(location));
+            cir.setReturnValue(RenderTypes.itemEntityTranslucentCull(location));
         }
     }
 
@@ -53,11 +54,11 @@ public class RenderTypeMixin {
      * @param location The resource location of the texture.
      * @param cir      The callback information returnable.
      */
-    @Inject(method = "entityCutoutNoCull(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;", at = @At("HEAD"), cancellable = true)
-    private static void enchantment_core$upgradeEntityCutoutNoCull(ResourceLocation location, CallbackInfoReturnable<RenderType> cir) {
+    @Inject(method = "entityCutoutNoCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", at = @At("HEAD"), cancellable = true)
+    private static void enchantment_core$upgradeEntityCutoutNoCull(Identifier location, CallbackInfoReturnable<RenderType> cir) {
         if (TransparencyRenderHelper.isAlphaActive()) {
             // Reverts to standard translucent to preserve the No-Cull geometry contract
-            cir.setReturnValue(RenderType.entityTranslucent(location));
+            cir.setReturnValue(RenderTypes.entityTranslucent(location));
         }
     }
 }

@@ -2,6 +2,33 @@
   "description": {
     "translate": "enchantment.minecraft.piercing"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "piercing",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/crossbow"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "piercing",
+      "property": "weight"
+    },
+    "fallback": 10
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "piercing",
+      "property": "max_level"
+    },
+    "fallback": 4
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,46 +89,12 @@
       "mainhand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "piercing",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/crossbow"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "piercing",
-      "property": "weight"
-    },
-    "fallback": 10
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "piercing",
-      "property": "max_level"
-    },
-    "fallback": 4
-  },
   "exclusive_set": "#minecraft:exclusive_set/crossbow",
   "effects": {
     "minecraft:projectile_piercing": [
       {
         "effect": {
           "value": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "piercing",
-              "property": "value_per_level"
-            },
-            "per_level_default": 1.0,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -109,6 +102,13 @@
               "property": "value_base"
             },
             "base_default": 1.0,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "piercing",
+              "property": "value_per_level"
+            },
+            "per_level_default": 1.0,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:add"

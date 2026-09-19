@@ -24,7 +24,7 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class Fabric implements ModInitializer {
     @Override
@@ -85,7 +85,7 @@ public class Fabric implements ModInitializer {
 
         FabricLoader.getInstance().getModContainer(Constants.MOD_ID).ifPresent(container -> {
             ResourceManagerHelper.registerBuiltinResourcePack(
-                    ResourceLocation.fromNamespaceAndPath(namespace, directory),
+                    Identifier.fromNamespaceAndPath(namespace, directory),
                     container,
                     Component.literal(name),
                     activationType

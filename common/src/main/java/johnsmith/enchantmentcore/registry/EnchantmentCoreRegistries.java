@@ -20,7 +20,7 @@ import johnsmith.enchantmentcore.platform.Services;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Manages custom dynamic registries required for the modular spell field system.
@@ -31,13 +31,13 @@ public class EnchantmentCoreRegistries {
 
     // region Keys
     public static final ResourceKey<Registry<MapCodec<? extends DistanceScalingFunction>>> DISTANCE_SCALING_FUNCTION_KEY =
-            ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "distance_scaling_function"));
+            ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "distance_scaling_function"));
 
     public static final ResourceKey<Registry<MapCodec<? extends SpellFieldShape>>> SPELL_FIELD_SHAPE_KEY =
-            ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "spell_field_shape"));
+            ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "spell_field_shape"));
 
     public static final ResourceKey<Registry<MapCodec<? extends SpellFieldEffect>>> SPELL_FIELD_EFFECT_KEY =
-            ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "spell_field_effect"));// endregion
+            ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "spell_field_effect"));// endregion
 
     // region Suppliers
     public static final Supplier<Registry<MapCodec<? extends DistanceScalingFunction>>> DISTANCE_SCALING_FUNCTIONS =

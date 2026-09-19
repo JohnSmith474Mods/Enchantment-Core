@@ -2,6 +2,42 @@
   "description": {
     "translate": "enchantment.minecraft.thorns"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/armor"
+  },
+  "primary_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "primary_items"
+    },
+    "fallback": "#minecraft:enchantable/chest_armor"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "weight"
+    },
+    "fallback": 1
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "thorns",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -61,42 +97,6 @@
     "fallback": [
       "any"
     ]
-  },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "thorns",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/armor"
-  },
-  "primary_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "thorns",
-      "property": "primary_items"
-    },
-    "fallback": "#minecraft:enchantable/chest_armor"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "thorns",
-      "property": "weight"
-    },
-    "fallback": 1
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "thorns",
-      "property": "max_level"
-    },
-    "fallback": 3
   },
   "effects": {
     "minecraft:post_attack": [

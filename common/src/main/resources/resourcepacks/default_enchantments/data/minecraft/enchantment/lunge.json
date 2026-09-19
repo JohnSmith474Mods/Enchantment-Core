@@ -1,0 +1,197 @@
+{
+  "description": {
+    "translate": "enchantment.minecraft.lunge"
+  },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "lunge",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/lunge"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "lunge",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "lunge",
+      "property": "max_level"
+    },
+    "fallback": 3
+  },
+  "min_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "lunge",
+        "property": "min_cost_base"
+      },
+      "fallback": 5
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "lunge",
+        "property": "min_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "max_cost": {
+    "base": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "lunge",
+        "property": "max_cost_base"
+      },
+      "fallback": 25
+    },
+    "per_level_above_first": {
+      "config": {
+        "mod_id": "enchantment_core",
+        "category": "enchantment",
+        "group": "lunge",
+        "property": "max_cost_per_level"
+      },
+      "fallback": 8
+    }
+  },
+  "anvil_cost": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "lunge",
+      "property": "anvil_cost"
+    },
+    "fallback": 2
+  },
+  "slots": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "lunge",
+      "property": "slots"
+    },
+    "fallback": [
+      "hand"
+    ]
+  },
+  "effects": {
+    "minecraft:post_piercing_attack": [
+      {
+        "effect": {
+          "effects": [
+            {
+              "amount": {
+                "config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "lunge",
+                  "property": "amount"
+                },
+                "default_value": 1.0,
+                "type": "enchantment_core:configurable_constant"
+              },
+              "type": "minecraft:change_item_damage"
+            },
+            {
+              "amount": {
+                "base_config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "lunge",
+                  "property": "amount_2_base"
+                },
+                "base_default": 4.0,
+                "per_level_config": {
+                  "mod_id": "enchantment_core",
+                  "category": "enchantment",
+                  "group": "lunge",
+                  "property": "amount_2_per_level"
+                },
+                "per_level_default": 4.0,
+                "type": "enchantment_core:configurable_linear"
+              },
+              "type": "minecraft:apply_exhaustion"
+            },
+            {
+              "direction": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "coordinate_scale": [
+                1.0,
+                0.0,
+                1.0
+              ],
+              "magnitude": {
+                "base": 0.458,
+                "per_level_above_first": 0.458,
+                "type": "minecraft:linear"
+              },
+              "type": "minecraft:apply_impulse"
+            },
+            {
+              "sound": [
+                "minecraft:item.spear.lunge_1",
+                "minecraft:item.spear.lunge_2",
+                "minecraft:item.spear.lunge_3"
+              ],
+              "volume": 1.0,
+              "pitch": 1.0,
+              "type": "minecraft:play_sound"
+            }
+          ],
+          "type": "minecraft:all_of"
+        },
+        "requirements": {
+          "terms": [
+            {
+              "term": {
+                "predicate": {
+                  "vehicle": {}
+                },
+                "entity": "this",
+                "condition": "minecraft:entity_properties"
+              },
+              "condition": "minecraft:inverted"
+            },
+            {
+              "predicate": {
+                "flags": {
+                  "is_fall_flying": false
+                }
+              },
+              "entity": "this",
+              "condition": "minecraft:entity_properties"
+            },
+            {
+              "predicate": {
+                "flags": {
+                  "is_in_water": false
+                }
+              },
+              "entity": "this",
+              "condition": "minecraft:entity_properties"
+            }
+          ],
+          "condition": "minecraft:all_of"
+        }
+      }
+    ]
+  }
+}

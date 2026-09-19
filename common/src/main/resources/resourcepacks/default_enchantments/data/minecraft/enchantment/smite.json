@@ -2,6 +2,42 @@
   "description": {
     "translate": "enchantment.minecraft.smite"
   },
+  "supported_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "smite",
+      "property": "supported_items"
+    },
+    "fallback": "#minecraft:enchantable/weapon"
+  },
+  "primary_items": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "smite",
+      "property": "primary_items"
+    },
+    "fallback": "#minecraft:enchantable/melee_weapon"
+  },
+  "weight": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "smite",
+      "property": "weight"
+    },
+    "fallback": 5
+  },
+  "max_level": {
+    "config": {
+      "mod_id": "enchantment_core",
+      "category": "enchantment",
+      "group": "smite",
+      "property": "max_level"
+    },
+    "fallback": 5
+  },
   "min_cost": {
     "base": {
       "config": {
@@ -62,55 +98,12 @@
       "mainhand"
     ]
   },
-  "supported_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "smite",
-      "property": "supported_items"
-    },
-    "fallback": "#minecraft:enchantable/weapon"
-  },
-  "primary_items": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "smite",
-      "property": "primary_items"
-    },
-    "fallback": "#minecraft:enchantable/sword"
-  },
-  "weight": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "smite",
-      "property": "weight"
-    },
-    "fallback": 5
-  },
-  "max_level": {
-    "config": {
-      "mod_id": "enchantment_core",
-      "category": "enchantment",
-      "group": "smite",
-      "property": "max_level"
-    },
-    "fallback": 5
-  },
   "exclusive_set": "#minecraft:exclusive_set/damage",
   "effects": {
     "minecraft:damage": [
       {
         "effect": {
           "value": {
-            "per_level_config": {
-              "mod_id": "enchantment_core",
-              "category": "enchantment",
-              "group": "smite",
-              "property": "value_per_level"
-            },
-            "per_level_default": 2.5,
             "base_config": {
               "mod_id": "enchantment_core",
               "category": "enchantment",
@@ -118,6 +111,13 @@
               "property": "value_base"
             },
             "base_default": 2.5,
+            "per_level_config": {
+              "mod_id": "enchantment_core",
+              "category": "enchantment",
+              "group": "smite",
+              "property": "value_per_level"
+            },
+            "per_level_default": 2.5,
             "type": "enchantment_core:configurable_linear"
           },
           "type": "minecraft:add"

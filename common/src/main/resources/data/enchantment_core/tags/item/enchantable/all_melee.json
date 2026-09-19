@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:enchantable/sword",
+    "#minecraft:enchantable/melee_weapon",
     "#minecraft:enchantable/axe",
     "#minecraft:enchantable/mace",
     "minecraft:trident"
