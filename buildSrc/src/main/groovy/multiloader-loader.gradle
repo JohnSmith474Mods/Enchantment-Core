@@ -1,5 +1,11 @@
 plugins {
     id 'multiloader-common'
+    id 'me.modmuss50.mod-publish-plugin'
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
 configurations {
@@ -41,4 +47,69 @@ tasks.named('sourcesJar', Jar) {
     from(configurations.commonJava)
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
+}
+
+publishMods {
+    changelog = rootProject.file("CHANGELOG.md").text
+    type = STABLE
+    dryRun = gradle.startParameter.taskNames.contains("dryRunPublish")
+
+    modLoaders.add(project.name)
+
+    modrinth {
+        accessToken = System.getenv("MODRINTH_TOKEN") ?: "mock_token"
+        projectId = System.getenv("MODRINTH_PROJECT_ID") ?: "mock_id"
+        environment = CLIENT_AND_SERVER
+
+        // Modrinth-specific naming
+        displayName = "${rootProject.mod_name} ${rootProject.version}"
+        version = "${rootProject.version}+${rootProject.minecraft_version}-${project.name}"
+
+        minecraftVersionRange {
+            start = rootProject.minecraft_version
+            end = rootProject.minecraft_version_max
+        }
+
+        requires {
+            id = rootProject.config_overhauled_project_id
+            version = "${rootProject.config_overhauled_version_min}+${rootProject.minecraft_version}-${project.name}"
+        }
+
+        additionalFile(javadocJar) {
+            type = JAVADOC_JAR
+        }
+        additionalFile(sourcesJar) {
+            type = SOURCES_JAR
+        }
+    }
+
+    curseforge {
+        accessToken = System.getenv("CURSEFORGE_TOKEN") ?: "mock_token"
+        projectId = System.getenv("CURSEFORGE_PROJECT_ID") ?: "mock_id"
+
+        // CurseForge-specific naming
+        displayName = "${rootProject.version}+${rootProject.minecraft_version}-${project.name}"
+        version = "${rootProject.mod_name} ${rootProject.version}"
+
+        minecraftVersionRange {
+            start = rootProject.minecraft_version
+            end = rootProject.minecraft_version_max
+        }
+
+        javaVersions.add(JavaVersion.toVersion(rootProject.java_version))
+
+        client = true
+        server = true
+
+        requires("config-overhauled")
+
+        changelog = rootProject.file("CHANGELOG.md").text
+        changelogType = "markdown"
+    }
+}
+
+tasks.register("dryRunPublish") {
+    group = "publishing"
+    description = "Validates the deployment payload using mock credentials."
+    dependsOn tasks.named("publishMods")
 }
