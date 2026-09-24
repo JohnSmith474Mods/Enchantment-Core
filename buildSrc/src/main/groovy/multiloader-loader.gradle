@@ -67,12 +67,12 @@ publishMods {
 
         minecraftVersionRange {
             start = rootProject.minecraft_version
-            end = rootProject.minecraft_version_max
+            end = rootProject.minecraft_version_supremum
         }
 
         requires {
             id = rootProject.config_overhauled_project_id
-            version = "${rootProject.config_overhauled_version_min}+${rootProject.minecraft_version}-${project.name}"
+            version = "${rootProject.config_overhauled_version}+${rootProject.minecraft_version}-${project.name}"
         }
 
         additionalFile(javadocJar) {
@@ -93,7 +93,7 @@ publishMods {
 
         minecraftVersionRange {
             start = rootProject.minecraft_version
-            end = rootProject.minecraft_version_max
+            end = rootProject.minecraft_version_supremum
         }
 
         javaVersions.add(JavaVersion.toVersion(rootProject.java_version))
@@ -101,7 +101,7 @@ publishMods {
         client = true
         server = true
 
-        requires("config-overhauled")
+        requires(rootProject.config_overhauled_project_name)
 
         changelog = rootProject.file("CHANGELOG.md").text
         changelogType = "markdown"
