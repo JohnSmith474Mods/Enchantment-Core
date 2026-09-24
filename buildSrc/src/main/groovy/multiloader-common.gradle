@@ -87,6 +87,7 @@ processResources {
             'version'                      : version,
             'group'                        : project.group, //Else we target the task's group.
             'minecraft_version'            : minecraft_version,
+            'minecraft_version_max'        : minecraft_version_max,
             'minecraft_version_range'      : minecraft_version_range,
             'fabric_version'               : fabric_version,
             'fabric_loader_version'        : fabric_loader_version,
@@ -101,6 +102,7 @@ processResources {
             "forge_loader_version_range": forge_loader_version_range,
             "config_overhauled_version_min": project.config_overhauled_version_min,
             "config_overhauled_version_max": project.config_overhauled_version_max,
+            "config_overhauled_project_id" : project.config_overhauled_project_id,
             'credits'                      : credits,
             'java_version'                 : java_version
     ]
