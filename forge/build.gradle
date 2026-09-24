@@ -82,7 +82,6 @@ dependencies {
 }
 
 
-
 sourceSets.each {
     def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
     it.output.resourcesDir = dir
