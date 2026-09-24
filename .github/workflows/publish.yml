@@ -25,16 +25,20 @@ jobs:
 
       - name: Validate Release (Dry Run)
         if: ${{ inputs.dry_run }}
-        run: ./gradlew publishMods --dry-run
+        run: ./gradlew dryRunPublish --parallel
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
           MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
           CURSEFORGE_PROJECT_ID: ${{ secrets.CURSEFORGE_PROJECT_ID }}
 
-      - name: Execute Upload
+      - name: Compile and Assemble (Parallel)
         if: ${{ !inputs.dry_run }}
-        run: ./gradlew build publishMods
+        run: ./gradlew build --parallel
+
+      - name: Execute Upload (Sequential)
+        if: ${{ !inputs.dry_run }}
+        run: ./gradlew publishMods --no-parallel
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
