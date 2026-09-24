@@ -35,7 +35,7 @@
         "fabric-api": "*",
         "minecraft": "${minecraft_version}",
         "java": ">=${java_version}",
-        "config_overhauled": ">=${config_overhauled_version_min} <${config_overhauled_version_max}"
+        "config_overhauled": ">=${config_overhauled_version} <${config_overhauled_version_upper_limit}"
     },
     "custom": {
       "modmenu": {

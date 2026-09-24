@@ -22,12 +22,12 @@ side = "BOTH" # Side this dependency is applied on - 'BOTH', 'CLIENT' or 'SERVER
 [[dependencies.${mod_id}]]
 modId = "minecraft"
 mandatory = true
-versionRange = "${minecraft_version_range}"
+versionRange = "[${minecraft_version},${minecraft_version_upper_limit})"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "config_overhauled"
 mandatory = true
-versionRange = "[${config_overhauled_version_min}, ${config_overhauled_version_max})"
+versionRange = "[${config_overhauled_version}, ${config_overhauled_version_upper_limit})"
 ordering = "AFTER"
 side = "BOTH"

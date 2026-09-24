@@ -4,7 +4,7 @@ plugins {
 }
 
 base {
-    archivesName = project.normalized_mod_name
+    archivesName = project.mod_name_normalized
     version = "${project.version}+${project.minecraft_version}-${project.name}"
 }
 
@@ -84,27 +84,28 @@ jar {
 
 processResources {
     var expandProps = [
-            'version'                      : version,
-            'group'                        : project.group, //Else we target the task's group.
-            'minecraft_version'            : minecraft_version,
-            'minecraft_version_max'        : minecraft_version_max,
-            'minecraft_version_range'      : minecraft_version_range,
-            'fabric_version'               : fabric_version,
-            'fabric_loader_version'        : fabric_loader_version,
-            'mod_name'                     : mod_name,
-            'mod_author'                   : mod_author,
-            'mod_id'                       : mod_id,
-            'license'                      : license,
-            'description'                  : project.description,
-            'neoforge_version'             : neoforge_version,
-            'neoforge_loader_version_range': neoforge_loader_version_range,
-            "forge_version": forge_version,
-            "forge_loader_version_range": forge_loader_version_range,
-            "config_overhauled_version_min": project.config_overhauled_version_min,
-            "config_overhauled_version_max": project.config_overhauled_version_max,
-            "config_overhauled_project_id" : project.config_overhauled_project_id,
-            'credits'                      : credits,
-            'java_version'                 : java_version
+            'version'                               : version,
+            'group'                                 : project.group, //Else we target the task's group.
+            'minecraft_version'                     : minecraft_version,
+            'minecraft_version_supremum'            : minecraft_version_supremum,
+            'minecraft_version_upper_limit'         : minecraft_version_upper_limit,
+            'fabric_version'                        : fabric_version,
+            'fabric_loader_version'                 : fabric_loader_version,
+            'mod_name'                              : mod_name,
+            'mod_author'                            : mod_author,
+            'mod_id'                                : mod_id,
+            'license'                               : license,
+            'description'                           : project.description,
+            'neoforge_version'                      : neoforge_version,
+            'neoforge_loader_version_range'         : neoforge_loader_version_range,
+            "forge_version"                         : forge_version,
+            "forge_loader_version_range"            : forge_loader_version_range,
+            "config_overhauled_project_id"          : project.config_overhauled_project_id,
+            "config_overhauled_project_name"        : project.config_overhauled_project_name,
+            "config_overhauled_version"             : project.config_overhauled_version,
+            "config_overhauled_version_upper_limit" : project.config_overhauled_version_upper_limit,
+            'credits'                               : credits,
+            'java_version'                          : java_version
     ]
 
     filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {
