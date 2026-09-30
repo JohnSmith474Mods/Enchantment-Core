@@ -4,6 +4,8 @@ import johnsmith.configoverhauled.api.client.gui.factory.WidgetFactory;
 import johnsmith.configoverhauled.api.client.gui.screen.ConfigScreenFactory;
 import johnsmith.configoverhauled.impl.client.gui.registry.DefaultWidgetRegistry;
 
+import johnsmith.enchantmentcore.api.tooltip.TooltipFormatterRegistry;
+import johnsmith.enchantmentcore.client.tooltip.DebugTooltipFormatter;
 import johnsmith.enchantmentcore.config.Config;
 import johnsmith.enchantmentcore.config.property.EnchantableItemListProperty;
 import johnsmith.enchantmentcore.config.property.SlotListProperty;
@@ -23,5 +25,7 @@ public class CommonClient {
         Config.MANAGER.setScreenFactory(parent ->
                  ConfigScreenFactory.createWithRegistry((Screen) parent, Config.MANAGER, registry)
         );
+
+        TooltipFormatterRegistry.registerFormatter(new DebugTooltipFormatter());
     }
 }
