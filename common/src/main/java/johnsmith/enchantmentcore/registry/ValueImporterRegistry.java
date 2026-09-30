@@ -12,9 +12,9 @@ import java.util.Optional;
 import johnsmith.configoverhauled.api.data.ConfigDescription;
 
 import johnsmith.enchantmentcore.api.config.ConfigReference;
-import johnsmith.enchantmentcore.enchantment.value.configurable.ConfigurableConstantValue;
-import johnsmith.enchantmentcore.enchantment.value.configurable.ConfigurableLevelsSquaredValue;
-import johnsmith.enchantmentcore.enchantment.value.configurable.ConfigurableLinearValue;
+import johnsmith.enchantmentcore.enchantment.value.DiminishingReturnsValue;
+import johnsmith.enchantmentcore.enchantment.value.PolynomialValue;
+import johnsmith.enchantmentcore.enchantment.value.configurable.*;
 
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 
@@ -215,5 +215,28 @@ public class ValueImporterRegistry {
             if (obj.has("chance")) obj.add("chance", importLevelBasedValue(obj.get("chance"), modId, group, property + "_chance"));
             return obj;
         });
+
+        register("enchantment_core:diminishing_returns", bindCodecs(
+                DiminishingReturnsValue.CODEC,
+                ConfigurableDiminishingReturnsValue.CODEC,
+                "enchantment_core:configurable_diminishing_returns",
+                (source, modId, group, prefix) -> new ConfigurableDiminishingReturnsValue(
+                        createRef(modId, group, prefix + "_base"), source.base(),
+                        createRef(modId, group, prefix + "_decrement"), source.decrement(),
+                        createRef(modId, group, prefix + "_minimum"), source.minimum()
+                )
+        ));
+
+        register("enchantment_core:polynomial", bindCodecs(
+                PolynomialValue.CODEC,
+                ConfigurablePolynomialValue.CODEC,
+                "enchantment_core:configurable_polynomial",
+                (source, modId, group, prefix) -> new ConfigurablePolynomialValue(
+                        createRef(modId, group, prefix + "_scale"), source.scale(),
+                        createRef(modId, group, prefix + "_power"), source.power(),
+                        createRef(modId, group, prefix + "_offset"), source.offset(),
+                        createRef(modId, group, prefix + "_level_offset"), source.levelOffset()
+                )
+        ));
     }
 }

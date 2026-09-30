@@ -2,6 +2,7 @@ package johnsmith.enchantmentcore.api.tooltip;
 
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.List;
@@ -16,9 +17,10 @@ public interface EnchantmentTooltipFormatter {
      *
      * @param enchantment The target enchantment holder.
      * @param level       The level of the enchantment.
-     * @return An optional list of formatted text components.
+     * @param itemStack   The item stack hosting the enchantment.
+     * @return An optional list of formatted text components. Return Optional.empty() to fallback to other formatters.
      */
-    Optional<List<Component>> format(Holder<Enchantment> enchantment, int level);
+    Optional<List<Component>> format(Holder<Enchantment> enchantment, int level, ItemStack itemStack);
 
     /**
      * Retrieves the execution priority of this formatter.
