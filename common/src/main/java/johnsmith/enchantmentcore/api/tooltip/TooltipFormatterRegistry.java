@@ -2,6 +2,7 @@ package johnsmith.enchantmentcore.api.tooltip;
 
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class TooltipFormatterRegistry {
      *
      * @param formatter The formatter instance to register.
      */
-    public static void register(EnchantmentTooltipFormatter formatter) {
+    public static void registerFormatter(EnchantmentTooltipFormatter formatter) {
         FORMATTERS.add(formatter);
         isDirty = true;
     }
@@ -30,9 +31,10 @@ public class TooltipFormatterRegistry {
      *
      * @param enchantment The target enchantment holder.
      * @param level       The level of the enchantment.
+     * @param itemStack   The item stack hosting the enchantment.
      * @return A list of formatted text components.
      */
-    public static List<Component> getFormatted(Holder<Enchantment> enchantment, int level) {
+    public static List<Component> getFormatted(Holder<Enchantment> enchantment, int level, ItemStack itemStack) {
         if (isDirty) {
             FORMATTERS.sort(Comparator.comparingInt(EnchantmentTooltipFormatter::getPriority).reversed());
             isDirty = false;
@@ -43,7 +45,7 @@ public class TooltipFormatterRegistry {
                 continue;
             }
 
-            var result = formatter.format(enchantment, level);
+            var result = formatter.format(enchantment, level, itemStack);
             if (result.isPresent()) {
                 return result.get();
             }
