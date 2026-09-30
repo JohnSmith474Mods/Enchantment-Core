@@ -24,7 +24,6 @@ public class Config {
     public static final Category ENCHANTMENT = MANAGER.define("enchantment");
     public static final Category DEBUG = MANAGER.define("debug");
 
-    public static final Group TOOLTIP = CLIENT.define("tooltip");
     public static final Group ACCESSIBILITY = CLIENT.define("accessibility");
 
     public static final Group COMBAT_RULES = GLOBAL.define("combat_rules");
@@ -33,7 +32,9 @@ public class Config {
     public static final Group ENCHANTING = GLOBAL.define("enchanting");
     public static final Group EXPLOSION = GLOBAL.define("explosion");
     public static final Group SPELL_FIELD = GLOBAL.define("spell_field");
+    public static final Group TOOLTIP = GLOBAL.define("tooltip");
 
+    public static final Group DEBUG_TOOLTIP = DEBUG.define("tooltip");
     public static final Group RENDERER = DEBUG.define("renderer");
 
     public static final Property<Integer> ALERT_COLOR = ACCESSIBILITY.define("alert_color")
@@ -46,12 +47,6 @@ public class Config {
             .clientSide()
             .asRGBColor(0x55FFFF)
             .withComment("The color of the log directory link in the orphaned values alert.")
-            .register();
-
-    public static final Property<Boolean> TOOLTIP_FORMATTING = TOOLTIP.define("formatting")
-            .clientSide()
-            .asBoolean(false)
-            .withComment("Whether the tooltip changes should be enabled.")
             .register();
 
     public static final Property<Float> BOUNDED_PROTECTION_NUMERATOR = COMBAT_RULES.define("protection_numerator")
@@ -88,6 +83,12 @@ public class Config {
             )).withComment("Blocks that block-based spell field effects are prohibited from modifying.")
             .register();
 
+    public static final Property<Boolean> TOOLTIP_FORMATTING = TOOLTIP.define("formatting")
+            .globalSide()
+            .asBoolean(true)
+            .withComment("Whether the tooltip changes should be enabled.")
+            .register();
+
     public static final Property<PackInclusionType> CONFIGURABLE_DEFAULT_ENCHANTMENTS = DATA.define("configurable_enchantment_resource_pack_activation_type")
             .globalSide()
             .asEnum(PackInclusionType.OPTIONAL, Codec.STRING.xmap(PackInclusionType::valueOf, Enum::name))
@@ -110,6 +111,12 @@ public class Config {
             .globalSide()
             .asBoolean(false)
             .withComment("Whether explosions occurring inside of blocks, should behave as if they were not inside a block.")
+            .register();
+
+    public static final Property<Boolean> ENABLE_DEBUG_TOOLTIP_FORMATTER = DEBUG_TOOLTIP.define("enable_debug_tooltip_formatter")
+            .clientSide()
+            .asBoolean(false)
+            .withComment("Whether the debug tooltip formatter should be applied or not. Requires client.tooltip.formatting to be true.")
             .register();
 
     public static final Property<Boolean> ENABLE_DEBUG_RENDERER = RENDERER.define("enable_debug_renderer")
