@@ -72,7 +72,7 @@ public class EnchantmentCodecMixin {
         // Reassign the static field to our custom wrapping codec.
         DIRECT_CODEC = new Codec<Enchantment>() {
 
-            /**
+            /**\
              * Intercepts the deserialization (loading from JSON/NBT) pipeline.
              * It extracts custom configuration definitions, leaves behind the "fallback" values for Vanilla to parse,
              * and then applies the live configuration bindings to the resulting Enchantment object.
