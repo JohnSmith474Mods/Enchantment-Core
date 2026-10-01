@@ -54,6 +54,8 @@ publishMods {
     type = STABLE
     dryRun = gradle.startParameter.taskNames.contains("dryRunPublish")
 
+    def targetMcVer = project.name == 'forge' ? rootProject.minecraft_version_forge : rootProject.minecraft_version
+
     modLoaders.add(project.name)
 
     modrinth {
@@ -63,16 +65,16 @@ publishMods {
 
         // Modrinth-specific naming
         displayName = "${rootProject.mod_name} ${rootProject.version}"
-        version = "${rootProject.version}+${rootProject.minecraft_version}-${project.name}"
+        version = "${rootProject.version}+${targetMcVer}-${project.name}"
 
         minecraftVersionRange {
-            start = rootProject.minecraft_version
+            start = targetMcVer
             end = rootProject.minecraft_version_supremum
         }
 
         requires {
             id = rootProject.config_overhauled_project_id
-            version = "${rootProject.config_overhauled_version}+${rootProject.minecraft_version}-${project.name}"
+            version = "${rootProject.config_overhauled_version}+${targetMcVer}-${project.name}"
         }
 
         additionalFile(javadocJar) {
@@ -87,12 +89,11 @@ publishMods {
         accessToken = System.getenv("CURSEFORGE_TOKEN") ?: "mock_token"
         projectId = System.getenv("CURSEFORGE_PROJECT_ID") ?: "mock_id"
 
-        // CurseForge-specific naming
-        displayName = "${rootProject.version}+${rootProject.minecraft_version}-${project.name}"
+        displayName = "${rootProject.version}+${targetMcVer}-${project.name}"
         version = "${rootProject.mod_name} ${rootProject.version}"
 
         minecraftVersionRange {
-            start = rootProject.minecraft_version
+            start = targetMcVer
             end = rootProject.minecraft_version_supremum
         }
 
