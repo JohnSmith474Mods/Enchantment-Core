@@ -18,3 +18,13 @@ allprojects {
         }
     }
 }
+
+gradle.projectsEvaluated {
+    project(':forge').tasks.named('publishMods') {
+        mustRunAfter project(':fabric').tasks.named('publishMods')
+    }
+
+    project(':neoforge').tasks.named('publishMods') {
+        mustRunAfter project(':forge').tasks.named('publishMods')
+    }
+}
