@@ -1,9 +1,12 @@
 package johnsmith.enchantmentcore.mixin.enchantment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -24,6 +27,7 @@ import johnsmith.enchantmentcore.api.config.wrapper.CostPropertyWrapper;
 import johnsmith.enchantmentcore.api.config.wrapper.IntPropertyWrapper;
 import johnsmith.enchantmentcore.api.config.wrapper.ItemSetPropertyWrapper;
 import johnsmith.enchantmentcore.api.config.wrapper.SlotListPropertyWrapper;
+
 import johnsmith.enchantmentcore.config.Config;
 import johnsmith.enchantmentcore.config.property.EnchantableItemListProperty;
 import johnsmith.enchantmentcore.config.property.SlotListProperty;
@@ -44,10 +48,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Mixin targeting the static initialization of the Enchantment class.
  * <p>
  * Purpose: This mixin intercepts and replaces the static {@code DIRECT_CODEC} of the {@link Enchantment} class.
- * The replacement codec acts as a "man-in-the-middle" to enable dynamic, JSON-driven configuration for
- * standard enchantment properties (e.g., max_level, weight, anvil_cost). It intercepts custom JSON configuration
- * blocks before passing the sanitized data to the original Vanilla codec, and reconstructs those configuration
- * blocks when serializing the data back to disk.
+ * The replacement codec acts as a "man-in-the-middle" to enable dynamic, JSON-driven configuration and
+ * perform pre-instantiation tree transformations like auto-wiring LBV pointers.
  */
 @Mixin(Enchantment.class)
 public class EnchantmentCodecMixin {
@@ -80,6 +82,25 @@ public class EnchantmentCodecMixin {
             @Override
             public <T> DataResult<Pair<Enchantment, T>> decode(DynamicOps<T> ops, T input) {
                 Dynamic<T> dynamic = new Dynamic<>(ops, input);
+
+                // --- 0. AUTO-WIRING PHASE ---
+                // Recursively scan the effects map for Pointer LBVs and inject them into description_args
+                Map<String, Dynamic<T>> autoWiredPointers = new HashMap<>();
+                dynamic.get("effects").result().ifPresent(effectsDynamic -> {
+                    extractPointers(effectsDynamic, autoWiredPointers);
+                });
+
+                if (!autoWiredPointers.isEmpty()) {
+                    Dynamic<T> effectsDynamic = dynamic.get("effects").orElseEmptyMap();
+                    Dynamic<T> descArgsDynamic = effectsDynamic.get("enchantment_core:description_args").orElseEmptyMap();
+
+                    for (Map.Entry<String, Dynamic<T>> entry : autoWiredPointers.entrySet()) {
+                        descArgsDynamic = descArgsDynamic.set(entry.getKey(), entry.getValue());
+                    }
+
+                    effectsDynamic = effectsDynamic.set("enchantment_core:description_args", descArgsDynamic);
+                    dynamic = dynamic.set("effects", effectsDynamic);
+                }
 
                 // --- 1. EXTRACTION PHASE ---
                 // Parse and strip custom configuration blocks from the JSON tree for primitive integers.
@@ -171,6 +192,44 @@ public class EnchantmentCodecMixin {
                     return DataResult.success(dynamic.getValue());
                 });
             }
+
+            // region Auto-Wiring Tree Traversal
+
+            /**
+             * Recursively scans the DFU Dynamic tree looking for Pointer values.
+             * Safely extracts the 'id' and 'value' components and binds them to the passed map.
+             */
+            private <T> void extractPointers(Dynamic<T> current, Map<String, Dynamic<T>> pointers) {
+                // If the current node is a Map/Object
+                Optional<Map<Dynamic<T>, Dynamic<T>>> mapOpt = current.getMapValues().result();
+                if (mapOpt.isPresent()) {
+                    Map<Dynamic<T>, Dynamic<T>> map = mapOpt.get();
+
+                    Optional<String> typeOpt = current.get("type").asString().result();
+                    if (typeOpt.isPresent() && typeOpt.get().equals("enchantment_core:pointer")) {
+                        Optional<String> idOpt = current.get("id").asString().result();
+                        Optional<Dynamic<T>> valueOpt = current.get("value").result();
+
+                        if (idOpt.isPresent() && valueOpt.isPresent()) {
+                            pointers.put(idOpt.get(), valueOpt.get());
+                        }
+                    }
+
+                    // Recurse into child values
+                    for (Dynamic<T> val : map.values()) {
+                        extractPointers(val, pointers);
+                    }
+                    return;
+                }
+
+                // If the current node is a List/Array
+                Optional<Stream<Dynamic<T>>> listOpt = current.asStreamOpt().result();
+                if (listOpt.isPresent()) {
+                    listOpt.get().forEach(child -> extractPointers(child, pointers));
+                }
+            }
+
+            // endregion
 
             // region Utility Methods: extraction (JSON -> Runtime)
 
@@ -317,7 +376,7 @@ public class EnchantmentCodecMixin {
                 if (single.result().isPresent()) {
                     return List.of(single.result().get());
                 }
-                return List.of(); // Empty fallback
+                return List.of();
             }
 
             // endregion

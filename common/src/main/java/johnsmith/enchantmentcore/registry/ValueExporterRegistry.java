@@ -100,9 +100,10 @@ public class ValueExporterRegistry {
      */
     public static JsonElement exportLevelBasedValue(JsonElement element) {
         if (!element.isJsonObject()) return element;
-        JsonObject obj = element.getAsJsonObject();
 
+        JsonObject obj = element.getAsJsonObject();
         String type = "minecraft:constant";
+
         if (obj.has("type")) {
             type = obj.get("type").getAsString();
         }
@@ -117,10 +118,6 @@ public class ValueExporterRegistry {
             if (obj.has("denominator")) obj.add("denominator", exportLevelBasedValue(obj.get("denominator")));
         } else if (type.equals("minecraft:lookup") || type.equals("lookup")) {
             if (obj.has("fallback")) obj.add("fallback", exportLevelBasedValue(obj.get("fallback")));
-        } else if (type.equals("enchantment_core:negate")) {
-            if (obj.has("value")) obj.add("value", exportLevelBasedValue(obj.get("value")));
-        } else if (type.equals("enchantment_core:probabilistic")) {
-            if (obj.has("chance")) obj.add("chance", exportLevelBasedValue(obj.get("chance")));
         }
 
         return obj;
@@ -168,6 +165,24 @@ public class ValueExporterRegistry {
             if (obj.has("value")) out.add("value", exportLevelBasedValue(obj.get("value")));
             out.addProperty("min", obj.has("min_default") ? obj.get("min_default").getAsFloat() : 0.0f);
             out.addProperty("max", obj.has("max_default") ? obj.get("max_default").getAsFloat() : 0.0f);
+            return out;
+        });
+
+        register("enchantment_core:negate", obj -> {
+            JsonObject out = obj.deepCopy();
+            if (out.has("value")) out.add("value", exportLevelBasedValue(out.get("value")));
+            return out;
+        });
+
+        register("enchantment_core:probabilistic", obj -> {
+            JsonObject out = obj.deepCopy();
+            if (out.has("chance")) out.add("chance", exportLevelBasedValue(out.get("chance")));
+            return out;
+        });
+
+        register("enchantment_core:pointer", obj -> {
+            JsonObject out = obj.deepCopy();
+            if (out.has("value")) out.add("value", exportLevelBasedValue(out.get("value")));
             return out;
         });
     }

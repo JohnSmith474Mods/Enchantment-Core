@@ -3,10 +3,7 @@ package johnsmith.enchantmentcore.registry;
 import com.mojang.serialization.MapCodec;
 
 import johnsmith.enchantmentcore.*;
-import johnsmith.enchantmentcore.enchantment.value.DiminishingReturnsValue;
-import johnsmith.enchantmentcore.enchantment.value.NegateValue;
-import johnsmith.enchantmentcore.enchantment.value.PolynomialValue;
-import johnsmith.enchantmentcore.enchantment.value.ProbabilisticValue;
+import johnsmith.enchantmentcore.enchantment.value.*;
 import johnsmith.enchantmentcore.enchantment.value.configurable.*;
 
 import net.minecraft.core.Registry;
@@ -36,6 +33,7 @@ public class EnchantmentValueRegistry {
         register("config_aware", ConfigAwareValue.CODEC);
         register("probabilistic", ProbabilisticValue.CODEC);
         register("negative", NegateValue.CODEC);
+        register("pointer", PointerValue.CODEC);
     }
 
     /**

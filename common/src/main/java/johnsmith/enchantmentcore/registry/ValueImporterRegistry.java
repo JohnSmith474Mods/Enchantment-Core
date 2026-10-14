@@ -216,6 +216,12 @@ public class ValueImporterRegistry {
             return obj;
         });
 
+        register("enchantment_core:pointer", (element, modId, group, property) -> {
+            JsonObject obj = element.getAsJsonObject().deepCopy();
+            if (obj.has("value")) obj.add("value", importLevelBasedValue(obj.get("value"), modId, group, property + "_value"));
+            return obj;
+        });
+
         register("enchantment_core:diminishing_returns", bindCodecs(
                 DiminishingReturnsValue.CODEC,
                 ConfigurableDiminishingReturnsValue.CODEC,

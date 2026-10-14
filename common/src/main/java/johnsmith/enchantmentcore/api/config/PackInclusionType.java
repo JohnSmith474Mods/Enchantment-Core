@@ -1,6 +1,7 @@
 package johnsmith.enchantmentcore.api.config;
 
 import com.mojang.serialization.Codec;
+
 import net.minecraft.util.StringRepresentable;
 
 public enum PackInclusionType implements StringRepresentable {

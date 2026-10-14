@@ -1,6 +1,7 @@
 package johnsmith.enchantmentcore.registry;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.UnaryOperator;
 
 import com.mojang.serialization.Codec;
@@ -20,6 +21,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.enchantment.ConditionalEffect;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.item.enchantment.effects.EnchantmentEntityEffect;
@@ -561,6 +563,14 @@ public class EnchantmentEffectComponentRegistry {
     }
 
     /**
+     * Registers a marker component indicating an item grants powder snow walkability, typically for boots.
+     */
+    public static final DataComponentType<Unit> POWDER_SNOW_WALKABLE = register(
+            "powder_snow_walkable",
+            builder -> builder.persistent(Unit.CODEC)
+    );
+
+    /**
      * Helper to register a generic custom {@link DataComponentType} into the {@code ENCHANTMENT_EFFECT_COMPONENT_TYPE} registry.
      *
      * @param name             The resource path for the component.
@@ -591,6 +601,12 @@ public class EnchantmentEffectComponentRegistry {
                     "stored_smelting_xp"
             ), DataComponentType.<Float>builder().persistent(Codec.FLOAT).build()
     );
+
+    /**
+     * A map of extracted math curves natively attached to the Enchantment object.
+     * Auto-populated at load time by the {@code EnchantmentCodecMixin} scanning for {@code PointerValue}s.
+     */
+    public static final DataComponentType<Map<String, LevelBasedValue>> DESCRIPTION_ARGS = register("description_args", builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, LevelBasedValue.CODEC)));
 
     /**
      * Initializes the enchantment effect component registry.

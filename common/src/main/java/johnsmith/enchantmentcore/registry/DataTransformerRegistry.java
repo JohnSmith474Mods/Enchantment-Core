@@ -3,8 +3,8 @@ package johnsmith.enchantmentcore.registry;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import com.google.gson.JsonPrimitive;
+
 import johnsmith.enchantmentcore.config.Config;
 
 import java.util.ArrayList;
@@ -323,6 +323,11 @@ public class DataTransformerRegistry {
         public void applyImport(JsonObject root, String targetNamespace, String enchantmentName) {
             if (!root.has("effects") || !root.get("effects").isJsonObject()) return;
             JsonObject effects = root.getAsJsonObject("effects");
+
+            if (effects.has("enchantment_core:description_args")) {
+                effects.remove("enchantment_core:description_args");
+            }
+
             Map<String, Integer> keyFrequencyMap = new HashMap<>();
             scanAndImport(effects, targetNamespace, enchantmentName, keyFrequencyMap);
         }
@@ -375,6 +380,11 @@ public class DataTransformerRegistry {
         public void applyExport(JsonObject root) {
             if (!root.has("effects") || !root.get("effects").isJsonObject()) return;
             JsonObject effects = root.getAsJsonObject("effects");
+
+            if (effects.has("enchantment_core:description_args")) {
+                effects.remove("enchantment_core:description_args");
+            }
+
             scanAndExport(effects);
         }
 

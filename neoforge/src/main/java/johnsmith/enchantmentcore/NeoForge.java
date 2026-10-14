@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import johnsmith.enchantmentcore.api.config.PackInclusionType;
+import johnsmith.enchantmentcore.command.GenerateDescriptionKeysCommand;
 import johnsmith.enchantmentcore.command.ImportCommand;
 import johnsmith.enchantmentcore.command.ExportCommand;
 import johnsmith.enchantmentcore.command.SpellFieldCommand;
@@ -99,6 +100,7 @@ public class NeoForge {
 
     private void onRegisterCommands(RegisterCommandsEvent event) {
         ImportCommand.register(event.getDispatcher());
+        GenerateDescriptionKeysCommand.register(event.getDispatcher());
         ExportCommand.register(event.getDispatcher());
         SpellFieldCommand.register(event.getDispatcher());
     }

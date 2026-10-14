@@ -1,6 +1,7 @@
 package johnsmith.enchantmentcore;
 
 import johnsmith.enchantmentcore.api.config.PackInclusionType;
+import johnsmith.enchantmentcore.command.GenerateDescriptionKeysCommand;
 import johnsmith.enchantmentcore.command.ImportCommand;
 import johnsmith.enchantmentcore.command.ExportCommand;
 import johnsmith.enchantmentcore.command.SpellFieldCommand;
@@ -53,6 +54,7 @@ public class Fabric implements ModInitializer {
         // Register Commands
         CommandRegistrationCallback.EVENT.register((dispatcher, context, selection) -> {
             ExportCommand.register(dispatcher);
+            GenerateDescriptionKeysCommand.register(dispatcher);
             ImportCommand.register(dispatcher);
             SpellFieldCommand.register(dispatcher);
         });
