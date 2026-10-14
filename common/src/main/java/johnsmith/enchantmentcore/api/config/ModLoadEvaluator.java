@@ -1,36 +1,45 @@
 package johnsmith.enchantmentcore.api.config;
 
 /**
- * Abstraction for evaluating mod load status across different mod loader platforms.
+ * Platform-agnostic service abstraction for querying whether a specific mod is loaded in the active
+ * runtime environment.
+ * <p>
+ * Used primarily by {@link ConfigReference#resolve()} to evaluate conditional {@code "try_config"} and
+ * {@code "else_config"} configuration targets across Fabric, Forge, and NeoForge.
  */
+@FunctionalInterface
 public interface ModLoadEvaluator {
     /**
-     * Checks if a mod is currently loaded in the runtime environment.
+     * Checks whether a mod with the specified identifier is currently loaded.
      *
-     * @param modId The target mod identifier.
-     * @return True if the mod is loaded, false otherwise.
+     * @param modId The namespace/identifier of the mod to query.
+     * @return {@code true} if the mod is loaded in the current environment, {@code false} otherwise.
      */
     boolean isLoaded(String modId);
 
     /**
-     * Global provider for the mod load evaluator instance.
+     * Global service provider holding the platform-specific {@link ModLoadEvaluator} implementation.
      */
-    class Provider {
+    final class Provider {
+        /** The active evaluator instance, defaulting to {@code false} prior to platform initialization. */
         private static ModLoadEvaluator instance = modId -> false;
 
+        /** Private constructor to prevent instantiation. */
+        private Provider() {}
+
         /**
-         * Sets the global mod load evaluator instance.
+         * Assigns the global {@link ModLoadEvaluator} implementation for the current mod loader platform.
          *
-         * @param evaluator The evaluator implementation.
+         * @param evaluator The platform-specific evaluator implementation.
          */
         public static void set(ModLoadEvaluator evaluator) {
             instance = evaluator;
         }
 
         /**
-         * Retrieves the global mod load evaluator instance.
+         * Retrieves the active global {@link ModLoadEvaluator} implementation.
          *
-         * @return The evaluator implementation.
+         * @return The installed {@link ModLoadEvaluator} instance.
          */
         public static ModLoadEvaluator get() {
             return instance;

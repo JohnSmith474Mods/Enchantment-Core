@@ -10,17 +10,26 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
- * Data container holding either a concrete item or an item tag key.
+ * Immutable sum-type data container representing either a single registered {@link Item} or an
+ * item {@link TagKey} (prefixed with {@code "#"} when serialized).
+ * <p>
+ * Used by Enchantment Core's configurable item set properties and GUI selection screens to allow
+ * users and datapacks to mix individual items and item tags seamlessly within a single list.
  */
 public class ItemOrItems {
-    private final Item item;
-    private final TagKey<Item> tag;
+    /** The concrete item instance, or {@code null} if this container represents an item tag. */
+    private final @Nullable Item item;
+
+    /** The item tag key, or {@code null} if this container represents a single item. */
+    private final @Nullable TagKey<Item> tag;
 
     /**
-     * Initializes the container with a specific item.
+     * Constructs an {@link ItemOrItems} container holding a single concrete {@link Item}.
      *
-     * @param item The target item.
+     * @param item The target item instance.
      */
     public ItemOrItems(Item item) {
         this.item = item;
@@ -28,7 +37,7 @@ public class ItemOrItems {
     }
 
     /**
-     * Initializes the container with an item tag key.
+     * Constructs an {@link ItemOrItems} container holding an item {@link TagKey}.
      *
      * @param tag The target item tag key.
      */
@@ -38,36 +47,39 @@ public class ItemOrItems {
     }
 
     /**
-     * Identifies if the container holds a tag key.
+     * Checks whether this container holds an item {@link TagKey} rather than a single {@link Item}.
      *
-     * @return True if the container holds a tag key, false otherwise.
+     * @return {@code true} if this instance represents a tag key, {@code false} if it represents a single item.
      */
     public boolean isTag() {
         return this.tag != null;
     }
 
     /**
-     * Retrieves the stored item.
+     * Retrieves the stored {@link Item} instance.
      *
-     * @return The stored item, or null if the container holds a tag key.
+     * @return The stored {@link Item}, or {@code null} if {@link #isTag()} is {@code true}.
      */
-    public Item getItem() {
+    public @Nullable Item getItem() {
         return this.item;
     }
 
     /**
-     * Retrieves the stored tag key.
+     * Retrieves the stored item {@link TagKey}.
      *
-     * @return The stored tag key, or null if the container holds an item.
+     * @return The stored {@link TagKey}, or {@code null} if {@link #isTag()} is {@code false}.
      */
-    public TagKey<Item> getTag() {
+    public @Nullable TagKey<Item> getTag() {
         return this.tag;
     }
 
     /**
-     * Converts the stored data into its string representation.
+     * Converts the stored item or tag key into its canonical string representation.
+     * <p>
+     * Tag keys are formatted with a leading {@code "#"} (e.g., {@code "#minecraft:enchantable/sword"}),
+     * while single items are formatted as their registry resource location (e.g., {@code "minecraft:trident"}).
      *
-     * @return The string representation of the item or tag key.
+     * @return The string representation of this entry, defaulting to {@code "minecraft:air"} if the item is unregistered.
      */
     public String asString() {
         if (this.isTag()) {
@@ -92,7 +104,9 @@ public class ItemOrItems {
     }
 
     /**
-     * Codec for serialization and deserialization of the container data.
+     * Codec for serializing and deserializing {@link ItemOrItems} instances to and from strings.
+     * Strings prefixed with {@code "#"} are parsed as item {@link TagKey}s; all other strings are
+     * resolved against {@link BuiltInRegistries#ITEM}.
      */
     public static final Codec<ItemOrItems> CODEC = Codec.STRING.xmap(
             str -> {

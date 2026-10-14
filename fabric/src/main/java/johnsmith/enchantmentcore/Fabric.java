@@ -1,19 +1,19 @@
 package johnsmith.enchantmentcore;
 
 import johnsmith.enchantmentcore.api.config.PackInclusionType;
-import johnsmith.enchantmentcore.command.ImportCommand;
 import johnsmith.enchantmentcore.command.ExportCommand;
+import johnsmith.enchantmentcore.command.GenerateDescriptionKeysCommand;
+import johnsmith.enchantmentcore.command.ImportCommand;
 import johnsmith.enchantmentcore.command.SpellFieldCommand;
-import johnsmith.enchantmentcore.config.Orphanage;
 import johnsmith.enchantmentcore.config.Config;
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
-import johnsmith.enchantmentcore.registry.EnchantmentValueRegistry;
-import johnsmith.enchantmentcore.registry.EnchantmentCoreEntities;
-import johnsmith.enchantmentcore.registry.EnchantmentCoreRegistries;
-import johnsmith.enchantmentcore.registry.SpellFieldRegistrar;
+import johnsmith.enchantmentcore.config.Orphanage;
+import johnsmith.enchantmentcore.entity.FabricEntities;
+import johnsmith.enchantmentcore.item.enchantment.FabricEnchantmentEffectComponents;
+import johnsmith.enchantmentcore.item.enchantment.FabricLevelBasedValues;
+import johnsmith.enchantmentcore.item.enchantment.spellfield.FabricSpellFieldRegistries;
+import johnsmith.enchantmentcore.registry.FabricRegistries;
 import johnsmith.enchantmentcore.util.SpellFieldTaskScheduler;
 import johnsmith.enchantmentcore.util.TransientBlockTracker;
-
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -21,46 +21,35 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
-
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 public class Fabric implements ModInitializer {
+
     @Override
     public void onInitialize() {
-        // Initialize common classes
-        Common.initialize();
-
-        // Initialize Registries
-        SpellFieldRegistrar.registerFunctions((id, codec) ->
-                Registry.register(EnchantmentCoreRegistries.DISTANCE_SCALING_FUNCTIONS.get(), id, codec));
-
-        SpellFieldRegistrar.registerShapes((id, codec) ->
-                Registry.register(EnchantmentCoreRegistries.SPELL_FIELD_SHAPES.get(), id, codec));
-
-        SpellFieldRegistrar.registerEffects((id, codec) ->
-                Registry.register(EnchantmentCoreRegistries.SPELL_FIELD_EFFECTS.get(), id, codec));
-
         // Resolve Config Path
         Config.MANAGER.init(FabricLoader.getInstance().getConfigDir());
 
-        // Register Library Components
-        EnchantmentValueRegistry.initialize();
-        EnchantmentEffectComponentRegistry.initialize();
-        EnchantmentCoreEntities.initialize();
+        // Initialize common classes
+        Common.initialize(FabricLoader.getInstance()::isModLoaded);
+
+        // Initialize Custom Registries & Library Components
+        FabricRegistries.initialize();
+        FabricSpellFieldRegistries.initialize();
+        FabricLevelBasedValues.initialize();
+        FabricEnchantmentEffectComponents.initialize();
+        FabricEntities.initialize();
 
         // Register Commands
         CommandRegistrationCallback.EVENT.register((dispatcher, context, selection) -> {
             ExportCommand.register(dispatcher);
+            GenerateDescriptionKeysCommand.register(dispatcher);
             ImportCommand.register(dispatcher);
             SpellFieldCommand.register(dispatcher);
         });
 
-        // Register SpellFieldTaskScheduler
-        ServerTickEvents.END_LEVEL_TICK.register(SpellFieldTaskScheduler::tick);
-
-        // Register TransientBlockTracker
+        // Register Server Level Tick Handlers
         ServerTickEvents.END_LEVEL_TICK.register(level -> {
             SpellFieldTaskScheduler.tick(level);
             TransientBlockTracker.get(level).tick(level);

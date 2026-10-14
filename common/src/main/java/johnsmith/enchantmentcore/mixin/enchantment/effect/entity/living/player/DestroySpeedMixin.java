@@ -5,10 +5,10 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 import johnsmith.enchantmentcore.api.entity.accessor.StreakStateAccessor;
-import johnsmith.enchantmentcore.enchantment.effect.BuoyancyEffect;
-import johnsmith.enchantmentcore.enchantment.effect.StreakEffect;
+import johnsmith.enchantmentcore.api.enchantment.effect.BuoyancyEffect;
+import johnsmith.enchantmentcore.api.enchantment.effect.StreakEffect;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -69,7 +69,7 @@ public abstract class DestroySpeedMixin {
                 if (enchantments.isEmpty()) continue;
 
                 for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-                    List<ConditionalEffect<BuoyancyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.BUOYANCY.get());
+                    List<ConditionalEffect<BuoyancyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.BUOYANCY);
 
                     if (effects != null) {
                         if (!isClient && buoyancyContext == null) {
@@ -104,7 +104,7 @@ public abstract class DestroySpeedMixin {
                     LootContext streakContext = null;
 
                     for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-                        List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.MINING_STREAK.get());
+                        List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.MINING_STREAK);
 
                         if (effects != null) {
                             if (!isClient && streakContext == null) {

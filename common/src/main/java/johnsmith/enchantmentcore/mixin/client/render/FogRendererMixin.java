@@ -4,8 +4,8 @@ import com.llamalad7.mixinextras.sugar.Local;
 
 import java.util.Map;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
-import johnsmith.enchantmentcore.enchantment.effect.FluidFogDensityEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
+import johnsmith.enchantmentcore.api.enchantment.effect.FluidFogDensityEffect;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.fog.FogData;
@@ -47,6 +47,7 @@ public abstract class FogRendererMixin {
             @Local(argsOnly = true) Camera camera,
             @Local(argsOnly = true) float viewDistance
     ) {
+        // 1. Extract required context directly from the Camera parameter
         FogType fogType = camera.getFluidInCamera();
         Entity entity = camera.entity();
 
@@ -59,17 +60,21 @@ public abstract class FogRendererMixin {
 
         if (enchantments.isEmpty()) return;
 
+        // 2. Retrieve the actual FluidState from the world using the camera position.
         FluidState fluidState = livingEntity.level().getFluidState(camera.blockPosition());
 
         for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
-            FluidFogDensityEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.FLUID_FOG_DENSITY.get());
+            FluidFogDensityEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponents.FLUID_FOG_DENSITY);
 
+            // 3. Check if the current fluid matches the effect's configuration.
             if (effect != null && fluidState.is(effect.fluids())) {
                 int level = entry.getValue();
 
+                // 4. Calculate dynamic values for the fog boundaries.
                 float start = effect.fogStart().calculate(level);
                 float end = viewDistance * effect.fogEndMultiplier().calculate(level);
 
+                // 5. Construct a new FogParameters record with modified bounds
                 FogData fogData = cir.getReturnValue();
                 fogData.environmentalStart = start;
                 fogData.renderDistanceStart = start;
