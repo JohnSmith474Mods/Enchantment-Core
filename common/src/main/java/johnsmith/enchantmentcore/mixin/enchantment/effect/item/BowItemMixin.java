@@ -4,8 +4,8 @@ import com.llamalad7.mixinextras.sugar.Local;
 
 import java.util.Map;
 
-import johnsmith.enchantmentcore.enchantment.effect.BowChargeTimeEffect;
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.enchantment.effect.BowChargeTimeEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.BowItem;
@@ -50,7 +50,7 @@ public class BowItemMixin {
 
         // Iterate all active enchantments to aggregate charge time reductions.
         for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
-            BowChargeTimeEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.BOW_CHARGE_TIME.get());
+            BowChargeTimeEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponents.BOW_CHARGE_TIME);
 
             if (effect != null) {
                 int lvl = entry.getValue();

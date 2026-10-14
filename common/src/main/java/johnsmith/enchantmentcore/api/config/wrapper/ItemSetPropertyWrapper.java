@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import johnsmith.configoverhauled.api.Property;
 import johnsmith.configoverhauled.api.data.ConfigDescription;
+
 import johnsmith.enchantmentcore.api.config.data.ItemOrItems;
 
 import net.minecraft.core.Holder;
@@ -14,28 +15,35 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 
 /**
- * Wrapper for resolving a configuration property containing item lists into a holder set.
+ * Binds a dynamic configuration property containing {@link ItemOrItems} entries to an enchantment's
+ * {@code supported_items} or {@code primary_items} definition, resolving them into a {@link HolderSet} at runtime.
  *
- * @param property      The configuration property containing the item list.
- * @param description   The description of the configuration property.
- * @param fallbackItems The default list of items to use if the property is unconfigured or empty.
+ * @param property      The live configuration {@link Property} holding the list of items and item tags.
+ * @param description   The {@link ConfigDescription} metadata identifying the configuration property.
+ * @param fallbackItems The fallback list of {@link ItemOrItems} parsed from the datapack JSON definition.
  */
-public record ItemSetPropertyWrapper(Property<List<ItemOrItems>> property, ConfigDescription description, List<ItemOrItems> fallbackItems) {
-
+public record ItemSetPropertyWrapper(
+        Property<List<ItemOrItems>> property,
+        ConfigDescription description,
+        List<ItemOrItems> fallbackItems
+) {
     /**
-     * Determines if the target property is present.
+     * Determines whether a valid configuration property is bound to this wrapper.
      *
-     * @return True if the property is not null, false otherwise.
+     * @return {@code true} if {@link #property()} is non-null, {@code false} otherwise.
      */
     public boolean isConfigured() {
         return this.property != null;
     }
 
     /**
-     * Compiles the configured items and tags into a direct holder set. Returns the fallback set if the configuration is empty.
+     * Compiles the configured {@link ItemOrItems} entries (expanding any item tags against
+     * {@link BuiltInRegistries#ITEM}) into a direct {@link HolderSet}.
+     * <p>
+     * If the property is unconfigured or its resolved entry list is empty, {@code vanillaFallback} is returned.
      *
-     * @param vanillaFallback The fallback holder set.
-     * @return The resolved holder set.
+     * @param vanillaFallback The baseline {@link HolderSet} to return if no configured entries are available.
+     * @return A {@link HolderSet} containing all resolved item holders, or {@code vanillaFallback} if empty.
      */
     public HolderSet<Item> resolve(HolderSet<Item> vanillaFallback) {
         List<ItemOrItems> entries = this.isConfigured() ? this.property.get() : this.fallbackItems;

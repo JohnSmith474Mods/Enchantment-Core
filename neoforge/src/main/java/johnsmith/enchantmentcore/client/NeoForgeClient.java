@@ -2,10 +2,10 @@ package johnsmith.enchantmentcore.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import johnsmith.enchantmentcore.Constants;
+import johnsmith.enchantmentcore.api.registry.EnchantmentCoreEntities;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugRenderer;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugTracker;
 import johnsmith.enchantmentcore.client.render.SpellFieldAnchorRenderer;
-import johnsmith.enchantmentcore.registry.EnchantmentCoreEntities;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -16,7 +16,6 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 public class NeoForgeClient {
-
     @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
     public static class ModEvents {
         @SubscribeEvent

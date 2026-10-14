@@ -5,120 +5,126 @@ import johnsmith.enchantmentcore.api.config.wrapper.IntPropertyWrapper;
 import johnsmith.enchantmentcore.api.config.wrapper.ItemSetPropertyWrapper;
 import johnsmith.enchantmentcore.api.config.wrapper.SlotListPropertyWrapper;
 
+import net.minecraft.world.item.enchantment.Enchantment;
+
 /**
- * Defines the contract for dynamically configurable enchantment properties.
- * Implemented via mixin injection on standard enchantment definitions.
+ * Duck interface injected into {@link Enchantment} via mixin to attach and query live configuration
+ * property wrappers on top of static enchantment definitions.
+ * <p>
+ * Populated during deserialization by {@code EnchantmentCodecMixin} and queried at runtime by
+ * {@code EnchantmentMixin} to dynamically rebuild {@link Enchantment.EnchantmentDefinition} records
+ * whenever configured values deviate from their datapack fallbacks.
  */
 public interface ConfigurableEnchantmentDefinition {
     /**
-     * Sets the maximum level wrapper.
+     * Attaches the dynamic configuration wrapper controlling the enchantment's maximum level.
      *
-     * @param wrapper The integer property wrapper.
+     * @param wrapper The {@link IntPropertyWrapper} for {@code max_level}.
      */
     void enchantment_core$setMaxLevelWrapper(IntPropertyWrapper wrapper);
 
     /**
-     * Retrieves the maximum level wrapper.
+     * Retrieves the dynamic configuration wrapper controlling the enchantment's maximum level.
      *
-     * @return The integer property wrapper.
+     * @return The attached {@link IntPropertyWrapper}, or {@code null} if not configured.
      */
     IntPropertyWrapper enchantment_core$getMaxLevelWrapper();
 
     /**
-     * Sets the weight wrapper.
+     * Attaches the dynamic configuration wrapper controlling the enchantment's rarity weight.
      *
-     * @param wrapper The integer property wrapper.
+     * @param wrapper The {@link IntPropertyWrapper} for {@code weight}.
      */
     void enchantment_core$setWeightWrapper(IntPropertyWrapper wrapper);
 
     /**
-     * Retrieves the weight wrapper.
+     * Retrieves the dynamic configuration wrapper controlling the enchantment's rarity weight.
      *
-     * @return The integer property wrapper.
+     * @return The attached {@link IntPropertyWrapper}, or {@code null} if not configured.
      */
     IntPropertyWrapper enchantment_core$getWeightWrapper();
 
     /**
-     * Sets the anvil cost wrapper.
+     * Attaches the dynamic configuration wrapper controlling the enchantment's anvil combination cost.
      *
-     * @param wrapper The integer property wrapper.
+     * @param wrapper The {@link IntPropertyWrapper} for {@code anvil_cost}.
      */
     void enchantment_core$setAnvilCostWrapper(IntPropertyWrapper wrapper);
 
     /**
-     * Retrieves the anvil cost wrapper.
+     * Retrieves the dynamic configuration wrapper controlling the enchantment's anvil combination cost.
      *
-     * @return The integer property wrapper.
+     * @return The attached {@link IntPropertyWrapper}, or {@code null} if not configured.
      */
     IntPropertyWrapper enchantment_core$getAnvilCostWrapper();
 
     /**
-     * Sets the minimum cost wrapper.
+     * Attaches the dynamic configuration wrapper controlling the enchantment's minimum enchanting table cost.
      *
-     * @param wrapper The cost property wrapper.
+     * @param wrapper The {@link CostPropertyWrapper} for {@code min_cost}.
      */
     void enchantment_core$setMinCostWrapper(CostPropertyWrapper wrapper);
 
     /**
-     * Retrieves the minimum cost wrapper.
+     * Retrieves the dynamic configuration wrapper controlling the enchantment's minimum enchanting table cost.
      *
-     * @return The cost property wrapper.
+     * @return The attached {@link CostPropertyWrapper}, or {@code null} if not configured.
      */
     CostPropertyWrapper enchantment_core$getMinCostWrapper();
 
     /**
-     * Sets the maximum cost wrapper.
+     * Attaches the dynamic configuration wrapper controlling the enchantment's maximum enchanting table cost.
      *
-     * @param wrapper The cost property wrapper.
+     * @param wrapper The {@link CostPropertyWrapper} for {@code max_cost}.
      */
     void enchantment_core$setMaxCostWrapper(CostPropertyWrapper wrapper);
 
     /**
-     * Retrieves the maximum cost wrapper.
+     * Retrieves the dynamic configuration wrapper controlling the enchantment's maximum enchanting table cost.
      *
-     * @return The cost property wrapper.
+     * @return The attached {@link CostPropertyWrapper}, or {@code null} if not configured.
      */
     CostPropertyWrapper enchantment_core$getMaxCostWrapper();
 
     /**
-     * Sets the supported items wrapper.
+     * Attaches the dynamic configuration wrapper controlling the set of items compatible with this enchantment.
      *
-     * @param wrapper The item set property wrapper.
+     * @param wrapper The {@link ItemSetPropertyWrapper} for {@code supported_items}.
      */
     void enchantment_core$setSupportedItemsWrapper(ItemSetPropertyWrapper wrapper);
 
     /**
-     * Retrieves the supported items wrapper.
+     * Retrieves the dynamic configuration wrapper controlling the set of items compatible with this enchantment.
      *
-     * @return The item set property wrapper.
+     * @return The attached {@link ItemSetPropertyWrapper}, or {@code null} if not configured.
      */
     ItemSetPropertyWrapper enchantment_core$getSupportedItemsWrapper();
 
     /**
-     * Sets the primary items wrapper.
+     * Attaches the dynamic configuration wrapper controlling the primary items for this enchantment in the enchanting table.
      *
-     * @param wrapper The item set property wrapper.
+     * @param wrapper The {@link ItemSetPropertyWrapper} for {@code primary_items}.
      */
     void enchantment_core$setPrimaryItemsWrapper(ItemSetPropertyWrapper wrapper);
 
     /**
-     * Retrieves the primary items wrapper.
+     * Retrieves the dynamic configuration wrapper controlling the primary items for this enchantment in the enchanting table.
      *
-     * @return The item set property wrapper.
+     * @return The attached {@link ItemSetPropertyWrapper}, or {@code null} if not configured.
      */
     ItemSetPropertyWrapper enchantment_core$getPrimaryItemsWrapper();
 
     /**
-     * Sets the equipment slots wrapper.
+     * Attaches the dynamic configuration wrapper controlling the active equipment slot groups for this enchantment.
      *
-     * @param wrapper The slot list property wrapper.
+     * @param wrapper The {@link SlotListPropertyWrapper} for {@code slots}.
      */
     void enchantment_core$setSlotsWrapper(SlotListPropertyWrapper wrapper);
 
     /**
-     * Retrieves the equipment slots wrapper.
+     * Retrieves the dynamic configuration wrapper controlling the active equipment slot groups for this enchantment.
      *
-     * @return The slot list property wrapper.
+     * @return The attached {@link SlotListPropertyWrapper}, or {@code null} if not configured.
      */
     SlotListPropertyWrapper enchantment_core$getSlotsWrapper();
 }

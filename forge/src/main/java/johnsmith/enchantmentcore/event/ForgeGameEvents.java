@@ -25,9 +25,6 @@ public class ForgeGameEvents {
     public static void onLevelTick(TickEvent.LevelTickEvent event) {
         if (event.phase == TickEvent.Phase.END && event.level instanceof ServerLevel serverLevel) {
             SpellFieldTaskScheduler.tick(serverLevel);
-        }
-        if (event.phase == TickEvent.Phase.END && event.level instanceof ServerLevel serverLevel) {
-            SpellFieldTaskScheduler.tick(serverLevel);
             johnsmith.enchantmentcore.util.TransientBlockTracker.get(serverLevel).tick(serverLevel);
         }
     }

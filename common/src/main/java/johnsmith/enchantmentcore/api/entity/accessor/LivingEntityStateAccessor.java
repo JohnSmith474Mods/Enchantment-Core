@@ -1,17 +1,18 @@
 package johnsmith.enchantmentcore.api.entity.accessor;
 
-import johnsmith.enchantmentcore.api.enchantment.effect.FluidWalkerDefinition;
-
 import java.util.List;
 
+import johnsmith.enchantmentcore.api.enchantment.effect.FluidWalkerDefinition;
+
 /**
- * Interface exposing internal runtime states of a living entity concerning custom enchantment effects.
+ * Duck interface injected into {@link net.minecraft.world.entity.LivingEntity} via {@code PassiveEffectsMixin}
+ * to expose active per-tick passive enchantment states such as fluid-walking definitions.
  */
 public interface LivingEntityStateAccessor {
     /**
-     * Retrieves the list of active fluid walker definitions currently applied to the entity.
+     * Retrieves the list of active {@link FluidWalkerDefinition} instances currently evaluated on the living entity.
      *
-     * @return A list of active {@link FluidWalkerDefinition} instances.
+     * @return A list of active {@link FluidWalkerDefinition}s for the current tick.
      */
     List<FluidWalkerDefinition> enchantment_core$getActiveFluidWalkers();
 }

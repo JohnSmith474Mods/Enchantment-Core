@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import johnsmith.configoverhauled.api.registry.ConfigRegistry;
 import johnsmith.enchantmentcore.Constants;
 import johnsmith.enchantmentcore.config.Config;
-import johnsmith.enchantmentcore.registry.DataTransformerRegistry;
+import johnsmith.enchantmentcore.api.registry.DataTransformerRegistry;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

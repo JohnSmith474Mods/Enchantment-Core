@@ -2,8 +2,8 @@ package johnsmith.enchantmentcore.mixin.client.render;
 
 import java.util.Map;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
-import johnsmith.enchantmentcore.enchantment.effect.FluidFogDensityEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
+import johnsmith.enchantmentcore.api.enchantment.effect.FluidFogDensityEffect;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.FogParameters;
@@ -67,20 +67,23 @@ public abstract class FogRendererMixin {
 
         if (enchantments.isEmpty()) return;
 
-        FluidState fluidState = livingEntity.level().getFluidState(camera.getBlockPosition());
+        // 2. Retrieve the actual FluidState from the world using the camera position.
+        FluidState fluidState = entity.level().getFluidState(camera.getBlockPosition());
 
         for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
-            FluidFogDensityEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.FLUID_FOG_DENSITY.get());
+            FluidFogDensityEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponents.FLUID_FOG_DENSITY);
 
+            // 3. Check if the current fluid matches the effect's configuration.
             if (effect != null && fluidState.is(effect.fluids())) {
                 int level = entry.getValue();
 
+                // 4. Calculate dynamic values for the fog boundaries.
                 float start = effect.fogStart().calculate(level);
                 float endMultiplier = effect.fogEndMultiplier().calculate(level);
 
                 FogParameters original = cir.getReturnValue();
 
-                // Construct a new FogParameters record with modified bounds
+                // 5. Construct a new FogParameters record with modified bounds
                 cir.setReturnValue(new FogParameters(
                         start,
                         viewDistance * endMultiplier,
