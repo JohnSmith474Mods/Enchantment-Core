@@ -5,12 +5,15 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
- * Defines the mathematical algorithm utilized to calculate spatial distance.
+ * Defines the mathematical norm used to measure spatial distance within a {@link Topology}.
  */
 public enum DistanceMetric implements StringRepresentable {
     /**
-     * Standard linear distance calculation (L2 norm).
+     * Standard Euclidean distance calculation ($L_2$ norm): $\sqrt{x^2 + y^2 + z^2}$.
+     * Produces spherical or cylindrical isosurfaces.
      */
     EUCLIDEAN("euclidean") {
         @Override
@@ -18,8 +21,10 @@ public enum DistanceMetric implements StringRepresentable {
             return vector.length();
         }
     },
+
     /**
-     * Grid-based distance calculation summing the absolute differences of Cartesian coordinates (L1 norm).
+     * Taxicab / grid-based distance calculation ($L_1$ norm): $|x| + |y| + |z|$.
+     * Produces octahedral or diamond-shaped isosurfaces.
      */
     MANHATTAN("manhattan") {
         @Override
@@ -28,8 +33,12 @@ public enum DistanceMetric implements StringRepresentable {
         }
     };
 
+    /**
+     * Codec for serializing and deserializing {@link DistanceMetric} constants by their lowercase identifier.
+     */
     public static final Codec<DistanceMetric> CODEC = StringRepresentable.fromEnum(DistanceMetric::values);
 
+    /** The serialized string identifier of this metric. */
     private final String name;
 
     DistanceMetric(String name) {
@@ -37,15 +46,15 @@ public enum DistanceMetric implements StringRepresentable {
     }
 
     /**
-     * Executes the distance calculation algorithm on the provided vector.
+     * Computes the scalar distance norm of the provided displacement vector.
      *
-     * @param vector The vector representing the difference between two spatial points.
-     * @return The calculated scalar distance.
+     * @param vector The displacement vector between two points in 3D space.
+     * @return The non-negative scalar distance.
      */
     public abstract double calculate(Vec3 vector);
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
         return this.name;
     }
 }

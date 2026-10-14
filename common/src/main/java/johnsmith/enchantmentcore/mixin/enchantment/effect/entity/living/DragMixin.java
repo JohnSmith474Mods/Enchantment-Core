@@ -2,12 +2,13 @@ package johnsmith.enchantmentcore.mixin.enchantment.effect.entity.living;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -37,10 +38,10 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class DragMixin {
 
     /**
-     * Internal calculation logic iterating through the equipment slots to extract and apply Drag multipliers.
+     * Modifies the drag coefficient applied to the movement vector during travel updates.
      *
-     * @param originalDrag The initial drag scalar.
-     * @return The modified drag scalar.
+     * @param originalDrag The vanilla velocity retention factor (0.0 to 1.0).
+     * @return The modified drag factor.
      */
     @Unique
     private double enchantment_core$calculateDragMultiplier(double originalDrag) {
@@ -51,6 +52,7 @@ public abstract class DragMixin {
         float currentDrag = (float) originalDrag;
         LootContext lootContext = null;
 
+        // Iterate all equipment slots to collect compounding drag modifiers.
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = entity.getItemBySlot(slot);
             if (stack.isEmpty()) continue;
@@ -60,7 +62,7 @@ public abstract class DragMixin {
 
             for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                 if (!entry.getKey().value().matchingSlot(slot)) continue;
-                List<ConditionalEffect<EnchantmentValueEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.ENTITY_DRAG.get());
+                List<ConditionalEffect<EnchantmentValueEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.ENTITY_DRAG);
 
                 if (effects != null) {
                     if (!isClient && lootContext == null) {
@@ -73,6 +75,7 @@ public abstract class DragMixin {
                     }
 
                     for (ConditionalEffect<EnchantmentValueEffect> cond : effects) {
+                        // Allow clients to calculate drag without full loot predicates for prediction smoothness.
                         if (isClient || cond.matches(lootContext)) {
                             currentDrag = cond.effect().process(entry.getIntValue(), entity.getRandom(), currentDrag);
                         }
