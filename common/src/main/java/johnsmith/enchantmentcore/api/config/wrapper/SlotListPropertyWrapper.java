@@ -8,28 +8,34 @@ import johnsmith.configoverhauled.api.data.ConfigDescription;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 
 /**
- * Wrapper for resolving a configuration property containing equipment slot groups.
+ * Binds a dynamic configuration property containing a list of {@link EquipmentSlotGroup} values to an
+ * enchantment's {@code slots} definition.
  *
- * @param property    The configuration property containing the equipment slot groups.
- * @param description The description of the configuration property.
- * @param fallback    The default list of equipment slot groups to use if the property is unconfigured or empty.
+ * @param property    The live configuration {@link Property} holding the list of equipment slot groups.
+ * @param description The {@link ConfigDescription} metadata identifying the configuration property.
+ * @param fallback    The fallback list of {@link EquipmentSlotGroup} values parsed from the datapack JSON definition.
  */
-public record SlotListPropertyWrapper(Property<List<EquipmentSlotGroup>> property, ConfigDescription description, List<EquipmentSlotGroup> fallback) {
-
+public record SlotListPropertyWrapper(
+        Property<List<EquipmentSlotGroup>> property,
+        ConfigDescription description,
+        List<EquipmentSlotGroup> fallback
+) {
     /**
-     * Determines if the target property is present.
+     * Determines whether a valid configuration property is bound to this wrapper.
      *
-     * @return True if the property is not null, false otherwise.
+     * @return {@code true} if {@link #property()} is non-null, {@code false} otherwise.
      */
     public boolean isConfigured() {
         return this.property != null;
     }
 
     /**
-     * Returns the configured list of equipment slot groups. Returns the fallback list if the configuration is empty.
+     * Resolves the active list of {@link EquipmentSlotGroup} values from the bound configuration property.
+     * <p>
+     * Falls back to {@link #fallback()} or {@code vanillaFallback} if the property is unconfigured or empty.
      *
-     * @param vanillaFallback The fallback equipment slot group list.
-     * @return The resolved equipment slot group list.
+     * @param vanillaFallback The baseline equipment slot group list from the enchantment definition.
+     * @return The resolved list of {@link EquipmentSlotGroup} instances.
      */
     public List<EquipmentSlotGroup> resolve(List<EquipmentSlotGroup> vanillaFallback) {
         if (!this.isConfigured()) return this.fallback != null ? this.fallback : vanillaFallback;

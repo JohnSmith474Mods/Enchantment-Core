@@ -5,8 +5,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
-import johnsmith.enchantmentcore.enchantment.effect.ExperienceYieldEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
+import johnsmith.enchantmentcore.api.enchantment.effect.ExperienceYieldEffect;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -60,7 +60,7 @@ public abstract class ExperienceMixin {
             for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                 if (!entry.getKey().value().matchingSlot(slot)) continue;
 
-                List<ConditionalEffect<ExperienceYieldEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.EXPERIENCE_YIELD_MULTIPLIER.get());
+                List<ConditionalEffect<ExperienceYieldEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.EXPERIENCE_YIELD_MULTIPLIER);
 
                 if (effects != null && !effects.isEmpty()) {
                     LootParams params = new LootParams.Builder(level)
