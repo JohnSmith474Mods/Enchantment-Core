@@ -1,9 +1,9 @@
 package johnsmith.enchantmentcore.client;
 
+import johnsmith.enchantmentcore.api.registry.EnchantmentCoreEntities;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugTracker;
 import johnsmith.enchantmentcore.client.render.SpellFieldAnchorRenderer;
 import johnsmith.enchantmentcore.config.Config;
-import johnsmith.enchantmentcore.registry.EnchantmentCoreEntities;
 
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.EntityRenderersEvent;

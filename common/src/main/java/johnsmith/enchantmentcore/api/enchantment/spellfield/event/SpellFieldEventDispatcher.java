@@ -10,31 +10,36 @@ import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Manages the registration and execution of global spell field interception hooks.
- * Dispatches events during the application phases of a spell field.
+ * Thread-safe event bus managing the registration and execution of global spell field interception hooks.
+ * <p>
+ * Allows external mods to cancel spell field activations globally or dynamically attenuate/nullify
+ * topological multipliers for specific entity or block targets (e.g., for party/claim protection).
  */
 public class SpellFieldEventDispatcher {
 
     /**
-     * Intercepts the initial application of a spell field.
+     * Functional listener that intercepts the initial activation of a {@link johnsmith.enchantmentcore.api.enchantment.spellfield.SpellFieldComponent}.
      */
+    @FunctionalInterface
     public interface ApplyInterceptor {
         /**
-         * Evaluates the application context before volume processing begins.
+         * Evaluates the spell field activation context before volume and target processing begins.
          *
          * @param level            The executing server level.
          * @param enchantmentLevel The level of the spell field enchantment.
          * @param context          The item usage context triggering the spell field.
          * @param target           The anchor entity or focal point of the spell field.
          * @param epicenter        The exact spatial origin vector of the spell field.
-         * @return True to permit execution. False to cancel the spell field application entirely.
+         * @return {@code true} to permit execution, or {@code false} to cancel the spell field application entirely.
          */
         boolean onApply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity target, Vec3 epicenter);
     }
 
     /**
-     * Intercepts the targeting evaluation for individual entities within a spell field volume.
+     * Functional listener that intercepts and modifies the topological scalar for individual entities
+     * targeted within a spell field volume.
      */
+    @FunctionalInterface
     public interface EntityTargetInterceptor {
         /**
          * Evaluates and modifies the effect scalar for a specific entity target.
@@ -43,16 +48,18 @@ public class SpellFieldEventDispatcher {
          * @param enchantmentLevel The level of the spell field enchantment.
          * @param context          The item usage context triggering the spell field.
          * @param target           The anchor entity or focal point of the spell field.
-         * @param victim           The entity targeted by the spell field.
+         * @param victim           The candidate entity targeted by the spell field.
          * @param currentScalar    The active topological multiplier for the target.
-         * @return The modified scalar value. Return 0.0F to exclude the entity from effects.
+         * @return The modified scalar value; returning {@code <= 0.0F} excludes the entity from all effects.
          */
         float onEntityTarget(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity target, Entity victim, float currentScalar);
     }
 
     /**
-     * Intercepts the targeting evaluation for individual block coordinates within a spell field volume.
+     * Functional listener that intercepts and modifies the topological scalar for individual block coordinates
+     * targeted within a spell field volume.
      */
+    @FunctionalInterface
     public interface BlockTargetInterceptor {
         /**
          * Evaluates and modifies the effect scalar for a specific block coordinate.
@@ -63,19 +70,24 @@ public class SpellFieldEventDispatcher {
          * @param target           The anchor entity or focal point of the spell field.
          * @param pos              The block coordinate targeted by the spell field.
          * @param currentScalar    The active topological multiplier for the target.
-         * @return The modified scalar value. Return 0.0F to exclude the block from effects.
+         * @return The modified scalar value; returning {@code <= 0.0F} excludes the block from all effects.
          */
         float onBlockTarget(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity target, BlockPos pos, float currentScalar);
     }
 
+    /** Registered listeners for initial spell field application interception. */
     private static final List<ApplyInterceptor> APPLY_LISTENERS = new CopyOnWriteArrayList<>();
+
+    /** Registered listeners for per-entity target scalar interception. */
     private static final List<EntityTargetInterceptor> ENTITY_TARGET_LISTENERS = new CopyOnWriteArrayList<>();
+
+    /** Registered listeners for per-block target scalar interception. */
     private static final List<BlockTargetInterceptor> BLOCK_TARGET_LISTENERS = new CopyOnWriteArrayList<>();
 
     /**
-     * Registers a global apply interceptor.
+     * Registers a global spell field application interceptor.
      *
-     * @param interceptor The interceptor implementation to register.
+     * @param interceptor The {@link ApplyInterceptor} implementation to register.
      */
     public static void registerApplyInterceptor(ApplyInterceptor interceptor) {
         APPLY_LISTENERS.add(interceptor);
@@ -84,7 +96,7 @@ public class SpellFieldEventDispatcher {
     /**
      * Registers a global entity target interceptor.
      *
-     * @param interceptor The interceptor implementation to register.
+     * @param interceptor The {@link EntityTargetInterceptor} implementation to register.
      */
     public static void registerEntityTargetInterceptor(EntityTargetInterceptor interceptor) {
         ENTITY_TARGET_LISTENERS.add(interceptor);
@@ -93,21 +105,21 @@ public class SpellFieldEventDispatcher {
     /**
      * Registers a global block target interceptor.
      *
-     * @param interceptor The interceptor implementation to register.
+     * @param interceptor The {@link BlockTargetInterceptor} implementation to register.
      */
     public static void registerBlockTargetInterceptor(BlockTargetInterceptor interceptor) {
         BLOCK_TARGET_LISTENERS.add(interceptor);
     }
 
     /**
-     * Dispatches the apply event to all registered interceptors.
+     * Dispatches the initial spell field application event to all registered {@link ApplyInterceptor}s.
      *
      * @param level            The executing server level.
      * @param enchantmentLevel The level of the spell field enchantment.
      * @param context          The item usage context triggering the spell field.
      * @param target           The anchor entity or focal point of the spell field.
      * @param epicenter        The exact spatial origin vector of the spell field.
-     * @return True if all interceptors permit execution. False if any interceptor cancels execution.
+     * @return {@code true} if all interceptors permit execution, or {@code false} if any interceptor cancels it.
      */
     public static boolean dispatchApply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity target, Vec3 epicenter) {
         for (ApplyInterceptor listener : APPLY_LISTENERS) {
@@ -119,7 +131,8 @@ public class SpellFieldEventDispatcher {
     }
 
     /**
-     * Dispatches the entity target event to all registered interceptors sequentially.
+     * Dispatches the entity target evaluation event sequentially to all registered {@link EntityTargetInterceptor}s,
+     * short-circuiting if the scalar drops to or below {@code 0.0001F}.
      *
      * @param level            The executing server level.
      * @param enchantmentLevel The level of the spell field enchantment.
@@ -141,7 +154,8 @@ public class SpellFieldEventDispatcher {
     }
 
     /**
-     * Dispatches the block target event to all registered interceptors sequentially.
+     * Dispatches the block target evaluation event sequentially to all registered {@link BlockTargetInterceptor}s,
+     * short-circuiting if the scalar drops to or below {@code 0.0001F}.
      *
      * @param level            The executing server level.
      * @param enchantmentLevel The level of the spell field enchantment.

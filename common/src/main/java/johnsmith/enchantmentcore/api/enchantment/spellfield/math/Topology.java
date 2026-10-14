@@ -8,82 +8,103 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Specifies the mathematical rule set defining internal volume strength falloff and bounds generation.
+ * Contract specifying the mathematical rule set that governs internal volume strength falloff,
+ * directional axis projection, and bounding box generation for a spell field volume.
  */
 public interface Topology {
     /**
-     * @return The primary operational limit radiating from the spatial epicenter.
+     * Retrieves the primary operational range radiating from the spatial epicenter.
+     *
+     * @return The {@link LevelBasedValue} governing the maximum origin distance.
      */
     LevelBasedValue originRange();
 
     /**
-     * @return The specific operational limit dictating the radius extending along the primary orientation axis.
+     * Retrieves the optional distance limit extending parallel to the primary orientation {@link #axis()}.
+     *
+     * @return An {@link Optional} containing the axial range {@link LevelBasedValue}.
      */
     Optional<LevelBasedValue> axialRange();
 
     /**
-     * @return The specific operational limit dictating the radius extending perpendicular to the primary orientation axis.
+     * Retrieves the optional distance limit extending perpendicular to the primary orientation {@link #axis()}.
+     *
+     * @return An {@link Optional} containing the radial range {@link LevelBasedValue}.
      */
     Optional<LevelBasedValue> radialRange();
 
     /**
-     * @return The localized physical displacement separating the epicenter from the target focal point.
+     * Retrieves the optional spatial displacement separating the topological origin from the volume center.
+     *
+     * @return An {@link Optional} containing the origin offset {@link SpatialVector}.
      */
     Optional<SpatialVector> originOffset();
 
     /**
-     * @return The directional line dominating field alignment and spatial distortion functions.
+     * Retrieves the optional directional axis vector governing cylindrical/planar field alignment.
+     *
+     * @return An {@link Optional} containing the orientation axis {@link SpatialVector}.
      */
     Optional<SpatialVector> axis();
 
     /**
-     * @return The falloff mapping algorithm applied to targets moving away from the operational epicenter.
+     * Retrieves the falloff scaling function applied to a target's distance from the topological origin.
+     *
+     * @return The origin {@link DistanceScalingFunction}.
      */
     DistanceScalingFunction originScaling();
 
     /**
-     * @return The falloff mapping algorithm applied to targets moving along the orientation axis.
+     * Retrieves the falloff scaling function applied to a target's distance parallel to {@link #axis()}.
+     *
+     * @return The axial {@link DistanceScalingFunction}.
      */
     DistanceScalingFunction axialScaling();
 
     /**
-     * @return The falloff mapping algorithm applied to targets moving perpendicular to the orientation axis.
+     * Retrieves the falloff scaling function applied to a target's distance perpendicular to {@link #axis()}.
+     *
+     * @return The radial {@link DistanceScalingFunction}.
      */
     DistanceScalingFunction radialScaling();
 
     /**
-     * @return The specific distance measuring logic (e.g., Euclidean vs Manhattan) for radius comparisons.
+     * Retrieves the distance metric ($L_2$ Euclidean or $L_1$ Manhattan) used for radius comparisons.
+     *
+     * @return The active {@link DistanceMetric}.
      */
     DistanceMetric metric();
 
     /**
-     * Calculates the exact absolute starting origin coordinate for topological mapping.
+     * Calculates the absolute world-space origin coordinate for topological evaluation by applying
+     * {@link #originOffset()} to the given {@code epicenter}.
      *
-     * @param enchantmentLevel The level of the spell field enchantment.
-     * @param spatialReference The entity defining the reference frame.
+     * @param enchantmentLevel The active level of the spell field enchantment.
+     * @param spatialReference The entity defining the local reference frame, or {@code null}.
      * @param epicenter        The base mathematical center of the volume.
-     * @return The offset absolute origin coordinate.
+     * @return The offset world-space origin coordinate.
      */
     Vec3 getOrigin(int enchantmentLevel, Entity spatialReference, Vec3 epicenter);
 
     /**
-     * Constructs the minimal bounding box enclosing the calculated geometry.
+     * Constructs a tight world-space axis-aligned bounding box enclosing the active topological range.
      *
-     * @param enchantmentLevel The level of the spell field enchantment.
-     * @param spatialReference The entity defining the reference frame.
+     * @param enchantmentLevel The active level of the spell field enchantment.
+     * @param spatialReference The entity defining the local reference frame, or {@code null}.
      * @param volumeCenter     The mathematical center of the volume.
-     * @return The strict geometric bounds.
+     * @return The computed world-space {@link AABB}.
      */
     AABB computeAABB(int enchantmentLevel, Entity spatialReference, Vec3 volumeCenter);
 
     /**
-     * Calculates the effective multiplier applied to a target at a designated spatial coordinate based on falloff scaling.
+     * Evaluates the composite topological multiplier ($\text{origin} \cdot \text{axial} \cdot \text{radial}$)
+     * for a target at {@code targetPos}.
      *
-     * @param enchantmentLevel The level of the spell field enchantment.
-     * @param spatialReference The entity defining the reference frame.
+     * @param enchantmentLevel The active level of the spell field enchantment.
+     * @param spatialReference The entity defining the local reference frame, or {@code null}.
      * @param epicenter        The mathematical center of the field volume.
-     * @param targetPos        The absolute world position of the specific entity or block target.
-     * @return The scalar multiplier bounded between 0.0 and 1.0. Returns 0.0 if the target is outside maximum range limits.
+     * @param targetPos        The absolute world position of the target entity or block.
+     * @return The scalar multiplier in $[0.0, 1.0]$, or {@code 0.0F} if the target lies outside any active range bound.
      */
     float evaluateMultiplier(int enchantmentLevel, Entity spatialReference, Vec3 epicenter, Vec3 targetPos);
 }

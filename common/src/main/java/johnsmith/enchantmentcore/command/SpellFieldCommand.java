@@ -9,7 +9,7 @@ import com.mojang.serialization.JsonOps;
 import java.util.Collection;
 
 import johnsmith.enchantmentcore.Constants;
-import johnsmith.enchantmentcore.enchantment.spellfield.SpellFieldComponent;
+import johnsmith.enchantmentcore.api.enchantment.spellfield.SpellFieldComponent;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

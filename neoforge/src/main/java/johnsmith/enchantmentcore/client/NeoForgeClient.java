@@ -1,9 +1,10 @@
 package johnsmith.enchantmentcore.client;
 
 import johnsmith.enchantmentcore.Constants;
+import johnsmith.enchantmentcore.api.registry.EnchantmentCoreEntities;
+import johnsmith.enchantmentcore.client.debug.SpellFieldDebugRenderer;
 import johnsmith.enchantmentcore.client.debug.SpellFieldDebugTracker;
 import johnsmith.enchantmentcore.client.render.SpellFieldAnchorRenderer;
-import johnsmith.enchantmentcore.registry.EnchantmentCoreEntities;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;

@@ -1,11 +1,12 @@
 package johnsmith.enchantmentcore.mixin.client.item;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+
 import com.llamalad7.mixinextras.sugar.Local;
 import java.util.Map;
 
-import johnsmith.enchantmentcore.enchantment.effect.BowChargeTimeEffect;
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.enchantment.effect.BowChargeTimeEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.client.renderer.item.properties.numeric.UseDuration;
 import net.minecraft.core.Holder;
@@ -54,15 +55,20 @@ public class UseDurationMixin {
             ItemEnchantments enchantments = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 
             for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
-                BowChargeTimeEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.BOW_CHARGE_TIME.get());
+                BowChargeTimeEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponents.BOW_CHARGE_TIME);
                 if (effect != null) {
                     reductionSeconds += effect.amount().calculate(entry.getValue());
                 }
             }
 
+            // Calculate the modified maximum charge threshold required to reach full power.
             float newMaxCharge = baseTime + (reductionSeconds * 20.0F);
+
+            // Clamp to prevent division by zero or negative charge times.
             newMaxCharge = Math.max(0.1F, newMaxCharge);
 
+            // Scale the returned use time up so that the vanilla JSON's 0.05 scale multiplier
+            // resolves to 1.0 (full draw) exactly at the new dynamic max charge.
             return original * (baseTime / newMaxCharge);
         }
 

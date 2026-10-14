@@ -12,30 +12,31 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Defines an effect applied to individual entities within a spell field volume.
+ * Contract for a {@link SpellFieldEffect} applied to individual entities intersecting an evaluated
+ * spell field volume.
  */
 public interface SpellFieldEntityEffect extends SpellFieldEffect {
-
     /**
-     * Executes the entity modification logic on the specified victim.
+     * Executes the entity effect logic on the specified {@code victim}.
      *
      * @param level            The executing server level.
-     * @param enchantmentLevel The level of the spell field enchantment.
+     * @param enchantmentLevel The active level of the spell field enchantment.
      * @param context          The item usage context triggering the spell field.
      * @param spatialReference The anchor entity or focal point of the spell field.
      * @param epicenter        The exact spatial origin vector of the spell field.
-     * @param victim           The entity targeted by the spell field.
-     * @param volumeScalar     The active topological multiplier for the target.
+     * @param victim           The target entity intersecting the spell field.
+     * @param volumeScalar     The active topological multiplier for {@code victim} in $(0.0, 1.0]$.
      */
     void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar);
 
     /**
-     * Constructs a standard loot context for evaluating entity predicates and loot tables.
+     * Constructs a standard {@link LootContext} parameterized with {@link LootContextParamSets#ENCHANTED_ENTITY}
+     * for evaluating {@link net.minecraft.advancements.critereon.ContextAwarePredicate} entity filters.
      *
      * @param level            The executing server level.
-     * @param target           The target entity for context evaluation.
-     * @param enchantmentLevel The level of the spell field enchantment.
-     * @return The configured loot context.
+     * @param target           The candidate target entity being tested.
+     * @param enchantmentLevel The active level of the spell field enchantment.
+     * @return The constructed {@link LootContext}.
      */
     static LootContext createLootContext(ServerLevel level, Entity target, int enchantmentLevel) {
         return new LootContext.Builder(
