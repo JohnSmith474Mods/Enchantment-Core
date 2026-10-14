@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
@@ -113,7 +113,7 @@ public abstract class EnchantmentEventsMixin {
      */
     @Inject(method = "checkTotemDeathProtection", at = @At("HEAD"))
     private void enchantment_core$onFatalDamage(DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
-        enchantment_core$evaluateAllSlots(EnchantmentEffectComponentRegistry.FATAL_DAMAGE.get(), damageSource);
+        enchantment_core$evaluateAllSlots(EnchantmentEffectComponents.FATAL_DAMAGE, damageSource);
     }
 
     /**
@@ -121,7 +121,7 @@ public abstract class EnchantmentEventsMixin {
      */
     @Inject(method = "jumpFromGround", at = @At("TAIL"))
     private void enchantment_core$onJump(CallbackInfo ci) {
-        enchantment_core$evaluateAllSlots(EnchantmentEffectComponentRegistry.ON_JUMP.get(), null);
+        enchantment_core$evaluateAllSlots(EnchantmentEffectComponents.ON_JUMP, null);
     }
 
     /**
@@ -132,7 +132,7 @@ public abstract class EnchantmentEventsMixin {
         if (cir.getReturnValueF() > 0.0F) {
             LivingEntity entity = (LivingEntity) (Object) this;
             EquipmentSlot slot = entity.getUsedItemHand() == InteractionHand.OFF_HAND ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
-            enchantment_core$evaluateEffect(entity.getUseItem(), slot, EnchantmentEffectComponentRegistry.SHIELD_BLOCK.get(), damageSource);
+            enchantment_core$evaluateEffect(entity.getUseItem(), slot, EnchantmentEffectComponents.SHIELD_BLOCK, damageSource);
         }
     }
 
@@ -144,7 +144,7 @@ public abstract class EnchantmentEventsMixin {
         LivingEntity entity = (LivingEntity) (Object) this;
         ItemStack item = entity.getItemInHand(hand);
         EquipmentSlot slot = hand == InteractionHand.OFF_HAND ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
-        enchantment_core$evaluateEffect(item, slot, EnchantmentEffectComponentRegistry.ITEM_USE_START.get(), null);
+        enchantment_core$evaluateEffect(item, slot, EnchantmentEffectComponents.ITEM_USE_START, null);
     }
 
     /**
@@ -154,6 +154,6 @@ public abstract class EnchantmentEventsMixin {
     private void enchantment_core$onItemUseTick(ItemStack usingItem, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
         EquipmentSlot slot = entity.getUsedItemHand() == InteractionHand.OFF_HAND ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
-        enchantment_core$evaluateEffect(usingItem, slot, EnchantmentEffectComponentRegistry.ITEM_USE_TICK.get(), null);
+        enchantment_core$evaluateEffect(usingItem, slot, EnchantmentEffectComponents.ITEM_USE_TICK, null);
     }
 }
