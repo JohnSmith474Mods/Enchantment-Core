@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
@@ -107,7 +107,7 @@ public abstract class InventoryTickMixin {
                 continue;
             }
 
-            List<ConditionalEffect<EnchantmentEntityEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.INVENTORY_TICK);
+            List<ConditionalEffect<EnchantmentEntityEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.INVENTORY_TICK);
 
             if (effects != null && !effects.isEmpty()) {
                 // Instantiate the parameter builder lazily to eliminate overhead on items lacking the effect.

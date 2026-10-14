@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
@@ -105,7 +105,7 @@ public abstract class EnchantmentEventsMixin {
      */
     @Inject(method = "checkTotemDeathProtection", at = @At("HEAD"))
     private void enchantment_core$onFatalDamage(DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
-        enchantment_core$evaluateAllSlots(EnchantmentEffectComponentRegistry.FATAL_DAMAGE, damageSource);
+        enchantment_core$evaluateAllSlots(EnchantmentEffectComponents.FATAL_DAMAGE, damageSource);
     }
 
     /**
@@ -113,7 +113,7 @@ public abstract class EnchantmentEventsMixin {
      */
     @Inject(method = "jumpFromGround", at = @At("TAIL"))
     private void enchantment_core$onJump(CallbackInfo ci) {
-        enchantment_core$evaluateAllSlots(EnchantmentEffectComponentRegistry.ON_JUMP, null);
+        enchantment_core$evaluateAllSlots(EnchantmentEffectComponents.ON_JUMP, null);
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class EnchantmentEventsMixin {
     @Inject(method = "hurtCurrentlyUsedShield", at = @At("HEAD"))
     private void enchantment_core$onShieldBlock(float damage, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
-        enchantment_core$evaluateEffect(entity.getUseItem(), EnchantmentEffectComponentRegistry.SHIELD_BLOCK, null);
+        enchantment_core$evaluateEffect(entity.getUseItem(), EnchantmentEffectComponents.SHIELD_BLOCK, null);
     }
 
     /**
@@ -132,7 +132,7 @@ public abstract class EnchantmentEventsMixin {
     private void enchantment_core$onItemUseStart(InteractionHand hand, CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
         ItemStack item = entity.getItemInHand(hand);
-        enchantment_core$evaluateEffect(item, EnchantmentEffectComponentRegistry.ITEM_USE_START, null);
+        enchantment_core$evaluateEffect(item, EnchantmentEffectComponents.ITEM_USE_START, null);
     }
 
     /**
@@ -140,6 +140,6 @@ public abstract class EnchantmentEventsMixin {
      */
     @Inject(method = "updateUsingItem", at = @At("HEAD"))
     private void enchantment_core$onItemUseTick(ItemStack usingItem, CallbackInfo ci) {
-        enchantment_core$evaluateEffect(usingItem, EnchantmentEffectComponentRegistry.ITEM_USE_TICK, null);
+        enchantment_core$evaluateEffect(usingItem, EnchantmentEffectComponents.ITEM_USE_TICK, null);
     }
 }

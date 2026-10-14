@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.api.enchantment.effect.FluidWalkerDefinition;
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.enchantment.effect.*;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 import johnsmith.enchantmentcore.api.entity.accessor.LivingEntityStateAccessor;
 import johnsmith.enchantmentcore.api.entity.accessor.StreakStateAccessor;
-import johnsmith.enchantmentcore.enchantment.effect.*;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -171,7 +170,7 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
                     lootContext = new LootContext.Builder(params).create(Optional.empty());
                 }
 
-                List<ConditionalEffect<FluidWalkerEffect>> fwEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.FLUID_WALKER);
+                List<ConditionalEffect<FluidWalkerEffect>> fwEffects = ench.value().effects().get(EnchantmentEffectComponents.FLUID_WALKER);
                 if (fwEffects != null) {
                     for (ConditionalEffect<FluidWalkerEffect> cond : fwEffects) {
                         if (isClient || cond.matches(lootContext)) {
@@ -182,7 +181,7 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
                 }
 
                 if (!this.enchantment_core$hasBuoyancy) {
-                    List<ConditionalEffect<BuoyancyEffect>> bEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.BUOYANCY);
+                    List<ConditionalEffect<BuoyancyEffect>> bEffects = ench.value().effects().get(EnchantmentEffectComponents.BUOYANCY);
                     if (bEffects != null) {
                         for (ConditionalEffect<BuoyancyEffect> cond : bEffects) {
                             if (isClient || cond.matches(lootContext)) {
@@ -193,7 +192,7 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
                     }
                 }
 
-                List<ConditionalEffect<MultiJumpEffect>> mjEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.MULTI_JUMP);
+                List<ConditionalEffect<MultiJumpEffect>> mjEffects = ench.value().effects().get(EnchantmentEffectComponents.MULTI_JUMP);
                 if (mjEffects != null) {
                     for (ConditionalEffect<MultiJumpEffect> cond : mjEffects) {
                         if (isClient || cond.matches(lootContext)) {
@@ -208,7 +207,7 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
                     }
                 }
 
-                List<ConditionalEffect<ClimbingEffect>> cEffects = ench.value().effects().get(EnchantmentEffectComponentRegistry.CLIMBING);
+                List<ConditionalEffect<ClimbingEffect>> cEffects = ench.value().effects().get(EnchantmentEffectComponents.CLIMBING);
                 if (cEffects != null) {
                     for (ConditionalEffect<ClimbingEffect> cond : cEffects) {
                         if (isClient || cond.matches(lootContext)) {

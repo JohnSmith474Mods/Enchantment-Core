@@ -7,8 +7,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
-import johnsmith.enchantmentcore.enchantment.effect.TransparencyEffect;
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.enchantment.effect.TransparencyEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
@@ -50,7 +50,7 @@ public abstract class HumanoidArmorLayerMixin {
 
         float minAlpha = 1.0F;
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.TRANSPARENCY);
+            List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.TRANSPARENCY);
             if (effects != null) {
                 for (ConditionalEffect<TransparencyEffect> cond : effects) {
                     minAlpha = Math.min(minAlpha, cond.effect().alphaMultiplier().calculate(entry.getIntValue()));

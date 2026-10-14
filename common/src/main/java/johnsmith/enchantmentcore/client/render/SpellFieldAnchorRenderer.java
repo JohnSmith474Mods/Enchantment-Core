@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import johnsmith.enchantmentcore.api.client.render.AnchorModelRenderer;
 import johnsmith.enchantmentcore.api.client.render.AnchorRendererRegistry;
-import johnsmith.enchantmentcore.enchantment.spellfield.entity.SpellFieldAnchorEntity;
+import johnsmith.enchantmentcore.api.enchantment.spellfield.entity.SpellFieldAnchorEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;

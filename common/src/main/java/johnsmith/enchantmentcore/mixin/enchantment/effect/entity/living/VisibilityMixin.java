@@ -2,8 +2,8 @@ package johnsmith.enchantmentcore.mixin.enchantment.effect.entity.living;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
-import johnsmith.enchantmentcore.enchantment.effect.TransparencyEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
+import johnsmith.enchantmentcore.api.enchantment.effect.TransparencyEffect;
 
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +61,7 @@ public abstract class VisibilityMixin {
 
             if (!enchantments.isEmpty()) {
                 for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-                    List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.TRANSPARENCY);
+                    List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.TRANSPARENCY);
 
                     if (effects != null) {
                         LootParams params = new LootParams.Builder(serverLevel)

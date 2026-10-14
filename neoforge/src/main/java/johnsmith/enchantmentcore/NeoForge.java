@@ -5,20 +5,17 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import johnsmith.enchantmentcore.api.config.PackInclusionType;
-import johnsmith.enchantmentcore.command.ImportCommand;
 import johnsmith.enchantmentcore.command.ExportCommand;
+import johnsmith.enchantmentcore.command.GenerateDescriptionKeysCommand;
+import johnsmith.enchantmentcore.command.ImportCommand;
 import johnsmith.enchantmentcore.command.SpellFieldCommand;
 import johnsmith.enchantmentcore.config.Config;
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
-import johnsmith.enchantmentcore.registry.EnchantmentValueRegistry;
-import johnsmith.enchantmentcore.platform.NeoForgeRegistryHelper;
-import johnsmith.enchantmentcore.registry.EnchantmentCoreEntities;
-import johnsmith.enchantmentcore.registry.EnchantmentCoreRegistries;
-import johnsmith.enchantmentcore.registry.SpellFieldRegistrar;
+import johnsmith.enchantmentcore.entity.NeoForgeEntities;
+import johnsmith.enchantmentcore.item.enchantment.NeoForgeEnchantmentEffectComponents;
+import johnsmith.enchantmentcore.item.enchantment.NeoForgeLevelBasedValues;
+import johnsmith.enchantmentcore.item.enchantment.spellfield.NeoForgeSpellFieldRegistries;
+import johnsmith.enchantmentcore.registry.NeoForgeRegistries;
 
-import net.minecraft.client.renderer.entity.NoopRenderer;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackSelectionConfig;
@@ -34,71 +31,48 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.registries.NewRegistryEvent;
-import net.neoforged.neoforge.registries.RegisterEvent;
+
 import org.jetbrains.annotations.NotNull;
 
 import static net.neoforged.neoforge.common.NeoForge.EVENT_BUS;
 
 @Mod(Constants.MOD_ID)
 public class NeoForge {
+
     public NeoForge(IEventBus eventBus, ModContainer container) {
-        Common.initialize();
+        // Resolve Config Path
         Config.MANAGER.init(FMLPaths.CONFIGDIR.get());
 
-        eventBus.addListener(this::onRegister);
-        eventBus.addListener(this::onNewRegistry);
-        eventBus.addListener(this::onRegisterRenderers);
+        // Initialize common classes
+        Common.initialize(ModList.get()::isLoaded);
+
+        // Register Library Components
+        NeoForgeEntities.initialize(eventBus);
+        eventBus.addListener(NeoForgeRegistries::initialize);
+        eventBus.addListener(NeoForgeSpellFieldRegistries::initialize);
+        eventBus.addListener(NeoForgeLevelBasedValues::initialize);
+        eventBus.addListener(NeoForgeEnchantmentEffectComponents::initialize);
+
+        // Register Optional Data
         eventBus.addListener(this::onAddPackFinders);
 
+        // Register Commands
         EVENT_BUS.addListener(this::onRegisterCommands);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            container.registerExtensionPoint(IConfigScreenFactory.class,
-                    (client, parent) -> Config.MANAGER.createScreen(parent));
+            container.registerExtensionPoint(
+                    IConfigScreenFactory.class,
+                    (client, parent) -> Config.MANAGER.createScreen(parent)
+            );
         }
-    }
-
-    private void onRegister(RegisterEvent event) {
-        if (event.getRegistryKey().equals(EnchantmentCoreRegistries.DISTANCE_SCALING_FUNCTION_KEY)) {
-            SpellFieldRegistrar.registerFunctions((id, codec) ->
-                    event.register(EnchantmentCoreRegistries.DISTANCE_SCALING_FUNCTION_KEY, id, () -> codec));
-        }
-        if (event.getRegistryKey().equals(EnchantmentCoreRegistries.SPELL_FIELD_SHAPE_KEY)) {
-            SpellFieldRegistrar.registerShapes((id, codec) ->
-                    event.register(EnchantmentCoreRegistries.SPELL_FIELD_SHAPE_KEY, id, () -> codec));
-        }
-        if (event.getRegistryKey().equals(EnchantmentCoreRegistries.SPELL_FIELD_EFFECT_KEY)) {
-            SpellFieldRegistrar.registerEffects((id, codec) ->
-                    event.register(EnchantmentCoreRegistries.SPELL_FIELD_EFFECT_KEY, id, () -> codec));
-        }
-        if (event.getRegistryKey().equals(BuiltInRegistries.ENCHANTMENT_LEVEL_BASED_VALUE_TYPE.key())) {
-            EnchantmentValueRegistry.initialize();
-        }
-        if (event.getRegistryKey().equals(BuiltInRegistries.ENCHANTMENT_ENTITY_EFFECT_TYPE.key())) {
-            EnchantmentEffectComponentRegistry.initialize();
-        }
-        if (event.getRegistryKey().equals(BuiltInRegistries.ENTITY_TYPE.key())) {
-            EnchantmentCoreEntities.initialize();
-        }
-    }
-
-    private void onNewRegistry(NewRegistryEvent event) {
-        for (Registry<?> registry : NeoForgeRegistryHelper.PENDING_REGISTRIES) {
-            event.register(registry);
-        }
-    }
-
-    private void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(EnchantmentCoreEntities.SPELL_FIELD_ANCHOR, NoopRenderer::new);
     }
 
     private void onRegisterCommands(RegisterCommandsEvent event) {
         ImportCommand.register(event.getDispatcher());
+        GenerateDescriptionKeysCommand.register(event.getDispatcher());
         ExportCommand.register(event.getDispatcher());
         SpellFieldCommand.register(event.getDispatcher());
     }
@@ -115,7 +89,6 @@ public class NeoForge {
         if (Files.exists(path)) {
             boolean isRequired = inclusionType == PackInclusionType.REQUIRED;
             boolean isDefaultActive = inclusionType != PackInclusionType.OPTIONAL;
-
             PackSelectionConfig selectionConfig = new PackSelectionConfig(isRequired, Pack.Position.TOP, false);
 
             PackSource packSource = new PackSource() {

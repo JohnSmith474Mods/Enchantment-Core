@@ -1,39 +1,43 @@
 package johnsmith.enchantmentcore.api.tooltip;
 
+import java.util.List;
+import java.util.Optional;
+
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
- * Contract for formatting enchantment tooltips.
+ * Pluggable strategy contract for formatting enchantment lines and descriptions on item tooltips.
+ * <p>
+ * Implementations are registered in {@link TooltipFormatterRegistry} and evaluated in descending
+ * order of {@link #getPriority()} whenever an item's applied or stored enchantments are rendered.
  */
 public interface EnchantmentTooltipFormatter {
     /**
-     * Formats the tooltip for the specified enchantment and level.
+     * Formats the tooltip lines for a single enchantment entry on the given {@link ItemStack}.
      *
-     * @param enchantment The target enchantment holder.
-     * @param level       The level of the enchantment.
-     * @param itemStack   The item stack hosting the enchantment.
-     * @return An optional list of formatted text components. Return Optional.empty() to fallback to other formatters.
+     * @param enchantment The registry {@link Holder} of the enchantment being rendered.
+     * @param level       The active level of the enchantment on the item.
+     * @param itemStack   The {@link ItemStack} hosting the enchantment.
+     * @return An {@link Optional} containing the list of formatted {@link Component} lines to append to the tooltip,
+     *         or {@link Optional#empty()} to pass evaluation to the next lower-priority formatter.
      */
     Optional<List<Component>> format(Holder<Enchantment> enchantment, int level, ItemStack itemStack);
 
     /**
-     * Retrieves the execution priority of this formatter.
-     * Higher values execute earlier.
+     * Returns the execution priority of this formatter.
+     * Formatters with higher priority values are queried first by {@link TooltipFormatterRegistry}.
      *
-     * @return The priority integer.
+     * @return The integer priority value.
      */
     int getPriority();
 
     /**
-     * Determines if this formatter is active.
+     * Determines whether this formatter is currently active and eligible to format tooltips.
      *
-     * @return True if the formatter is active, false otherwise.
+     * @return {@code true} if enabled, {@code false} to skip this formatter.
      */
     default boolean isEnabled() {
         return true;

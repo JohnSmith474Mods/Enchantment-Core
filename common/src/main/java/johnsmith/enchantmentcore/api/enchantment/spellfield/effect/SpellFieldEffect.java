@@ -3,14 +3,14 @@ package johnsmith.enchantmentcore.api.enchantment.spellfield.effect;
 import com.mojang.serialization.MapCodec;
 
 /**
- * Base contract for all data-driven spell field effects.
+ * Root polymorphic interface for all data-driven spell field effects registered in
+ * {@link johnsmith.enchantmentcore.api.registry.EnchantmentCoreRegistries#SPELL_FIELD_EFFECTS}.
  */
 public interface SpellFieldEffect {
-
     /**
-     * Retrieves the codec responsible for serializing and deserializing this effect.
+     * Retrieves the {@link MapCodec} responsible for serializing and deserializing this effect.
      *
-     * @return The map codec instance.
+     * @return The registered {@link MapCodec} instance.
      */
     MapCodec<? extends SpellFieldEffect> codec();
 }

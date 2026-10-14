@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -57,7 +57,7 @@ public abstract class DragMixin {
 
             for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                 if (!entry.getKey().value().matchingSlot(slot)) continue;
-                List<ConditionalEffect<EnchantmentValueEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.ENTITY_DRAG);
+                List<ConditionalEffect<EnchantmentValueEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.ENTITY_DRAG);
 
                 if (effects != null) {
                     if (!isClient && lootContext == null) {

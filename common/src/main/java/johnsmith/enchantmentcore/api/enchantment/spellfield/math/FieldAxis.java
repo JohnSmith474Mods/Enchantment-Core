@@ -6,12 +6,15 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
- * Defines spatial alignment vectors and corresponding impulse calculation vectors based on entity reference frames.
+ * Defines local and topological spatial reference axes and their corresponding kinetic impulse
+ * unit vectors relative to a reference entity's orientation and an evaluation epicenter.
  */
 public enum FieldAxis implements StringRepresentable {
     /**
-     * Aligns with the absolute global Y-axis.
+     * Aligns with the reference entity's local up vector (or the global $+Y$ axis if no entity is present).
      */
     VERTICAL("vertical") {
         @Override
@@ -24,8 +27,9 @@ public enum FieldAxis implements StringRepresentable {
             return this.getReferenceAxis(spatialReference);
         }
     },
+
     /**
-     * Aligns with the entity's direct line of sight (forward vector).
+     * Aligns with the reference entity's direct line of sight (forward view vector, or $+Z$ if no entity is present).
      */
     LONGITUDINAL("longitudinal") {
         @Override
@@ -38,8 +42,9 @@ public enum FieldAxis implements StringRepresentable {
             return this.getReferenceAxis(spatialReference);
         }
     },
+
     /**
-     * Aligns with the entity's horizontal lateral plane (right vector).
+     * Aligns with the reference entity's horizontal right vector ($\text{forward} \times \text{up}$, or $+X$ if no entity is present).
      */
     LATERAL("lateral") {
         @Override
@@ -57,8 +62,9 @@ public enum FieldAxis implements StringRepresentable {
             return this.getReferenceAxis(spatialReference);
         }
     },
+
     /**
-     * Aligns with the vector extending outward from the evaluation epicenter toward the target.
+     * Points radially outward from {@code offsetEpicenter} toward {@code targetPos}.
      */
     RADIAL("radial") {
         @Override
@@ -72,8 +78,10 @@ public enum FieldAxis implements StringRepresentable {
             return vectorToVictim.lengthSqr() > 0.0001D ? vectorToVictim.normalize() : Vec3.ZERO;
         }
     },
+
     /**
-     * Defines a vector tangent to the radius on the horizontal plane (orbital motion).
+     * Points tangentially around the {@link #VERTICAL} axis ($\vec{r} \times \hat{u}_{\text{vertical}}$),
+     * producing horizontal yaw-plane orbital motion.
      */
     AZIMUTHAL("azimuthal") {
         @Override
@@ -88,8 +96,10 @@ public enum FieldAxis implements StringRepresentable {
             return tangent.lengthSqr() > 0.0001D ? tangent.normalize() : Vec3.ZERO;
         }
     },
+
     /**
-     * Defines a vector tangent to the radius on the longitudinal plane (pitching orbit).
+     * Points tangentially around the {@link #LATERAL} axis ($\vec{r} \times \hat{u}_{\text{lateral}}$),
+     * producing longitudinal pitching orbital motion.
      */
     NUTATIONAL("nutational") {
         @Override
@@ -104,8 +114,10 @@ public enum FieldAxis implements StringRepresentable {
             return tangent.lengthSqr() > 0.0001D ? tangent.normalize() : Vec3.ZERO;
         }
     },
+
     /**
-     * Defines a vector tangent to the radius on the lateral plane (rolling orbit).
+     * Points tangentially around the {@link #LONGITUDINAL} axis ($\vec{r} \times \hat{u}_{\text{longitudinal}}$),
+     * producing lateral rolling orbital motion.
      */
     TORSIONAL("torsional") {
         @Override
@@ -121,7 +133,12 @@ public enum FieldAxis implements StringRepresentable {
         }
     };
 
+    /**
+     * Codec for serializing and deserializing {@link FieldAxis} constants by their lowercase identifier.
+     */
     public static final Codec<FieldAxis> CODEC = StringRepresentable.fromEnum(FieldAxis::values);
+
+    /** The serialized string identifier of this axis. */
     private final String name;
 
     FieldAxis(String name) {
@@ -129,25 +146,25 @@ public enum FieldAxis implements StringRepresentable {
     }
 
     /**
-     * Retrieves the core directional vector mapping for this axis based on the entity's orientation.
+     * Retrieves the normalized primary reference axis vector based on the entity's orientation.
      *
-     * @param spatialReference The entity defining the reference frame.
+     * @param spatialReference The entity defining the local coordinate frame, or {@code null} for world-axis defaults.
      * @return The normalized direction vector.
      */
     public abstract Vec3 getReferenceAxis(Entity spatialReference);
 
     /**
-     * Calculates the kinetic impulse vector generated along this axis.
+     * Computes the normalized kinetic impulse vector at {@code targetPos} relative to {@code offsetEpicenter}.
      *
-     * @param spatialReference The entity defining the reference frame.
-     * @param offsetEpicenter  The absolute origin point of the impulse force.
-     * @param targetPos        The absolute spatial position of the target.
-     * @return The normalized impulse vector.
+     * @param spatialReference The entity defining the local coordinate frame, or {@code null}.
+     * @param offsetEpicenter  The world-space origin point of the impulse field.
+     * @param targetPos        The world-space position of the target being evaluated.
+     * @return The normalized impulse direction vector, or {@link Vec3#ZERO} if degenerate.
      */
     public abstract Vec3 getImpulseVector(Entity spatialReference, Vec3 offsetEpicenter, Vec3 targetPos);
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
         return this.name;
     }
 }

@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 import johnsmith.enchantmentcore.api.entity.accessor.ProjectileStateAccessor;
-import johnsmith.enchantmentcore.enchantment.effect.projectile.HomingProjectileEffect;
-import johnsmith.enchantmentcore.enchantment.effect.projectile.MagneticProjectileEffect;
-import johnsmith.enchantmentcore.enchantment.effect.projectile.RicochetProjectileEffect;
-import johnsmith.enchantmentcore.enchantment.effect.projectile.ShrapnelProjectileEffect;
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.enchantment.effect.projectile.HomingProjectileEffect;
+import johnsmith.enchantmentcore.api.enchantment.effect.projectile.MagneticProjectileEffect;
+import johnsmith.enchantmentcore.api.enchantment.effect.projectile.RicochetProjectileEffect;
+import johnsmith.enchantmentcore.api.enchantment.effect.projectile.ShrapnelProjectileEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -118,7 +118,7 @@ public abstract class StateCaptureMixin {
                         int level = entry.getIntValue();
 
                         // Parse Gravity.
-                        List<ConditionalEffect<EnchantmentValueEffect>> gravityEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.GRAVITY_MODIFIER);
+                        List<ConditionalEffect<EnchantmentValueEffect>> gravityEffects = enchantment.value().effects().get(EnchantmentEffectComponents.GRAVITY_MODIFIER);
                         if (gravityEffects != null) {
                             for (ConditionalEffect<EnchantmentValueEffect> conditional : gravityEffects) {
                                 if (!isServer || conditional.matches(lootContext)) {
@@ -128,7 +128,7 @@ public abstract class StateCaptureMixin {
                         }
 
                         // Parse Drag.
-                        List<ConditionalEffect<EnchantmentValueEffect>> dragEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_DRAG);
+                        List<ConditionalEffect<EnchantmentValueEffect>> dragEffects = enchantment.value().effects().get(EnchantmentEffectComponents.PROJECTILE_DRAG);
                         if (dragEffects != null) {
                             for (ConditionalEffect<EnchantmentValueEffect> conditional : dragEffects) {
                                 if (!isServer || conditional.matches(lootContext)) {
@@ -138,7 +138,7 @@ public abstract class StateCaptureMixin {
                         }
 
                         // Parse Homing.
-                        List<ConditionalEffect<HomingProjectileEffect>> homingEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_HOMING);
+                        List<ConditionalEffect<HomingProjectileEffect>> homingEffects = enchantment.value().effects().get(EnchantmentEffectComponents.PROJECTILE_HOMING);
                         if (homingEffects != null) {
                             for (ConditionalEffect<HomingProjectileEffect> conditional : homingEffects) {
                                 if (!isServer || conditional.matches(lootContext)) {
@@ -155,7 +155,7 @@ public abstract class StateCaptureMixin {
                         }
 
                         // Parse Ricochet.
-                        List<ConditionalEffect<RicochetProjectileEffect>> ricochetEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_RICOCHET);
+                        List<ConditionalEffect<RicochetProjectileEffect>> ricochetEffects = enchantment.value().effects().get(EnchantmentEffectComponents.PROJECTILE_RICOCHET);
                         if (ricochetEffects != null) {
                             for (ConditionalEffect<RicochetProjectileEffect> conditional : ricochetEffects) {
                                 if (!isServer || conditional.matches(lootContext)) {
@@ -167,7 +167,7 @@ public abstract class StateCaptureMixin {
                         }
 
                         // Parse Magnetism.
-                        List<ConditionalEffect<MagneticProjectileEffect>> magneticEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_MAGNETIC);
+                        List<ConditionalEffect<MagneticProjectileEffect>> magneticEffects = enchantment.value().effects().get(EnchantmentEffectComponents.PROJECTILE_MAGNETIC);
                         if (magneticEffects != null) {
                             for (ConditionalEffect<MagneticProjectileEffect> conditional : magneticEffects) {
                                 if (!isServer || conditional.matches(lootContext)) {
@@ -181,7 +181,7 @@ public abstract class StateCaptureMixin {
                         }
 
                         // Parse Shrapnel.
-                        List<ConditionalEffect<ShrapnelProjectileEffect>> shrapnelEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_SHRAPNEL);
+                        List<ConditionalEffect<ShrapnelProjectileEffect>> shrapnelEffects = enchantment.value().effects().get(EnchantmentEffectComponents.PROJECTILE_SHRAPNEL);
                         if (shrapnelEffects != null) {
                             for (ConditionalEffect<ShrapnelProjectileEffect> conditional : shrapnelEffects) {
                                 if (!isServer || conditional.matches(lootContext)) {

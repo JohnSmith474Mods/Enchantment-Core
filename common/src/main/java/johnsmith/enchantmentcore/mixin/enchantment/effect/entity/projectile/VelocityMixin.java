@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -76,7 +76,7 @@ public abstract class VelocityMixin {
                         Holder<Enchantment> enchantment = entry.getKey();
                         int level = entry.getIntValue();
 
-                        List<ConditionalEffect<EnchantmentValueEffect>> velocityEffects = enchantment.value().effects().get(EnchantmentEffectComponentRegistry.PROJECTILE_VELOCITY);
+                        List<ConditionalEffect<EnchantmentValueEffect>> velocityEffects = enchantment.value().effects().get(EnchantmentEffectComponents.PROJECTILE_VELOCITY);
 
                         if (velocityEffects != null) {
                             for (ConditionalEffect<EnchantmentValueEffect> conditional : velocityEffects) {

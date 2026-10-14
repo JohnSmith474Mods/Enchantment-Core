@@ -5,9 +5,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 import johnsmith.enchantmentcore.api.entity.accessor.StreakStateAccessor;
-import johnsmith.enchantmentcore.enchantment.effect.StreakEffect;
+import johnsmith.enchantmentcore.api.enchantment.effect.StreakEffect;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -65,7 +65,7 @@ public abstract class CombatStreakMixin {
         LootContext lootContext = null;
 
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.DAMAGE_STREAK);
+            List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.DAMAGE_STREAK);
 
             if (effects != null && !effects.isEmpty()) {
                 // Lazily instantiate the loot context for condition validation.

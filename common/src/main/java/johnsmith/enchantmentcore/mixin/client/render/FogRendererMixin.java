@@ -5,8 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import java.util.Map;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
-import johnsmith.enchantmentcore.enchantment.effect.FluidFogDensityEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
+import johnsmith.enchantmentcore.api.enchantment.effect.FluidFogDensityEffect;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.FogRenderer;
@@ -72,7 +72,7 @@ public abstract class FogRendererMixin {
         FluidState fluidState = entity.level().getFluidState(camera.getBlockPosition());
 
         for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
-            FluidFogDensityEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.FLUID_FOG_DENSITY);
+            FluidFogDensityEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponents.FLUID_FOG_DENSITY);
 
             // 3. Check if the current fluid matches the effect's configuration.
             if (effect != null && fluidState.is(effect.fluids())) {
