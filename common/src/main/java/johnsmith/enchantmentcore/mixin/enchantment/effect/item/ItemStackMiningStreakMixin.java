@@ -5,9 +5,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.List;
 import java.util.Optional;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 import johnsmith.enchantmentcore.api.entity.accessor.StreakStateAccessor;
-import johnsmith.enchantmentcore.enchantment.effect.StreakEffect;
+import johnsmith.enchantmentcore.api.enchantment.effect.StreakEffect;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -64,7 +64,7 @@ public abstract class ItemStackMiningStreakMixin {
             // Restrict streak accumulation to items held in the main hand.
             if (!entry.getKey().value().matchingSlot(EquipmentSlot.MAINHAND)) continue;
 
-            List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.MINING_STREAK.get());
+            List<ConditionalEffect<StreakEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.MINING_STREAK);
             if (effects != null) {
                 // Lazily instantiate the loot context only on the server and only if an effect exists.
                 if (!isClient && lootContext == null) {
