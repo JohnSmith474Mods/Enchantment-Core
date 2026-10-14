@@ -2,8 +2,8 @@ package johnsmith.enchantmentcore.mixin.client.item;
 
 import java.util.Map;
 
-import johnsmith.enchantmentcore.enchantment.effect.BowChargeTimeEffect;
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
+import johnsmith.enchantmentcore.api.enchantment.effect.BowChargeTimeEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
@@ -61,7 +61,7 @@ public class ItemPropertiesMixin {
 
                 // Aggregate charge time reductions from all active enchantments on the item.
                 for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
-                    BowChargeTimeEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.BOW_CHARGE_TIME.get());
+                    BowChargeTimeEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponents.BOW_CHARGE_TIME);
                     if (effect != null) {
                         reductionSeconds += effect.amount().calculate(entry.getValue());
                     }

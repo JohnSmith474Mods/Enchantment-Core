@@ -7,8 +7,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 import java.util.List;
 
-import johnsmith.enchantmentcore.registry.EnchantmentEffectComponentRegistry;
-import johnsmith.enchantmentcore.enchantment.effect.TransparencyEffect;
+import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
+import johnsmith.enchantmentcore.api.enchantment.effect.TransparencyEffect;
 
 import net.minecraft.client.model.ShieldModel;
 import net.minecraft.client.model.TridentModel;
@@ -34,27 +34,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Mixin targeting the BlockEntityWithoutLevelRenderer (BEWLR).
- * Intercepts and applies transparency enchantment effects to complex items
- * utilizing custom block entity renderers, including Shields and Tridents.
+ * Responsible for intercepting and applying transparency enchantment effects to complex items
+ * that utilize custom block entity renderers, such as Shields and Tridents.
  */
 @Mixin(BlockEntityWithoutLevelRenderer.class)
 public abstract class BlockEntityWithoutLevelRendererMixin {
 
-    /** State tracker containing the calculated alpha multiplier during the current render pass. */
+    /** State tracker to hold the calculated alpha multiplier during the current render pass. */
     @Unique
     private float enchantment_core$currentAlpha = 1.0F;
 
     /**
-     * Intercept the initial render call to evaluate the item enchantments.
-     * Calculate and cache the minimum active alpha multiplier from the TRANSPARENCY component.
+     * Captures the initial render call to evaluate the item's enchantments.
+     * Calculates and stores the lowest active alpha multiplier from the TRANSPARENCY component.
      *
-     * @param pStack          The item stack undergoing rendering.
-     * @param pDisplayContext The rendering context.
-     * @param pPoseStack      The active transformation matrix stack.
-     * @param pBuffer         The buffer source.
-     * @param pPackedLight    The packed light integer.
-     * @param pPackedOverlay  The packed overlay integer.
-     * @param ci              The callback information.
+     * @param pStack         The item stack being rendered.
+     * @param pDisplayContext The rendering context (e.g., GUI, FIRST_PERSON_HAND).
+     * @param pPoseStack     The active transformation matrix stack.
+     * @param pBuffer        The buffer source.
+     * @param pPackedLight   The light level.
+     * @param pPackedOverlay The overlay map.
+     * @param ci             The callback information.
      */
     @Inject(method = "renderByItem", at = @At("HEAD"))
     private void enchantment_core$captureItemAlpha(ItemStack pStack, ItemDisplayContext pDisplayContext, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, int pPackedOverlay, CallbackInfo ci) {
@@ -66,7 +66,7 @@ public abstract class BlockEntityWithoutLevelRendererMixin {
 
         float minAlpha = 1.0F;
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponentRegistry.TRANSPARENCY.get());
+            List<ConditionalEffect<TransparencyEffect>> effects = entry.getKey().value().effects().get(EnchantmentEffectComponents.TRANSPARENCY);
             if (effects != null) {
                 for (ConditionalEffect<TransparencyEffect> cond : effects) {
                     minAlpha = Math.min(minAlpha, cond.effect().alphaMultiplier().calculate(entry.getIntValue()));
@@ -78,12 +78,9 @@ public abstract class BlockEntityWithoutLevelRendererMixin {
     }
 
     /**
-     * Redirect the render type resolution for Shields.
-     * Enforce a translucent cull render type if the cached alpha multiplier falls below 1.0.
-     *
-     * @param instance The shield model instance.
-     * @param texture  The resource location of the shield texture.
-     * @return The resolved render type.
+     * Redirects the render type resolution for Shields.
+     * Forces the use of a translucent cull render type if the item's alpha is below 1.0,
+     * ensuring proper depth sorting and blending.
      */
     @Redirect(
             method = "renderByItem",
@@ -95,12 +92,8 @@ public abstract class BlockEntityWithoutLevelRendererMixin {
     }
 
     /**
-     * Redirect the render type resolution for Tridents.
-     * Enforce a translucent cull render type if the cached alpha multiplier falls below 1.0.
-     *
-     * @param instance The trident model instance.
-     * @param texture  The resource location of the trident texture.
-     * @return The resolved render type.
+     * Redirects the render type resolution for Tridents.
+     * Forces the use of a translucent cull render type if the item's alpha is below 1.0.
      */
     @Redirect(
             method = "renderByItem",
@@ -112,14 +105,8 @@ public abstract class BlockEntityWithoutLevelRendererMixin {
     }
 
     /**
-     * Intercept the vertex consumer retrieval from the ItemRenderer.
-     * Wrap the consumer to scale the alpha parameter of submitted vertices by the cached multiplier.
-     *
-     * @param bufferSource The active buffer source.
-     * @param renderType   The requested render type.
-     * @param hasEntry     Whether the buffer has an entry.
-     * @param hasFoil      Whether the item has a glint effect.
-     * @return The modified or original vertex consumer.
+     * Wraps the vertex consumer returned by the ItemRenderer.
+     * Dynamically scales the alpha parameter of every submitted vertex by the captured alpha multiplier.
      */
     @Redirect(
             method = "renderByItem",
@@ -135,6 +122,7 @@ public abstract class BlockEntityWithoutLevelRendererMixin {
         return new VertexConsumer() {
             @Override public VertexConsumer addVertex(float x, float y, float z) { originalConsumer.addVertex(x, y, z); return this; }
 
+            // Intercept color assignment to inject the calculated transparency modification.
             @Override public VertexConsumer setColor(int r, int g, int b, int a) { originalConsumer.setColor(r, g, b, (int) (a * enchantment_core$currentAlpha)); return this; }
 
             @Override public VertexConsumer setUv(float u, float v) { originalConsumer.setUv(u, v); return this; }

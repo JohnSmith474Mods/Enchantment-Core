@@ -25,9 +25,6 @@ public class NeoForgeGameEvents {
     public static void onLevelTick(LevelTickEvent.Post event) {
         if (event.getLevel() instanceof ServerLevel serverLevel) {
             SpellFieldTaskScheduler.tick(serverLevel);
-        }
-        if (event.getLevel() instanceof ServerLevel serverLevel) {
-            SpellFieldTaskScheduler.tick(serverLevel);
             johnsmith.enchantmentcore.util.TransientBlockTracker.get(serverLevel).tick(serverLevel);
         }
     }

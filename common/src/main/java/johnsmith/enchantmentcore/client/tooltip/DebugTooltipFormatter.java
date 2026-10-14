@@ -2,6 +2,7 @@ package johnsmith.enchantmentcore.client.tooltip;
 
 import johnsmith.enchantmentcore.api.tooltip.EnchantmentTooltipFormatter;
 import johnsmith.enchantmentcore.config.Config;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
