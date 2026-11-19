@@ -52,8 +52,6 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.shape.WideCuboidShap
 
 import net.minecraft.resources.Identifier;
 
-import net.minecraft.resources.Identifier;
-
 /**
  * Centralized registration helper for binding built-in spell field {@link DistanceScalingFunction}s,
  * {@link SpellFieldShape}s, and {@link SpellFieldEffect}s to their custom registries across all mod loaders.
@@ -66,7 +64,7 @@ public class SpellFieldRegistrar {
     /**
      * Feeds all built-in {@link DistanceScalingFunction} codecs into the provided platform registrar callback.
      *
-     * @param registrar A consumer accepting each function's {@link ResourceLocation} and {@link MapCodec}.
+     * @param registrar A consumer accepting each function's {@link Identifier} and {@link MapCodec}.
      */
     public static void registerFunctions(BiConsumer<Identifier, MapCodec<? extends DistanceScalingFunction>> registrar) {
         registrar.accept(id(ConstantScalingFunction.KEY), ConstantScalingFunction.CODEC);
@@ -81,7 +79,7 @@ public class SpellFieldRegistrar {
      * Feeds all built-in {@link SpellFieldShape} codecs into the provided platform registrar callback
      * and registers their level-based JSON keys with {@link DataTransformerRegistry}.
      *
-     * @param registrar A consumer accepting each shape's {@link ResourceLocation} and {@link MapCodec}.
+     * @param registrar A consumer accepting each shape's {@link Identifier} and {@link MapCodec}.
      */
     public static void registerShapes(BiConsumer<Identifier, MapCodec<? extends SpellFieldShape>> registrar) {
         registerShape(registrar, CubeShape.KEY, CubeShape.CODEC, CubeShape.KEY_PROVIDER);
@@ -94,7 +92,7 @@ public class SpellFieldRegistrar {
      * Feeds all built-in {@link SpellFieldEffect} codecs into the provided platform registrar callback
      * and registers their level-based JSON keys with {@link DataTransformerRegistry}.
      *
-     * @param registrar A consumer accepting each effect's {@link ResourceLocation} and {@link MapCodec}.
+     * @param registrar A consumer accepting each effect's {@link Identifier} and {@link MapCodec}.
      */
     public static void registerEffects(BiConsumer<Identifier, MapCodec<? extends SpellFieldEffect>> registrar) {
         registerEffect(registrar, PlaySoundVolumeEffect.KEY, PlaySoundVolumeEffect.CODEC, PlaySoundVolumeEffect.KEY_PROVIDER);
