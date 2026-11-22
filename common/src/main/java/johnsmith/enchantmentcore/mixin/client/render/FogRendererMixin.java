@@ -37,15 +37,15 @@ public abstract class FogRendererMixin {
      * Intercepts the end of the fog setup process to forcefully override the returned parameters.
      * Evaluates the equipped helmet for active FLUID_FOG_DENSITY effects.
      *
-     * @param cir          The callback information returning the mutable FogData struct.
-     * @param camera       The player camera instance resolved via Local capture.
-     * @param viewDistance The current configured client view distance resolved via Local capture.
+     * @param cir                    The callback information returning the mutable FogData struct.
+     * @param camera                 The player camera instance resolved via Local capture.
+     * @param renderDistanceInChunks The current configured client render distance in chunks resolved via Local capture.
      */
     @Inject(method = "setupFog", at = @At("RETURN"))
     private void enchantment_core$applyLevelBasedWaterVisibility(
             CallbackInfoReturnable<FogData> cir,
             @Local(argsOnly = true) Camera camera,
-            @Local(argsOnly = true) float viewDistance
+            @Local(argsOnly = true) int renderDistanceInChunks
     ) {
         // 1. Extract required context directly from the Camera parameter
         FogType fogType = camera.getFluidInCamera();
@@ -62,6 +62,7 @@ public abstract class FogRendererMixin {
 
         // 2. Retrieve the actual FluidState from the world using the camera position.
         FluidState fluidState = livingEntity.level().getFluidState(camera.blockPosition());
+        float viewDistance = renderDistanceInChunks * 16.0F;
 
         for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
             FluidFogDensityEffect effect = entry.getKey().value().effects().get(EnchantmentEffectComponents.FLUID_FOG_DENSITY);

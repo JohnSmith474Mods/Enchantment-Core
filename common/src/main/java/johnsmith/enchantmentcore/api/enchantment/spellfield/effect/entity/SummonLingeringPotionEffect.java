@@ -12,7 +12,7 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEnt
 import johnsmith.enchantmentcore.api.enchantment.spellfield.type.PotionPayload;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -20,6 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -28,12 +29,12 @@ import net.minecraft.world.phys.Vec3;
  *
  * @param potionEffects The list of {@link PotionPayload} status effects added to the spawned area effect cloud.
  * @param cloudRadius   The {@link LevelBasedValue} initial radius (in blocks) of the spawned cloud.
- * @param entityFilter  Optional {@link ContextAwarePredicate} restricting which entities trigger cloud spawning.
+ * @param entityFilter  Optional {@link LootItemCondition} restricting which entities trigger cloud spawning.
  */
 public record SummonLingeringPotionEffect(
         List<PotionPayload> potionEffects,
         LevelBasedValue cloudRadius,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the list of potion payloads. */
     public static final String POTION_EFFECTS = "potion_effects";
@@ -58,7 +59,7 @@ public record SummonLingeringPotionEffect(
     public static final MapCodec<SummonLingeringPotionEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             PotionPayload.CODEC.listOf().fieldOf(POTION_EFFECTS).forGetter(SummonLingeringPotionEffect::potionEffects),
             LevelBasedValue.CODEC.fieldOf(CLOUD_RADIUS).forGetter(SummonLingeringPotionEffect::cloudRadius),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(SummonLingeringPotionEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(SummonLingeringPotionEffect::entityFilter)
     ).apply(instance, SummonLingeringPotionEffect::new));
 
     /**
@@ -75,7 +76,7 @@ public record SummonLingeringPotionEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         AreaEffectCloud cloud = new AreaEffectCloud(level, victim.getX(), victim.getY(), victim.getZ());
         cloud.setRadius(this.cloudRadius.calculate(enchantmentLevel));
@@ -139,7 +140,7 @@ public record SummonLingeringPotionEffect(
      * @param entityFilter The predicate filter to match against candidate entities.
      * @return A new {@link SummonLingeringPotionEffect} instance.
      */
-    public SummonLingeringPotionEffect withEntityFilter(ContextAwarePredicate entityFilter) {
+    public SummonLingeringPotionEffect withEntityFilter(Holder<LootItemCondition> entityFilter) {
         return new SummonLingeringPotionEffect(potionEffects, cloudRadius, Optional.of(entityFilter));
     }
     // endregion

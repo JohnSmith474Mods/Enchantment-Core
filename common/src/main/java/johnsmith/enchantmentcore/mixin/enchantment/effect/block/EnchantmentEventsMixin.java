@@ -22,7 +22,6 @@ import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
@@ -38,7 +37,6 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.effects.EnchantmentEntityEffect;
 import net.minecraft.world.level.gamerules.GameRules;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -332,8 +330,8 @@ public abstract class EnchantmentEventsMixin {
      * @param ci          The callback information.
      */
     @Inject(method = "playerDestroy", at = @At("HEAD"))
-    private void enchantment_core$triggerPostMineEffects(Level level, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack tool, CallbackInfo ci) {
-        if (level.isClientSide() || tool == null || tool.isEmpty()) return;
+    private void enchantment_core$triggerPostMineEffects(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack tool, CallbackInfo ci) {
+        if (tool == null || tool.isEmpty()) return;
 
         ItemEnchantments enchantments = tool.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         if (enchantments.isEmpty()) return;
@@ -347,7 +345,7 @@ public abstract class EnchantmentEventsMixin {
             if (effects != null && !effects.isEmpty()) {
                 // Defer loot context instantiation until an active effect is confirmed.
                 if (lootContext == null) {
-                    LootParams.Builder paramsBuilder = new LootParams.Builder((ServerLevel) level)
+                    LootParams.Builder paramsBuilder = new LootParams.Builder(level)
                             .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
                             .withParameter(LootContextParams.TOOL, tool)
                             .withParameter(LootContextParams.THIS_ENTITY, player)
@@ -361,7 +359,7 @@ public abstract class EnchantmentEventsMixin {
 
                 for (ConditionalEffect<EnchantmentEntityEffect> conditionalEffect : effects) {
                     if (conditionalEffect.matches(lootContext)) {
-                        conditionalEffect.effect().apply((ServerLevel) level, entry.getIntValue(), itemInUse, player, Vec3.atCenterOf(pos));
+                        conditionalEffect.effect().apply(level, entry.getIntValue(), itemInUse, player, Vec3.atCenterOf(pos));
                     }
                 }
             }

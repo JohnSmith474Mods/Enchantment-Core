@@ -74,15 +74,15 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
 
         poseStack.pushPose();
         poseStack.translate(0.0D, scale / 2.0D, 0.0D);
-        poseStack.mulPose(state.cameraOrientation);
-        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+        poseStack.rotate(state.cameraOrientation);
+        poseStack.rotateDegrees(Axis.YP, 180.0F);
         poseStack.scale(scale, scale, scale);
 
         int currentFrame = (state.tickCount / frameRate) % frames;
         float v0 = (float) currentFrame / frames;
         float v1 = (float) (currentFrame + 1) / frames;
 
-        nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentCullItemTarget(texture), (pose, consumer) -> {
+        nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentCull(texture), (pose, consumer) -> {
             Matrix4f matrix4f = pose.pose();
             int light = 15728880; // Full bright
 
@@ -102,7 +102,7 @@ public class SpellFieldAnchorRenderer extends EntityRenderer<SpellFieldAnchorEnt
     }
 
     @Override
-    protected AABB getBoundingBoxForCulling(SpellFieldAnchorEntity entity) {
+    protected AABB getBoundingBoxForCulling(SpellFieldAnchorEntity entity, float partialTicks) {
         return entity.getBoundingBox().inflate(entity.getVisualScale());
     }
 

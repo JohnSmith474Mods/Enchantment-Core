@@ -117,7 +117,7 @@
             "minecraft:entity_type": "#minecraft:arrows"
           },
           "entity": "direct_attacker",
-          "condition": "minecraft:entity_properties"
+          "type": "minecraft:entity_properties"
         }
       }
     ]

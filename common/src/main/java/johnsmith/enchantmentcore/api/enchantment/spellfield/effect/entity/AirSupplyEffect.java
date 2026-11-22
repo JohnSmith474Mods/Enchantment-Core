@@ -9,12 +9,13 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -22,11 +23,11 @@ import net.minecraft.world.phys.Vec3;
  * target entity's oxygen air supply ticks, scaled by the entity's local topological multiplier.
  *
  * @param amount       The {@link LevelBasedValue} change in air supply ticks before topological scaling.
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting which entities are affected.
+ * @param entityFilter Optional {@link LootItemCondition} restricting which entities are affected.
  */
 public record AirSupplyEffect(
         LevelBasedValue amount,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the air supply tick delta. */
     public static final String AMOUNT = "amount";
@@ -47,7 +48,7 @@ public record AirSupplyEffect(
      */
     public static final MapCodec<AirSupplyEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             LevelBasedValue.CODEC.fieldOf(AMOUNT).forGetter(AirSupplyEffect::amount),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(AirSupplyEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(AirSupplyEffect::entityFilter)
     ).apply(instance, AirSupplyEffect::new));
 
     /**
@@ -64,7 +65,7 @@ public record AirSupplyEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         int change = (int) (this.amount.calculate(enchantmentLevel) * volumeScalar);
         if (change == 0) return;
@@ -95,7 +96,7 @@ public record AirSupplyEffect(
      * @param amount       The {@link LevelBasedValue} air supply tick change.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public AirSupplyEffect(LevelBasedValue amount, ContextAwarePredicate entityFilter) {
+    public AirSupplyEffect(LevelBasedValue amount, Holder<LootItemCondition> entityFilter) {
         this(amount, Optional.of(entityFilter));
     }
     // endregion

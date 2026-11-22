@@ -13,7 +13,7 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldVol
 import johnsmith.enchantmentcore.api.enchantment.spellfield.math.GlobalVolume;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +26,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -39,14 +40,14 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * @param count          The {@link LevelBasedValue} number of surface hazards spawned when evaluated as a volume effect.
  * @param verticalSearch The {@link LevelBasedValue} vertical half-range (in blocks above and below the target point) searched for a solid surface.
  * @param distribution   Optional {@link ProbabilityDistribution} used to sample horizontal/vertical starting coordinates when evaluated as a volume effect.
- * @param entityFilter   Optional {@link ContextAwarePredicate} restricting which entities trigger hazards when evaluated as an entity effect.
+ * @param entityFilter   Optional {@link LootItemCondition} restricting which entities trigger hazards when evaluated as an entity effect.
  */
 public record SurfaceHazardEffect(
         EntityType<?> entityType,
         LevelBasedValue count,
         LevelBasedValue verticalSearch,
         Optional<ProbabilityDistribution> distribution,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect, SpellFieldVolumeEffect {
     /** JSON field key for the hazard entity type identifier. */
     public static final String ENTITY_TYPE = "entity_type";
@@ -79,7 +80,7 @@ public record SurfaceHazardEffect(
             LevelBasedValue.CODEC.optionalFieldOf(COUNT, LevelBasedValue.constant(1.0F)).forGetter(SurfaceHazardEffect::count),
             LevelBasedValue.CODEC.optionalFieldOf(VERTICAL_SEARCH, LevelBasedValue.constant(5.0F)).forGetter(SurfaceHazardEffect::verticalSearch),
             ProbabilityDistribution.CODEC.optionalFieldOf(DISTRIBUTION).forGetter(SurfaceHazardEffect::distribution),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(SurfaceHazardEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(SurfaceHazardEffect::entityFilter)
     ).apply(instance, SurfaceHazardEffect::new));
 
     /**
@@ -96,7 +97,7 @@ public record SurfaceHazardEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
         this.dispatchHazard(level, enchantmentLevel, context.owner(), victim.position(), volumeScalar);
     }
 
@@ -208,7 +209,7 @@ public record SurfaceHazardEffect(
      * @param verticalSearch The vertical search radius in blocks.
      * @param entityFilter   The predicate filter to match against candidate entities.
      */
-    public SurfaceHazardEffect(EntityType<?> entityType, LevelBasedValue count, LevelBasedValue verticalSearch, ContextAwarePredicate entityFilter) {
+    public SurfaceHazardEffect(EntityType<?> entityType, LevelBasedValue count, LevelBasedValue verticalSearch, Holder<LootItemCondition> entityFilter) {
         this(entityType, count, verticalSearch, Optional.empty(), Optional.of(entityFilter));
     }
 
@@ -221,7 +222,7 @@ public record SurfaceHazardEffect(
      * @param distribution   The spatial probability distribution for volume sampling.
      * @param entityFilter   The predicate filter to match against candidate entities.
      */
-    public SurfaceHazardEffect(EntityType<?> entityType, LevelBasedValue count, LevelBasedValue verticalSearch, ProbabilityDistribution distribution, ContextAwarePredicate entityFilter) {
+    public SurfaceHazardEffect(EntityType<?> entityType, LevelBasedValue count, LevelBasedValue verticalSearch, ProbabilityDistribution distribution, Holder<LootItemCondition> entityFilter) {
         this(entityType, count, verticalSearch, Optional.of(distribution), Optional.of(entityFilter));
     }
     // endregion

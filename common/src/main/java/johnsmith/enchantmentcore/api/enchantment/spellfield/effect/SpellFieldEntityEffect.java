@@ -31,7 +31,7 @@ public interface SpellFieldEntityEffect extends SpellFieldEffect {
 
     /**
      * Constructs a standard {@link LootContext} parameterized with {@link LootContextParamSets#ENCHANTED_ENTITY}
-     * for evaluating {@link net.minecraft.advancements.predicates.ContextAwarePredicate} entity filters.
+     * for evaluating {@link net.minecraft.world.level.storage.loot.predicates.LootItemCondition} entity filters.
      *
      * @param level            The executing server level.
      * @param target           The candidate target entity being tested.

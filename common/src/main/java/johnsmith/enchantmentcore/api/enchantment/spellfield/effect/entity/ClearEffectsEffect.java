@@ -11,7 +11,6 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
@@ -20,6 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -28,11 +28,11 @@ import net.minecraft.world.phys.Vec3;
  * multiplier, removing any effect whose remaining duration drops to or below zero.
  *
  * @param durationReduction The {@link LevelBasedValue} number of ticks subtracted from each active status effect before topological scaling.
- * @param entityFilter      Optional {@link ContextAwarePredicate} restricting which entities are affected.
+ * @param entityFilter      Optional {@link LootItemCondition} restricting which entities are affected.
  */
 public record ClearEffectsEffect(
         LevelBasedValue durationReduction,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the status effect duration reduction in ticks. */
     public static final String DURATION_REDUCTION = "duration_reduction";
@@ -53,7 +53,7 @@ public record ClearEffectsEffect(
      */
     public static final MapCodec<ClearEffectsEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             LevelBasedValue.CODEC.fieldOf(DURATION_REDUCTION).forGetter(ClearEffectsEffect::durationReduction),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ClearEffectsEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ClearEffectsEffect::entityFilter)
     ).apply(instance, ClearEffectsEffect::new));
 
     /**
@@ -71,7 +71,7 @@ public record ClearEffectsEffect(
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
         if (!(victim instanceof LivingEntity living)) return;
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         int reduction = (int) (this.durationReduction.calculate(enchantmentLevel) * volumeScalar);
         if (reduction <= 0) return;
@@ -127,7 +127,7 @@ public record ClearEffectsEffect(
      * @param durationReduction The {@link LevelBasedValue} duration reduction in ticks.
      * @param entityFilter      The predicate filter to match against candidate entities.
      */
-    public ClearEffectsEffect(LevelBasedValue durationReduction, ContextAwarePredicate entityFilter) {
+    public ClearEffectsEffect(LevelBasedValue durationReduction, Holder<LootItemCondition> entityFilter) {
         this(durationReduction, Optional.of(entityFilter));
     }
     // endregion

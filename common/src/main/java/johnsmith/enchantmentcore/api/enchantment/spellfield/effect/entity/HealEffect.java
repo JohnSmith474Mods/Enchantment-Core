@@ -9,12 +9,13 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -22,11 +23,11 @@ import net.minecraft.world.phys.Vec3;
  * instances within a spell field volume, scaled by each target's local topological multiplier.
  *
  * @param amount       The {@link LevelBasedValue} base health restored before topological scaling.
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting which entities are healed.
+ * @param entityFilter Optional {@link LootItemCondition} restricting which entities are healed.
  */
 public record HealEffect(
         LevelBasedValue amount,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the base healing amount. */
     public static final String AMOUNT = "amount";
@@ -47,7 +48,7 @@ public record HealEffect(
      */
     public static final MapCodec<HealEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             LevelBasedValue.CODEC.fieldOf(AMOUNT).forGetter(HealEffect::amount),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(HealEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(HealEffect::entityFilter)
     ).apply(instance, HealEffect::new));
 
     /**
@@ -65,7 +66,7 @@ public record HealEffect(
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
         if (!(victim instanceof LivingEntity living)) return;
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         float finalHeal = this.amount.calculate(enchantmentLevel) * volumeScalar;
         if (finalHeal > 0.0F) {
@@ -95,7 +96,7 @@ public record HealEffect(
      * @param amount       The {@link LevelBasedValue} base healing amount.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public HealEffect(LevelBasedValue amount, ContextAwarePredicate entityFilter) {
+    public HealEffect(LevelBasedValue amount, Holder<LootItemCondition> entityFilter) {
         this(amount, Optional.of(entityFilter));
     }
     // endregion

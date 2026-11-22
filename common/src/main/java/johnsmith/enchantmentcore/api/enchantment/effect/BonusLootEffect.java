@@ -8,8 +8,8 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.level.block.Block;
@@ -58,8 +58,8 @@ public record BonusLootEffect(
     public static final Codec<BonusLootEffect> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     LevelBasedValue.CODEC.fieldOf(CHANCE).forGetter(BonusLootEffect::chance),
-                    RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf(TARGET_BLOCKS).forGetter(BonusLootEffect::targetBlocks),
-                    RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf(REWARD_ITEMS).forGetter(BonusLootEffect::rewardItems),
+                    RegistryCodecs.holderSet(Registries.BLOCK).fieldOf(TARGET_BLOCKS).forGetter(BonusLootEffect::targetBlocks),
+                    RegistryCodecs.holderSet(Registries.ITEM).fieldOf(REWARD_ITEMS).forGetter(BonusLootEffect::rewardItems),
                     Codec.BOOL.optionalFieldOf(REWARD_EXPERIENCE, false).forGetter(BonusLootEffect::rewardExperience)
             ).apply(instance, BonusLootEffect::new)
     );

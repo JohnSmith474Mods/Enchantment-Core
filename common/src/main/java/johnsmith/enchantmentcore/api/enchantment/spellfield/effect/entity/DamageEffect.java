@@ -9,7 +9,7 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -18,6 +18,7 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -26,12 +27,12 @@ import net.minecraft.world.phys.Vec3;
  *
  * @param damageType   The registry {@link ResourceKey} of the {@link DamageType} to inflict.
  * @param amount       The {@link LevelBasedValue} base damage amount before topological scaling.
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting which entities take damage.
+ * @param entityFilter Optional {@link LootItemCondition} restricting which entities take damage.
  */
 public record DamageEffect(
         ResourceKey<DamageType> damageType,
         LevelBasedValue amount,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the damage type resource key. */
     public static final String DAMAGE_TYPE = "damage_type";
@@ -56,7 +57,7 @@ public record DamageEffect(
     public static final MapCodec<DamageEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             ResourceKey.codec(Registries.DAMAGE_TYPE).fieldOf(DAMAGE_TYPE).forGetter(DamageEffect::damageType),
             LevelBasedValue.CODEC.fieldOf(AMOUNT).forGetter(DamageEffect::amount),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(DamageEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(DamageEffect::entityFilter)
     ).apply(instance, DamageEffect::new));
 
     /**
@@ -73,7 +74,7 @@ public record DamageEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         float finalDamage = this.amount.calculate(enchantmentLevel) * volumeScalar;
         if (finalDamage <= 0.0F) return;
@@ -108,7 +109,7 @@ public record DamageEffect(
      * @param amount       The {@link LevelBasedValue} base damage amount.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public DamageEffect(ResourceKey<DamageType> damageType, LevelBasedValue amount, ContextAwarePredicate entityFilter) {
+    public DamageEffect(ResourceKey<DamageType> damageType, LevelBasedValue amount, Holder<LootItemCondition> entityFilter) {
         this(damageType, amount, Optional.of(entityFilter));
     }
     // endregion

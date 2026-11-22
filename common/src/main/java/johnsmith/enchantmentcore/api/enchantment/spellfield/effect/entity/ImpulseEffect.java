@@ -11,11 +11,12 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEnt
 import johnsmith.enchantmentcore.api.enchantment.spellfield.math.FieldAxis;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -28,12 +29,12 @@ import net.minecraft.world.phys.Vec3;
  *
  * @param strength     The {@link LevelBasedValue} peak impulse magnitude (positive pushes along the axis; negative pulls against it).
  * @param direction    Optional {@link FieldAxis} dictating the impulse vector geometry (defaults to {@link FieldAxis#RADIAL}).
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting which entities receive the impulse.
+ * @param entityFilter Optional {@link LootItemCondition} restricting which entities receive the impulse.
  */
 public record ImpulseEffect(
         LevelBasedValue strength,
         Optional<FieldAxis> direction,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect, DirectionalSpellFieldEffect {
     /** JSON field key for the impulse force magnitude. */
     public static final String STRENGTH = "strength";
@@ -58,7 +59,7 @@ public record ImpulseEffect(
     public static final MapCodec<ImpulseEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             LevelBasedValue.CODEC.fieldOf(STRENGTH).forGetter(ImpulseEffect::strength),
             FieldAxis.CODEC.optionalFieldOf(DIRECTION).forGetter(ImpulseEffect::direction),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ImpulseEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ImpulseEffect::entityFilter)
     ).apply(instance, ImpulseEffect::new));
 
     /**
@@ -76,7 +77,7 @@ public record ImpulseEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         float force = this.strength.calculate(enchantmentLevel) * volumeScalar;
         if (Math.abs(force) < 0.0001F) return;
@@ -90,7 +91,7 @@ public record ImpulseEffect(
                 : 0.0D;
 
         victim.setDeltaMovement(victim.getDeltaMovement().add(impulse.x, impulse.y + frictionBump, impulse.z));
-        victim.hurtMarked = true;
+        victim.syncVelocity = true;
         victim.needsSync = true;
     }
 
@@ -129,7 +130,7 @@ public record ImpulseEffect(
      * @param strength     The {@link LevelBasedValue} impulse strength.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public ImpulseEffect(LevelBasedValue strength, ContextAwarePredicate entityFilter) {
+    public ImpulseEffect(LevelBasedValue strength, Holder<LootItemCondition> entityFilter) {
         this(strength, Optional.empty(), Optional.of(entityFilter));
     }
 
@@ -140,7 +141,7 @@ public record ImpulseEffect(
      * @param direction    The {@link FieldAxis} direction.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public ImpulseEffect(LevelBasedValue strength, FieldAxis direction, ContextAwarePredicate entityFilter) {
+    public ImpulseEffect(LevelBasedValue strength, FieldAxis direction, Holder<LootItemCondition> entityFilter) {
         this(strength, Optional.of(direction), Optional.of(entityFilter));
     }
     // endregion

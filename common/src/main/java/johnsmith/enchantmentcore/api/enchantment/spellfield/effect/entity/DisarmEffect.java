@@ -12,7 +12,7 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -22,6 +22,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -31,12 +32,12 @@ import net.minecraft.world.phys.Vec3;
  *
  * @param dropChance   The {@link LevelBasedValue} base probability (0.0 to 1.0) of disarming each slot before topological scaling.
  * @param slots        The list of {@link EquipmentSlot}s evaluated for disarming.
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting which entities can be disarmed.
+ * @param entityFilter Optional {@link LootItemCondition} restricting which entities can be disarmed.
  */
 public record DisarmEffect(
         LevelBasedValue dropChance,
         List<EquipmentSlot> slots,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the base disarm probability. */
     public static final String DROP_CHANCE = "drop_chance";
@@ -64,7 +65,7 @@ public record DisarmEffect(
     public static final MapCodec<DisarmEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             LevelBasedValue.CODEC.fieldOf(DROP_CHANCE).forGetter(DisarmEffect::dropChance),
             SLOT_CODEC.listOf().fieldOf(SLOTS).forGetter(DisarmEffect::slots),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(DisarmEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(DisarmEffect::entityFilter)
     ).apply(instance, DisarmEffect::new));
 
     /**
@@ -83,7 +84,7 @@ public record DisarmEffect(
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
         if (!(victim instanceof LivingEntity living)) return;
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         float chance = this.dropChance.calculate(enchantmentLevel) * volumeScalar;
         if (chance <= 0.0F) return;
@@ -130,7 +131,7 @@ public record DisarmEffect(
      * @param slots        The single {@link EquipmentSlot} to target.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public DisarmEffect(LevelBasedValue dropChance, EquipmentSlot slots, ContextAwarePredicate entityFilter) {
+    public DisarmEffect(LevelBasedValue dropChance, EquipmentSlot slots, Holder<LootItemCondition> entityFilter) {
         this(dropChance, List.of(slots), Optional.of(entityFilter));
     }
     // endregion

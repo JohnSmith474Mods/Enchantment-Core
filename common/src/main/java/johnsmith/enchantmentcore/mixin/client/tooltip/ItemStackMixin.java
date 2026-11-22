@@ -28,7 +28,11 @@ import java.util.function.Consumer;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 
-    @Inject(method = "addToTooltip", at = @At("HEAD"), cancellable = true)
+    @Inject(
+            method = "addToTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Lnet/minecraft/world/item/component/TooltipDisplay;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
     private <T extends TooltipProvider> void enchantment_core$interceptEnchantmentTooltip(
             DataComponentType<T> componentType, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag tooltipFlag, CallbackInfo ci) {
 

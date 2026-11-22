@@ -13,7 +13,7 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldVol
 import johnsmith.enchantmentcore.api.enchantment.spellfield.math.GlobalVolume;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
@@ -21,6 +21,7 @@ import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 import org.jetbrains.annotations.Nullable;
@@ -36,13 +37,13 @@ import org.jetbrains.annotations.Nullable;
  * @param entityType   The {@link EntityType} to instantiate and spawn.
  * @param count        The {@link LevelBasedValue} number of entities to spawn (supports fractional probabilistic rounding).
  * @param distribution Optional {@link ProbabilityDistribution} used to sample spawn coordinates when evaluated as a volume effect.
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting target eligibility.
+ * @param entityFilter Optional {@link LootItemCondition} restricting target eligibility.
  */
 public record SummonEntityEffect(
         EntityType<?> entityType,
         LevelBasedValue count,
         Optional<ProbabilityDistribution> distribution,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect, SpellFieldVolumeEffect {
     /** JSON field key for the entity type identifier. */
     public static final String ENTITY_TYPE = "entity_type";
@@ -71,7 +72,7 @@ public record SummonEntityEffect(
             BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf(ENTITY_TYPE).forGetter(SummonEntityEffect::entityType),
             LevelBasedValue.CODEC.optionalFieldOf(COUNT, LevelBasedValue.constant(1.0F)).forGetter(SummonEntityEffect::count),
             ProbabilityDistribution.CODEC.optionalFieldOf(DISTRIBUTION).forGetter(SummonEntityEffect::distribution),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(SummonEntityEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(SummonEntityEffect::entityFilter)
     ).apply(instance, SummonEntityEffect::new));
 
     /**
@@ -84,7 +85,7 @@ public record SummonEntityEffect(
     public SummonEntityEffect(
             EntityType<?> entityType,
             LevelBasedValue count,
-            Optional<ContextAwarePredicate> entityFilter
+            Optional<Holder<LootItemCondition>> entityFilter
     ) {
         this(entityType, count, Optional.empty(), entityFilter);
     }
@@ -111,7 +112,7 @@ public record SummonEntityEffect(
             float volumeScalar
     ) {
         if (this.entityFilter.isPresent()
-                && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) {
+                && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) {
             return;
         }
 
@@ -154,7 +155,7 @@ public record SummonEntityEffect(
         Entity filterTarget = spatialReference != null ? spatialReference : context.owner();
         if (this.entityFilter.isPresent()
                 && filterTarget != null
-                && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, filterTarget, enchantmentLevel))) {
+                && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, filterTarget, enchantmentLevel))) {
             return;
         }
 
@@ -277,7 +278,7 @@ public record SummonEntityEffect(
      * @param count        The {@link LevelBasedValue} spawn count.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public SummonEntityEffect(EntityType<?> entityType, LevelBasedValue count, ContextAwarePredicate entityFilter) {
+    public SummonEntityEffect(EntityType<?> entityType, LevelBasedValue count, Holder<LootItemCondition> entityFilter) {
         this(entityType, count, Optional.empty(), Optional.of(entityFilter));
     }
 
@@ -289,7 +290,7 @@ public record SummonEntityEffect(
      * @param distribution The spatial probability distribution for volume sampling.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public SummonEntityEffect(EntityType<?> entityType, LevelBasedValue count, ProbabilityDistribution distribution, ContextAwarePredicate entityFilter) {
+    public SummonEntityEffect(EntityType<?> entityType, LevelBasedValue count, ProbabilityDistribution distribution, Holder<LootItemCondition> entityFilter) {
         this(entityType, count, Optional.of(distribution), Optional.of(entityFilter));
     }
     // endregion

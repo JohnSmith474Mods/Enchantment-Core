@@ -67,7 +67,7 @@ public abstract class EquipmentLayerRendererMixin {
     }
 
     /**
-     * Intercepts the static factory call for armor RenderTypes.
+     * Intercepts the static factory calls for armor RenderTypes (including glint-enabled armor in 26.3).
      * Upgrades opaque/cutout armor pipelines to translucent equivalents if an alpha multiplier is active.
      *
      * @param location The resource location of the armor texture.
@@ -76,11 +76,14 @@ public abstract class EquipmentLayerRendererMixin {
      */
     @WrapOperation(
             method = TARGET_METHOD,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;armorCutoutNoCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;")
+            at = {
+                    @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;armorCutoutNoCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;"),
+                    @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;armorCutoutNoCullGlint(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;")
+            }
     )
     private RenderType enchantment_core$switchToTranslucent(Identifier location, Operation<RenderType> original) {
         if (TransparencyRenderHelper.isAlphaActive()) {
-            return RenderTypes.entityTranslucentCullItemTarget(location);
+            return RenderTypes.entityTranslucentCull(location);
         }
         return original.call(location);
     }

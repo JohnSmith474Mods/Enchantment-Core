@@ -8,8 +8,8 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.level.material.Fluid;
 
@@ -50,10 +50,10 @@ public record FluidFogDensityEffect(
     /**
      * The codec responsible for serializing and deserializing instances of this record from data files (e.g., JSON).
      * <p>
-     * It uses {@link RegistryCodecs#homogeneousList} to properly handle the {@link HolderSet} of fluids.
+     * It uses {@link RegistryCodecs#holderSet} to properly handle the {@link HolderSet} of fluids.
      */
     public static final Codec<FluidFogDensityEffect> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryCodecs.homogeneousList(Registries.FLUID).fieldOf(FLUIDS).forGetter(FluidFogDensityEffect::fluids),
+            RegistryCodecs.holderSet(Registries.FLUID).fieldOf(FLUIDS).forGetter(FluidFogDensityEffect::fluids),
             LevelBasedValue.CODEC.fieldOf(FOG_START).forGetter(FluidFogDensityEffect::fogStart),
             LevelBasedValue.CODEC.fieldOf(FOG_END_MULTIPLIER).forGetter(FluidFogDensityEffect::fogEndMultiplier)
     ).apply(instance, FluidFogDensityEffect::new));

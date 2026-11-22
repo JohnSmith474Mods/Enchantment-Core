@@ -11,12 +11,13 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEnt
 import johnsmith.enchantmentcore.api.enchantment.spellfield.type.PotionPayload;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -24,11 +25,11 @@ import net.minecraft.world.phys.Vec3;
  * effects directly to targeted {@link LivingEntity} instances within a spell field volume.
  *
  * @param potionEffects The list of {@link PotionPayload} definitions to apply.
- * @param entityFilter  Optional {@link ContextAwarePredicate} restricting which entities receive the effects.
+ * @param entityFilter  Optional {@link LootItemCondition} restricting which entities receive the effects.
  */
 public record ApplyPotionEffect(
         List<PotionPayload> potionEffects,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the list of potion payloads. */
     public static final String POTION_EFFECTS = "potion_effects";
@@ -50,7 +51,7 @@ public record ApplyPotionEffect(
      */
     public static final MapCodec<ApplyPotionEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             PotionPayload.CODEC.listOf().fieldOf(POTION_EFFECTS).forGetter(ApplyPotionEffect::potionEffects),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ApplyPotionEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ApplyPotionEffect::entityFilter)
     ).apply(instance, ApplyPotionEffect::new));
 
     /**
@@ -68,7 +69,7 @@ public record ApplyPotionEffect(
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
         if (!(victim instanceof LivingEntity living)) return;
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         for (PotionPayload payload : this.potionEffects) {
             int duration = (int) payload.durationTicks().calculate(enchantmentLevel);
@@ -97,7 +98,7 @@ public record ApplyPotionEffect(
      * @param potionPayload The {@link PotionPayload} to apply.
      * @param entityFilter  The predicate filter to match against candidate entities.
      */
-    public ApplyPotionEffect(PotionPayload potionPayload, ContextAwarePredicate entityFilter) {
+    public ApplyPotionEffect(PotionPayload potionPayload, Holder<LootItemCondition> entityFilter) {
         this(List.of(potionPayload), Optional.of(entityFilter));
     }
 
@@ -106,7 +107,7 @@ public record ApplyPotionEffect(
      *
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public ApplyPotionEffect(ContextAwarePredicate entityFilter) {
+    public ApplyPotionEffect(Holder<LootItemCondition> entityFilter) {
         this(List.of(), Optional.of(entityFilter));
     }
     // endregion

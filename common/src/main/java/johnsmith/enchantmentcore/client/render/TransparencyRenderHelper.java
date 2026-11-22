@@ -1,6 +1,7 @@
 package johnsmith.enchantmentcore.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -12,21 +13,21 @@ import johnsmith.enchantmentcore.api.registry.EnchantmentEffectComponents;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.gizmos.DrawableGizmoPrimitives;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.UvMapping;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -40,10 +41,7 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -189,6 +187,22 @@ public class TransparencyRenderHelper {
         }
 
         @Override
+        public void submitTextBackground(
+                PoseStack poseStack,
+                float x,
+                float y,
+                float width,
+                float height,
+                int color,
+                Font.DisplayMode mode,
+                int light
+        ) {
+            if (this.alpha <= 0.00004F) return;
+            int modifiedColor = applyAlpha(color, this.alpha);
+            this.delegate.submitTextBackground(poseStack, x, y, width, height, modifiedColor, mode, light);
+        }
+
+        @Override
         public void submitFlame(
                 PoseStack poseStack,
                 EntityRenderState state,
@@ -209,20 +223,36 @@ public class TransparencyRenderHelper {
 
         @Override
         public <S> void submitModel(
-                Model<? super S> model, S state,
+                Model<? super S> model,
+                S state,
                 PoseStack poseStack,
                 RenderType renderType,
                 int light,
                 int overlay,
                 int color,
-                @Nullable TextureAtlasSprite sprite,
-                int outlineColor,
-                ModelFeatureRenderer.@Nullable CrumblingOverlay crumbling
+                @Nullable UvMapping uvMapping,
+                int outlineColor
         ) {
             if (this.alpha <= 0.00004F) return;
             int modifiedColor = applyAlpha(color, this.alpha);
             int modifiedOutline = applyAlpha(outlineColor, this.alpha);
-            this.delegate.submitModel(model, state, poseStack, renderType, light, overlay, modifiedColor, sprite, modifiedOutline, crumbling);
+            this.delegate.submitModel(model, state, poseStack, renderType, light, overlay, modifiedColor, uvMapping, modifiedOutline);
+        }
+
+        @Override
+        public <S> void submitCrumblingOverlay(
+                Model<? super S> model,
+                S state,
+                PoseStack poseStack,
+                RenderType renderType,
+                int light,
+                int overlay,
+                int color,
+                ModelFeatureRenderer.CrumblingOverlay crumbling
+        ) {
+            if (this.alpha <= 0.00004F) return;
+            int modifiedColor = applyAlpha(color, this.alpha);
+            this.delegate.submitCrumblingOverlay(model, state, poseStack, renderType, light, overlay, modifiedColor, crumbling);
         }
 
         @Override
@@ -261,10 +291,11 @@ public class TransparencyRenderHelper {
         public void submitBreakingBlockModel(
                 PoseStack poseStack,
                 List<BlockStateModelPart> parts,
-                int destroyProgress
+                int destroyProgress,
+                boolean isTranslucent
         ) {
             if (this.alpha <= 0.00004F) return;
-            this.delegate.submitBreakingBlockModel(poseStack, parts, destroyProgress);
+            this.delegate.submitBreakingBlockModel(poseStack, parts, destroyProgress, isTranslucent);
         }
 
         @Override
@@ -283,7 +314,7 @@ public class TransparencyRenderHelper {
 
         /**
          * Intercepts item model submissions to dynamically unroll standard BakedQuad records.
-         * Extracts vector data and repackages it with modified alpha into the consumer array.
+         * Applies the active alpha multiplier and selects the appropriate 26.3 translucent/glint item RenderType.
          */
         @Override
         public void submitItem(
@@ -293,7 +324,7 @@ public class TransparencyRenderHelper {
                 int overlay,
                 int outlineColor,
                 int[] tintLayers,
-                List<BakedQuad> quads,
+                ItemQuads quads,
                 ItemStackRenderState.FoilType foilType
         ) {
             float clampedAlpha = Math.max(0.0F, Math.min(1.0F, this.alpha));
@@ -307,57 +338,35 @@ public class TransparencyRenderHelper {
                 return;
             }
 
-            RenderType translucentType = RenderTypes.entityTranslucent(BLOCKS_ATLAS);
-            int[] modifiedTints = new int[tintLayers.length];
+            RenderType itemType = switch (foilType) {
+                case NONE -> RenderTypes.itemTranslucent(BLOCKS_ATLAS);
+                case STANDARD -> RenderTypes.itemTranslucentGlint(BLOCKS_ATLAS);
+                case SPECIAL -> RenderTypes.itemTranslucentGlintSpecial(BLOCKS_ATLAS);
+            };
 
+            int[] modifiedTints = new int[tintLayers.length];
             for (int i = 0; i < tintLayers.length; i++) {
                 modifiedTints[i] = applyAlpha(tintLayers[i] == -1 ? 0xFFFFFFFF : tintLayers[i], this.alpha);
             }
+            int defaultColor = applyAlpha(0xFFFFFFFF, this.alpha);
 
-            this.delegate.submitCustomGeometry(poseStack, translucentType, (pose, consumer) -> {
-                Matrix4f matrix = pose.pose();
-                for (BakedQuad quad : quads) {
+            this.delegate.submitCustomGeometry(poseStack, itemType, (pose, consumer) -> {
+                QuadInstance quadInstance = new QuadInstance();
+                quadInstance.setLightCoords(light);
+                quadInstance.setOverlayCoords(overlay);
+
+                for (BakedQuad quad : quads.all()) {
                     int tintIndex = quad.materialInfo().tintIndex();
-                    int color = (tintIndex != -1 && tintIndex < modifiedTints.length) ? modifiedTints[tintIndex] : applyAlpha(0xFFFFFFFF, this.alpha);
+                    int color = (tintIndex != -1 && tintIndex < modifiedTints.length) ? modifiedTints[tintIndex] : defaultColor;
+                    quadInstance.setColor(color);
 
-                    Vector3fc normalVec = quad.direction().getUnitVec3f();
-                    Vector3f normal = pose.transformNormal(normalVec, new Vector3f());
-
-                    for (int vertex = 0; vertex < 4; ++vertex) {
-                        Vector3fc position = quad.position(vertex);
-                        long packedUv = quad.packedUV(vertex);
-
-                        Vector3f pos = matrix.transformPosition(position, new Vector3f());
-                        float u = UVPair.unpackU(packedUv);
-                        float v = UVPair.unpackV(packedUv);
-
-                        consumer.addVertex(pos.x(), pos.y(), pos.z(), color, u, v, overlay, light, normal.x(), normal.y(), normal.z());
+                    if (foilType == ItemStackRenderState.FoilType.SPECIAL) {
+                        consumer.putBakedQuadWithGlint(pose, quad, quadInstance, pose);
+                    } else {
+                        consumer.putBakedQuad(pose, quad, quadInstance);
                     }
                 }
             });
-
-            if (foilType != ItemStackRenderState.FoilType.NONE) {
-                RenderType glintType = foilType == ItemStackRenderState.FoilType.SPECIAL ? RenderTypes.glintTranslucent() : RenderTypes.entityGlint();
-                int glintColor = 0xFFFFFFFF;
-                this.delegate.submitCustomGeometry(poseStack, glintType, (pose, consumer) -> {
-                    Matrix4f matrix = pose.pose();
-                    for (BakedQuad quad : quads) {
-                        Vector3fc normalVec = quad.direction().getUnitVec3f();
-                        Vector3f normal = pose.transformNormal(normalVec, new Vector3f());
-
-                        for (int vertex = 0; vertex < 4; ++vertex) {
-                            Vector3fc position = quad.position(vertex);
-                            long packedUv = quad.packedUV(vertex);
-
-                            Vector3f pos = matrix.transformPosition(position, new Vector3f());
-                            float u = UVPair.unpackU(packedUv);
-                            float v = UVPair.unpackV(packedUv);
-
-                            consumer.addVertex(pos.x(), pos.y(), pos.z(), glintColor, u, v, overlay, light, normal.x(), normal.y(), normal.z());
-                        }
-                    }
-                });
-            }
         }
 
         @Override
@@ -402,6 +411,12 @@ public class TransparencyRenderHelper {
                     @Override
                     public VertexConsumer setUv2(int u, int v) {
                         consumer.setUv2(u, v);
+                        return this;
+                    }
+
+                    @Override
+                    public VertexConsumer setUv3(float u, float v) {
+                        consumer.setUv3(u, v);
                         return this;
                     }
 

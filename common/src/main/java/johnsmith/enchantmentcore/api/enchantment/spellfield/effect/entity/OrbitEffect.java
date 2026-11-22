@@ -15,11 +15,12 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.type.RotationDirecti
 import johnsmith.enchantmentcore.api.registry.EnchantmentCoreRegistries;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -37,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
  * @param distanceScaling    The {@link DistanceScalingFunction} modulating the radial restoring force based on distance from the target ring.
  * @param axis               Optional {@link FieldAxis} normal vector defining a structured 2D orbital plane.
  * @param rotationDirection  The {@link RotationDirection} (clockwise, counter-clockwise, or entity-ID parity) of the orbit.
- * @param entityFilter       Optional {@link ContextAwarePredicate} restricting which entities are pulled into orbit.
+ * @param entityFilter       Optional {@link LootItemCondition} restricting which entities are pulled into orbit.
  */
 public record OrbitEffect(
         LevelBasedValue attractionStrength,
@@ -47,7 +48,7 @@ public record OrbitEffect(
         DistanceScalingFunction distanceScaling,
         Optional<FieldAxis> axis,
         RotationDirection rotationDirection,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect, DirectionalSpellFieldEffect {
     /** JSON field key for the radial restoring attraction strength. */
     public static final String ATTRACTION_STRENGTH = "attraction_strength";
@@ -94,7 +95,7 @@ public record OrbitEffect(
             EnchantmentCoreRegistries.getDistanceScalingFunctionCodec().optionalFieldOf(DISTANCE_SCALING, ConstantScalingFunction.NONE).forGetter(OrbitEffect::distanceScaling),
             FieldAxis.CODEC.optionalFieldOf(AXIS).forGetter(OrbitEffect::axis),
             RotationDirection.CODEC.optionalFieldOf(ROTATION_DIRECTION, RotationDirection.ANY).forGetter(OrbitEffect::rotationDirection),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(OrbitEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(OrbitEffect::entityFilter)
     ).apply(instance, OrbitEffect::new));
 
     /**
@@ -111,7 +112,7 @@ public record OrbitEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         Vec3 vectorToVictim = victim.position().subtract(epicenter);
         double distanceToCenter = vectorToVictim.length();
@@ -188,7 +189,7 @@ public record OrbitEffect(
         double antiGravity = (victim instanceof net.minecraft.world.entity.item.ItemEntity || victim instanceof net.minecraft.world.entity.ExperienceOrb) ? 0.04D : 0.0D;
 
         victim.setDeltaMovement(dampedDelta.add(radialImpulse).add(orbitImpulse).add(0, frictionBump + antiGravity, 0));
-        victim.hurtMarked = true;
+        victim.syncVelocity = true;
         victim.needsSync = true;
     }
 
@@ -242,7 +243,7 @@ public record OrbitEffect(
      * @param rotationDirection  The orbital rotation direction.
      * @param entityFilter       The predicate filter to match against candidate entities.
      */
-    public OrbitEffect(LevelBasedValue attractionStrength, LevelBasedValue orbitalRadius, LevelBasedValue orbitVelocity, LevelBasedValue dragMultiplier, DistanceScalingFunction distanceScaling, RotationDirection rotationDirection, ContextAwarePredicate entityFilter) {
+    public OrbitEffect(LevelBasedValue attractionStrength, LevelBasedValue orbitalRadius, LevelBasedValue orbitVelocity, LevelBasedValue dragMultiplier, DistanceScalingFunction distanceScaling, RotationDirection rotationDirection, Holder<LootItemCondition> entityFilter) {
         this(attractionStrength, orbitalRadius, orbitVelocity, dragMultiplier, distanceScaling, Optional.empty(), rotationDirection, Optional.of(entityFilter));
     }
 
@@ -258,7 +259,7 @@ public record OrbitEffect(
      * @param rotationDirection  The orbital rotation direction.
      * @param entityFilter       The predicate filter to match against candidate entities.
      */
-    public OrbitEffect(LevelBasedValue attractionStrength, LevelBasedValue orbitalRadius, LevelBasedValue orbitVelocity, LevelBasedValue dragMultiplier, DistanceScalingFunction distanceScaling, FieldAxis axis, RotationDirection rotationDirection, ContextAwarePredicate entityFilter) {
+    public OrbitEffect(LevelBasedValue attractionStrength, LevelBasedValue orbitalRadius, LevelBasedValue orbitVelocity, LevelBasedValue dragMultiplier, DistanceScalingFunction distanceScaling, FieldAxis axis, RotationDirection rotationDirection, Holder<LootItemCondition> entityFilter) {
         this(attractionStrength, orbitalRadius, orbitVelocity, dragMultiplier, distanceScaling, Optional.of(axis), rotationDirection, Optional.of(entityFilter));
     }
     // endregion

@@ -9,8 +9,8 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.level.block.Block;
 
@@ -50,7 +50,7 @@ public record ClimbingEffect(
     public static final Codec<ClimbingEffect> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             LevelBasedValue.CODEC.optionalFieldOf(SPEED, LevelBasedValue.constant(1.0F)).forGetter(ClimbingEffect::speed),
             Codec.BOOL.optionalFieldOf(HOLD_ON_CROUCH, false).forGetter(ClimbingEffect::holdOnCrouch),
-            RegistryCodecs.homogeneousList(Registries.BLOCK).optionalFieldOf(ALLOWED_BLOCKS).forGetter(ClimbingEffect::allowedBlocks)
+            RegistryCodecs.holderSet(Registries.BLOCK).optionalFieldOf(ALLOWED_BLOCKS).forGetter(ClimbingEffect::allowedBlocks)
     ).apply(instance, ClimbingEffect::new));
 
     // region Convenience Constructors

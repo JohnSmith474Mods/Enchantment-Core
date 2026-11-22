@@ -9,7 +9,6 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ExplosionParticleInfo;
 import net.minecraft.core.particles.ParticleOptions;
@@ -26,6 +25,7 @@ import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +39,7 @@ import org.jetbrains.annotations.Nullable;
  * @param createFire     Whether the explosion ignites fires on surrounding blocks.
  * @param damageEntities Whether the explosion inflicts blast damage to nearby entities.
  * @param interaction    The block destruction behavior of the explosion ({@link ExplosionInteraction}).
- * @param immuneFilter   An optional {@link ContextAwarePredicate} identifying entities immune to blast damage from this explosion.
+ * @param immuneFilter   An optional {@link LootItemCondition} identifying entities immune to blast damage from this explosion.
  * @param smallParticles Optional custom particle options for minor blast particles.
  * @param largeParticles Optional custom particle options for major emitter blast particles.
  * @param sound          Optional custom sound event played upon detonation.
@@ -49,7 +49,7 @@ public record ExplosionDefinition(
         boolean createFire,
         boolean damageEntities,
         ExplosionInteraction interaction,
-        Optional<ContextAwarePredicate> immuneFilter,
+        Optional<Holder<LootItemCondition>> immuneFilter,
         Optional<ParticleOptions> smallParticles,
         Optional<ParticleOptions> largeParticles,
         Optional<Holder<SoundEvent>> sound
@@ -91,7 +91,7 @@ public record ExplosionDefinition(
             Codec.BOOL.optionalFieldOf(CREATE_FIRE, false).forGetter(ExplosionDefinition::createFire),
             Codec.BOOL.optionalFieldOf(DAMAGE_ENTITIES, true).forGetter(ExplosionDefinition::damageEntities),
             ExplosionInteraction.CODEC.optionalFieldOf(EXPLOSION_INTERACTION, ExplosionInteraction.BLOCK).forGetter(ExplosionDefinition::interaction),
-            ContextAwarePredicate.CODEC.optionalFieldOf(IMMUNE_FILTER).forGetter(ExplosionDefinition::immuneFilter),
+            LootItemCondition.CODEC.optionalFieldOf(IMMUNE_FILTER).forGetter(ExplosionDefinition::immuneFilter),
             ParticleTypes.CODEC.optionalFieldOf(SMALL_PARTICLES).forGetter(ExplosionDefinition::smallParticles),
             ParticleTypes.CODEC.optionalFieldOf(LARGE_PARTICLES).forGetter(ExplosionDefinition::largeParticles),
             BuiltInRegistries.SOUND_EVENT.holderByNameCodec().optionalFieldOf(SOUND).forGetter(ExplosionDefinition::sound)
@@ -163,7 +163,7 @@ public record ExplosionDefinition(
             damageCalculator = new ExplosionDamageCalculator() {
                 @Override
                 public boolean shouldDamageEntity(Explosion explosion, Entity entity) {
-                    if (immuneFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, entity, enchantmentLevel))) {
+                    if (immuneFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, entity, enchantmentLevel))) {
                         return false;
                     }
                     return super.shouldDamageEntity(explosion, entity);
@@ -277,7 +277,7 @@ public record ExplosionDefinition(
      * @param immuneFilter The predicate matching entities immune to this explosion.
      * @return A new {@link ExplosionDefinition} instance.
      */
-    public ExplosionDefinition withImmuneFilter(ContextAwarePredicate immuneFilter) {
+    public ExplosionDefinition withImmuneFilter(Holder<LootItemCondition> immuneFilter) {
         return new ExplosionDefinition(radius, createFire, damageEntities, interaction, Optional.of(immuneFilter), smallParticles, largeParticles, sound);
     }
 

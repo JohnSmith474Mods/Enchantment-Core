@@ -15,11 +15,12 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.math.GlobalVolume;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 import johnsmith.enchantmentcore.util.SpellFieldTaskScheduler;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -32,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
  * @param delayVariance The {@link LevelBasedValue} random +/- tick jitter applied to each strike's delay.
  * @param visualOnly    Whether the spawned lightning bolts are purely visual ({@link LightningBolt#setVisualOnly(boolean)}) without dealing damage or starting fires.
  * @param distribution  Optional {@link ProbabilityDistribution} used to sample strike coordinates when evaluated as a volume effect.
- * @param entityFilter  Optional {@link ContextAwarePredicate} restricting which entities are struck when evaluated as an entity effect.
+ * @param entityFilter  Optional {@link LootItemCondition} restricting which entities are struck when evaluated as an entity effect.
  */
 public record LightningStrikeEffect(
         LevelBasedValue count,
@@ -40,7 +41,7 @@ public record LightningStrikeEffect(
         LevelBasedValue delayVariance,
         boolean visualOnly,
         Optional<ProbabilityDistribution> distribution,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect, SpellFieldVolumeEffect {
     /** JSON field key for the lightning strike count. */
     public static final String COUNT = "count";
@@ -77,7 +78,7 @@ public record LightningStrikeEffect(
             LevelBasedValue.CODEC.optionalFieldOf(DELAY_VARIANCE, LevelBasedValue.constant(0.0F)).forGetter(LightningStrikeEffect::delayVariance),
             Codec.BOOL.optionalFieldOf(VISUAL_ONLY, false).forGetter(LightningStrikeEffect::visualOnly),
             ProbabilityDistribution.CODEC.optionalFieldOf(DISTRIBUTION).forGetter(LightningStrikeEffect::distribution),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(LightningStrikeEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(LightningStrikeEffect::entityFilter)
     ).apply(instance, LightningStrikeEffect::new));
 
     /**
@@ -94,7 +95,7 @@ public record LightningStrikeEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
         this.dispatchStrikes(level, enchantmentLevel, victim.position(), volumeScalar);
     }
 
@@ -199,7 +200,7 @@ public record LightningStrikeEffect(
      * @param visualOnly    Whether the lightning bolts are visual-only.
      * @param entityFilter  The predicate filter to match against candidate entities.
      */
-    public LightningStrikeEffect(LevelBasedValue count, LevelBasedValue delayTicks, LevelBasedValue delayVariance, boolean visualOnly, ContextAwarePredicate entityFilter) {
+    public LightningStrikeEffect(LevelBasedValue count, LevelBasedValue delayTicks, LevelBasedValue delayVariance, boolean visualOnly, Holder<LootItemCondition> entityFilter) {
         this(count, delayTicks, delayVariance, visualOnly, Optional.empty(), Optional.of(entityFilter));
     }
 
@@ -213,7 +214,7 @@ public record LightningStrikeEffect(
      * @param distribution  The spatial probability distribution for volume sampling.
      * @param entityFilter  The predicate filter to match against candidate entities.
      */
-    public LightningStrikeEffect(LevelBasedValue count, LevelBasedValue delayTicks, LevelBasedValue delayVariance, boolean visualOnly, ProbabilityDistribution distribution, ContextAwarePredicate entityFilter) {
+    public LightningStrikeEffect(LevelBasedValue count, LevelBasedValue delayTicks, LevelBasedValue delayVariance, boolean visualOnly, ProbabilityDistribution distribution, Holder<LootItemCondition> entityFilter) {
         this(count, delayTicks, delayVariance, visualOnly, Optional.of(distribution), Optional.of(entityFilter));
     }
     // endregion

@@ -12,9 +12,9 @@ import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
@@ -57,7 +57,7 @@ public record TransmuteBlockEffect(
      * MapCodec for serializing and deserializing {@link TransmuteBlockEffect} instances from JSON.
      */
     public static final MapCodec<TransmuteBlockEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            RegistryCodecs.homogeneousList(Registries.BLOCK).optionalFieldOf(TARGET_BLOCKS).forGetter(TransmuteBlockEffect::targetBlocks),
+            RegistryCodecs.holderSet(Registries.BLOCK).optionalFieldOf(TARGET_BLOCKS).forGetter(TransmuteBlockEffect::targetBlocks),
             BuiltInRegistries.BLOCK.byNameCodec().fieldOf(REPLACEMENT_BLOCK).forGetter(TransmuteBlockEffect::replacementBlock),
             TopologyEvaluator.CODEC.optionalFieldOf(EVALUATOR, TopologyEvaluator.PROBABILISTIC).forGetter(TransmuteBlockEffect::evaluator)
     ).apply(instance, TransmuteBlockEffect::new));

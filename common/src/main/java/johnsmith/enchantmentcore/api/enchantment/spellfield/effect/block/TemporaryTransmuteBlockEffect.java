@@ -14,9 +14,9 @@ import johnsmith.enchantmentcore.util.TransientBlockTracker;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
@@ -80,7 +80,7 @@ public record TemporaryTransmuteBlockEffect(
      * MapCodec for serializing and deserializing {@link TemporaryTransmuteBlockEffect} definitions.
      */
     public static final MapCodec<TemporaryTransmuteBlockEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            RegistryCodecs.homogeneousList(Registries.BLOCK).optionalFieldOf(TARGET_BLOCKS).forGetter(TemporaryTransmuteBlockEffect::targetBlocks),
+            RegistryCodecs.holderSet(Registries.BLOCK).optionalFieldOf(TARGET_BLOCKS).forGetter(TemporaryTransmuteBlockEffect::targetBlocks),
             BuiltInRegistries.BLOCK.byNameCodec().fieldOf(REPLACEMENT_BLOCK).forGetter(TemporaryTransmuteBlockEffect::replacementBlock),
             LevelBasedValue.CODEC.optionalFieldOf(LIFETIME, LevelBasedValue.constant(20)).forGetter(TemporaryTransmuteBlockEffect::lifetime),
             LevelBasedValue.CODEC.optionalFieldOf(DECAY_DURATION, LevelBasedValue.constant(20)).forGetter(TemporaryTransmuteBlockEffect::decayDuration),

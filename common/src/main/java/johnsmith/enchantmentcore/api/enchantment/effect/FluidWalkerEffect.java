@@ -8,8 +8,8 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.level.material.Fluid;
 
@@ -43,7 +43,7 @@ public record FluidWalkerEffect(
      */
     public static final Codec<FluidWalkerEffect> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    RegistryCodecs.homogeneousList(Registries.FLUID).fieldOf(ALLOWED_FLUIDS).forGetter(FluidWalkerEffect::allowedFluids),
+                    RegistryCodecs.holderSet(Registries.FLUID).fieldOf(ALLOWED_FLUIDS).forGetter(FluidWalkerEffect::allowedFluids),
                     LevelBasedValue.CODEC.optionalFieldOf(SPEED_RETENTION, LevelBasedValue.constant(1.0F)).forGetter(FluidWalkerEffect::speedRetention)
             ).apply(instance, FluidWalkerEffect::new)
     );

@@ -9,11 +9,12 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -21,11 +22,11 @@ import net.minecraft.world.phys.Vec3;
  * of burning entities within a spell field volume, scaled by each target's local topological multiplier.
  *
  * @param tickReduction The {@link LevelBasedValue} number of fire ticks subtracted before topological scaling.
- * @param entityFilter  Optional {@link ContextAwarePredicate} restricting which entities are extinguished.
+ * @param entityFilter  Optional {@link LootItemCondition} restricting which entities are extinguished.
  */
 public record ExtinguishEffect(
         LevelBasedValue tickReduction,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the fire tick reduction amount. */
     public static final String TICK_REDUCTION = "tick_reduction";
@@ -46,7 +47,7 @@ public record ExtinguishEffect(
      */
     public static final MapCodec<ExtinguishEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             LevelBasedValue.CODEC.fieldOf(TICK_REDUCTION).forGetter(ExtinguishEffect::tickReduction),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ExtinguishEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ExtinguishEffect::entityFilter)
     ).apply(instance, ExtinguishEffect::new));
 
     /**
@@ -63,7 +64,7 @@ public record ExtinguishEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         int reduction = (int) (this.tickReduction.calculate(enchantmentLevel) * volumeScalar);
         if (reduction <= 0) return;
@@ -96,7 +97,7 @@ public record ExtinguishEffect(
      * @param tickReduction The {@link LevelBasedValue} fire tick reduction amount.
      * @param entityFilter  The predicate filter to match against candidate entities.
      */
-    public ExtinguishEffect(LevelBasedValue tickReduction, ContextAwarePredicate entityFilter) {
+    public ExtinguishEffect(LevelBasedValue tickReduction, Holder<LootItemCondition> entityFilter) {
         this(tickReduction, Optional.of(entityFilter));
     }
     // endregion

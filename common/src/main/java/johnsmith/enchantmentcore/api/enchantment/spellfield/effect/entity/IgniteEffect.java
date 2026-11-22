@@ -9,11 +9,12 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -21,11 +22,11 @@ import net.minecraft.world.phys.Vec3;
  * in seconds, scaled by each target's local topological multiplier.
  *
  * @param durationSeconds The {@link LevelBasedValue} base burn duration in seconds before topological scaling.
- * @param entityFilter    Optional {@link ContextAwarePredicate} restricting which entities are ignited.
+ * @param entityFilter    Optional {@link LootItemCondition} restricting which entities are ignited.
  */
 public record IgniteEffect(
         LevelBasedValue durationSeconds,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the burn duration in seconds. */
     public static final String DURATION_SECONDS = "duration_seconds";
@@ -46,7 +47,7 @@ public record IgniteEffect(
      */
     public static final MapCodec<IgniteEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             LevelBasedValue.CODEC.fieldOf(DURATION_SECONDS).forGetter(IgniteEffect::durationSeconds),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(IgniteEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(IgniteEffect::entityFilter)
     ).apply(instance, IgniteEffect::new));
 
     /**
@@ -63,7 +64,7 @@ public record IgniteEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         float finalDuration = this.durationSeconds.calculate(enchantmentLevel) * volumeScalar;
         if (finalDuration > 0.0F) {
@@ -93,7 +94,7 @@ public record IgniteEffect(
      * @param durationSeconds The {@link LevelBasedValue} base burn duration in seconds.
      * @param entityFilter    The predicate filter to match against candidate entities.
      */
-    public IgniteEffect(LevelBasedValue durationSeconds, ContextAwarePredicate entityFilter) {
+    public IgniteEffect(LevelBasedValue durationSeconds, Holder<LootItemCondition> entityFilter) {
         this(durationSeconds, Optional.of(entityFilter));
     }
     // endregion

@@ -16,11 +16,12 @@ import johnsmith.enchantmentcore.api.enchantment.spellfield.math.GlobalVolume;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 import johnsmith.enchantmentcore.util.SpellFieldTaskScheduler;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -37,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
  * @param fuseVariance The {@link LevelBasedValue} random +/- tick jitter applied to the fuse delay.
  * @param spatialDelay The {@link LevelBasedValue} additional delay in ticks per block of distance from the spell field epicenter.
  * @param distribution Optional {@link ProbabilityDistribution} used to sample detonation points when evaluated as a volume effect.
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting which entities trigger explosions when evaluated as an entity effect.
+ * @param entityFilter Optional {@link LootItemCondition} restricting which entities trigger explosions when evaluated as an entity effect.
  */
 public record ExplodeEffect(
         ExplosionDefinition explosion,
@@ -46,7 +47,7 @@ public record ExplodeEffect(
         LevelBasedValue fuseVariance,
         LevelBasedValue spatialDelay,
         Optional<ProbabilityDistribution> distribution,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect, SpellFieldVolumeEffect {
     /** JSON field key for the nested explosion definition. */
     public static final String EXPLOSION = "explosion";
@@ -91,7 +92,7 @@ public record ExplodeEffect(
             LevelBasedValue.CODEC.optionalFieldOf(FUSE_VARIANCE, LevelBasedValue.constant(0.0F)).forGetter(ExplodeEffect::fuseVariance),
             LevelBasedValue.CODEC.optionalFieldOf(SPATIAL_DELAY, LevelBasedValue.constant(0.0F)).forGetter(ExplodeEffect::spatialDelay),
             ProbabilityDistribution.CODEC.optionalFieldOf(DISTRIBUTION).forGetter(ExplodeEffect::distribution),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ExplodeEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(ExplodeEffect::entityFilter)
     ).apply(instance, ExplodeEffect::new));
 
     /**
@@ -108,7 +109,7 @@ public record ExplodeEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
         this.dispatchExplosion(level, enchantmentLevel, context.owner(), victim.position(), epicenter, volumeScalar);
     }
 
@@ -207,7 +208,7 @@ public record ExplodeEffect(
      * @param spatialDelay The per-block spatial delay in ticks.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public ExplodeEffect(ExplosionDefinition explosion, LevelBasedValue count, LevelBasedValue fuseTicks, LevelBasedValue fuseVariance, LevelBasedValue spatialDelay, ContextAwarePredicate entityFilter) {
+    public ExplodeEffect(ExplosionDefinition explosion, LevelBasedValue count, LevelBasedValue fuseTicks, LevelBasedValue fuseVariance, LevelBasedValue spatialDelay, Holder<LootItemCondition> entityFilter) {
         this(explosion, count, fuseTicks, fuseVariance, spatialDelay, Optional.empty(), Optional.of(entityFilter));
     }
 
@@ -222,7 +223,7 @@ public record ExplodeEffect(
      * @param distribution The spatial probability distribution for volume sampling.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public ExplodeEffect(ExplosionDefinition explosion, LevelBasedValue count, LevelBasedValue fuseTicks, LevelBasedValue fuseVariance, LevelBasedValue spatialDelay, ProbabilityDistribution distribution, ContextAwarePredicate entityFilter) {
+    public ExplodeEffect(ExplosionDefinition explosion, LevelBasedValue count, LevelBasedValue fuseTicks, LevelBasedValue fuseVariance, LevelBasedValue spatialDelay, ProbabilityDistribution distribution, Holder<LootItemCondition> entityFilter) {
         this(explosion, count, fuseTicks, fuseVariance, spatialDelay, Optional.of(distribution), Optional.of(entityFilter));
     }
     // endregion

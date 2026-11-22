@@ -20,7 +20,7 @@ public class RenderTypeMixin {
 
     /**
      * Intercepts the entitySolid render type request.
-     * Substitutes the render type with itemEntityTranslucentCull if an alpha multiplier is active.
+     * Substitutes the render type with entityTranslucentCull if an alpha multiplier is active.
      *
      * @param location The resource location of the texture.
      * @param cir      The callback information returnable.
@@ -28,33 +28,33 @@ public class RenderTypeMixin {
     @Inject(method = "entitySolid(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", at = @At("HEAD"), cancellable = true)
     private static void enchantment_core$upgradeEntitySolid(Identifier location, CallbackInfoReturnable<RenderType> cir) {
         if (TransparencyRenderHelper.isAlphaActive()) {
-            cir.setReturnValue(RenderTypes.entityTranslucentCullItemTarget(location));
+            cir.setReturnValue(RenderTypes.entityTranslucentCull(location));
         }
     }
 
     /**
-     * Intercepts the entityCutout render type request.
-     * Substitutes the render type with itemEntityTranslucentCull if an alpha multiplier is active.
+     * Intercepts the entityCutoutCull render type request.
+     * Substitutes the render type with entityTranslucentCull if an alpha multiplier is active.
      *
      * @param location The resource location of the texture.
      * @param cir      The callback information returnable.
      */
-    @Inject(method = "entityCutout(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", at = @At("HEAD"), cancellable = true)
-    private static void enchantment_core$upgradeEntityCutout(Identifier location, CallbackInfoReturnable<RenderType> cir) {
+    @Inject(method = "entityCutoutCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", at = @At("HEAD"), cancellable = true)
+    private static void enchantment_core$upgradeEntityCutoutCull(Identifier location, CallbackInfoReturnable<RenderType> cir) {
         if (TransparencyRenderHelper.isAlphaActive()) {
-            cir.setReturnValue(RenderTypes.entityTranslucentCullItemTarget(location));
+            cir.setReturnValue(RenderTypes.entityTranslucentCull(location));
         }
     }
 
     /**
-     * Intercepts the entityCutoutNoCull render type request.
+     * Intercepts the entityCutout (no-cull) render type request.
      * Substitutes the render type with entityTranslucent if an alpha multiplier is active.
      * Preserves the no-cull geometry property.
      *
      * @param location The resource location of the texture.
      * @param cir      The callback information returnable.
      */
-    @Inject(method = "entityTranslucentCullItemTarget(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "entityCutout(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", at = @At("HEAD"), cancellable = true)
     private static void enchantment_core$upgradeEntityCutoutNoCull(Identifier location, CallbackInfoReturnable<RenderType> cir) {
         if (TransparencyRenderHelper.isAlphaActive()) {
             // Reverts to standard translucent to preserve the No-Cull geometry contract

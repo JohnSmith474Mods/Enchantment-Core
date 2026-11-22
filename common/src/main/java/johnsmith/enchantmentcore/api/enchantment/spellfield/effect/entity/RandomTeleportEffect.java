@@ -9,15 +9,17 @@ import java.util.Set;
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 import johnsmith.enchantmentcore.api.registry.LevelBasedKeyProvider;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -26,11 +28,11 @@ import net.minecraft.world.phys.Vec3;
  * passengers and playing teleportation sound effects.
  *
  * @param range        The {@link LevelBasedValue} maximum horizontal and vertical teleportation radius in blocks.
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting which entities are teleported.
+ * @param entityFilter Optional {@link LootItemCondition} restricting which entities are teleported.
  */
 public record RandomTeleportEffect(
         LevelBasedValue range,
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** JSON field key for the teleportation radius in blocks. */
     public static final String RANGE = "range";
@@ -51,12 +53,12 @@ public record RandomTeleportEffect(
      */
     public static final MapCodec<RandomTeleportEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             LevelBasedValue.CODEC.fieldOf(RANGE).forGetter(RandomTeleportEffect::range),
-            ContextAwarePredicate.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(RandomTeleportEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf(ENTITY_FILTER).forGetter(RandomTeleportEffect::entityFilter)
     ).apply(instance, RandomTeleportEffect::new));
 
     /**
      * Attempts up to 16 times to teleport {@code victim} to a random valid coordinate within
-     * {@link #range()} blocks via {@link LivingEntity#randomTeleport(double, double, double, boolean)}.
+     * {@link #range()} blocks via {@link LivingEntity#randomTeleport(double, double, double, boolean, net.minecraft.tags.TagKey)}.
      *
      * @param level            The executing server level.
      * @param enchantmentLevel The active level of the spell field enchantment.
@@ -69,7 +71,7 @@ public record RandomTeleportEffect(
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
         if (!(victim instanceof LivingEntity living)) return;
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         double tpRange = this.range.calculate(enchantmentLevel);
 
@@ -81,7 +83,7 @@ public record RandomTeleportEffect(
             if (living.isPassenger()) living.stopRiding();
 
             Vec3 oldPos = living.position();
-            if (living.randomTeleport(x, y, z, true)) {
+            if (living.randomTeleport(x, y, z, true, BlockTags.CONSUMABLE_DOES_NOT_TELEPORT_TO)) {
                 level.playSound(null, oldPos.x, oldPos.y, oldPos.z, SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
                 living.playSound(SoundEvents.CHORUS_FRUIT_TELEPORT, 1.0F, 1.0F);
                 break;
@@ -111,7 +113,7 @@ public record RandomTeleportEffect(
      * @param range        The {@link LevelBasedValue} teleportation radius in blocks.
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public RandomTeleportEffect(LevelBasedValue range, ContextAwarePredicate entityFilter) {
+    public RandomTeleportEffect(LevelBasedValue range, Holder<LootItemCondition> entityFilter) {
         this(range, Optional.of(entityFilter));
     }
     // endregion

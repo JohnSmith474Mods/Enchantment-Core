@@ -15,6 +15,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -111,7 +112,7 @@ public abstract class PassiveEffectsMixin extends Entity implements LivingEntity
                 if (allowedOpt.isPresent()) {
                     return state.is(allowedOpt.get());
                 } else {
-                    return state.blocksMotion();
+                    return state.is(BlockTags.BLOCKS_MOTION);
                 }
             });
 

@@ -170,7 +170,7 @@ public record AreaGravityDamageEffect(
                 double frictionBump = victim.onGround() ? Math.min(0.2D, Math.abs(s * sigmoidScale)) : 0.0D;
 
                 victim.setDeltaMovement(victim.getDeltaMovement().add(impulse.x, impulse.y + frictionBump, impulse.z));
-                victim.hurtMarked = true;
+                victim.syncVelocity = true;
             }
 
             // Apply damage to all entities in the VoE, including the epicenter target

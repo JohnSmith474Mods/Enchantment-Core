@@ -11,12 +11,13 @@ import johnsmith.enchantmentcore.mixin.enchantment.accessor.ItemEntityAccessor;
 
 import java.util.Optional;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -24,10 +25,10 @@ import net.minecraft.world.phys.Vec3;
  * {@link ItemEntity} and {@link ExperienceOrb} instances back to {@code 0} ticks, preventing
  * them from despawning while inside the spell field.
  *
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting which entities have their age reset.
+ * @param entityFilter Optional {@link LootItemCondition} restricting which entities have their age reset.
  */
 public record ResetLifetimeEffect(
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** Registry path identifier for this spell field entity effect. */
     public static final String KEY = "reset_lifetime";
@@ -36,7 +37,7 @@ public record ResetLifetimeEffect(
      * MapCodec for serializing and deserializing {@link ResetLifetimeEffect} instances from JSON.
      */
     public static final MapCodec<ResetLifetimeEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            ContextAwarePredicate.CODEC.optionalFieldOf("entity_filter").forGetter(ResetLifetimeEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf("entity_filter").forGetter(ResetLifetimeEffect::entityFilter)
     ).apply(instance, ResetLifetimeEffect::new));
 
     /**
@@ -53,7 +54,7 @@ public record ResetLifetimeEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         // Reset the despawn timer to 0 for floating entities
         if (victim instanceof ItemEntity item) {
@@ -82,7 +83,7 @@ public record ResetLifetimeEffect(
      *
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public ResetLifetimeEffect(ContextAwarePredicate entityFilter) {
+    public ResetLifetimeEffect(Holder<LootItemCondition> entityFilter) {
         this(Optional.of(entityFilter));
     }
     // endregion

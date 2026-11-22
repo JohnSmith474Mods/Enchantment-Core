@@ -127,7 +127,7 @@
           "predicate": {
             "is_direct": true
           },
-          "condition": "minecraft:damage_source_properties"
+          "type": "minecraft:damage_source_properties"
         }
       }
     ]

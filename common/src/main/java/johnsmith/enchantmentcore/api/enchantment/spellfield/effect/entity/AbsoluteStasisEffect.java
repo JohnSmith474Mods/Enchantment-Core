@@ -7,20 +7,21 @@ import java.util.Optional;
 
 import johnsmith.enchantmentcore.api.enchantment.spellfield.effect.SpellFieldEntityEffect;
 
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 
 /**
  * A {@link SpellFieldEntityEffect} that zeroes out a target entity's velocity vector and resets its
  * accumulated {@link Entity#fallDistance}, freezing the entity in mid-air without lethal fall damage buildup.
  *
- * @param entityFilter Optional {@link ContextAwarePredicate} restricting which entities are affected.
+ * @param entityFilter Optional {@link LootItemCondition} restricting which entities are affected.
  */
 public record AbsoluteStasisEffect(
-        Optional<ContextAwarePredicate> entityFilter
+        Optional<Holder<LootItemCondition>> entityFilter
 ) implements SpellFieldEntityEffect {
     /** Registry path identifier for this spell field entity effect. */
     public static final String KEY = "absolute_stasis";
@@ -29,7 +30,7 @@ public record AbsoluteStasisEffect(
      * MapCodec for serializing and deserializing {@link AbsoluteStasisEffect} instances from JSON.
      */
     public static final MapCodec<AbsoluteStasisEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            ContextAwarePredicate.CODEC.optionalFieldOf("entity_filter").forGetter(AbsoluteStasisEffect::entityFilter)
+            LootItemCondition.CODEC.optionalFieldOf("entity_filter").forGetter(AbsoluteStasisEffect::entityFilter)
     ).apply(instance, AbsoluteStasisEffect::new));
 
     /**
@@ -46,7 +47,7 @@ public record AbsoluteStasisEffect(
      */
     @Override
     public void apply(ServerLevel level, int enchantmentLevel, EnchantedItemInUse context, Entity spatialReference, Vec3 epicenter, Entity victim, float volumeScalar) {
-        if (this.entityFilter.isPresent() && !this.entityFilter.get().matches(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
+        if (this.entityFilter.isPresent() && !this.entityFilter.get().value().test(SpellFieldEntityEffect.createLootContext(level, victim, enchantmentLevel))) return;
 
         // 1. Clamp all momentum and gravity accumulation
         victim.setDeltaMovement(Vec3.ZERO);
@@ -56,7 +57,7 @@ public record AbsoluteStasisEffect(
 
         // 3. Force the server to synchronize the frozen state to the client
         victim.needsSync = true;
-        victim.hurtMarked = true;
+        victim.syncVelocity = true;
     }
 
     @Override
@@ -78,7 +79,7 @@ public record AbsoluteStasisEffect(
      *
      * @param entityFilter The predicate filter to match against candidate entities.
      */
-    public AbsoluteStasisEffect(ContextAwarePredicate entityFilter) {
+    public AbsoluteStasisEffect(Holder<LootItemCondition> entityFilter) {
         this(Optional.of(entityFilter));
     }
     // endregion
