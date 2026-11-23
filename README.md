@@ -30,23 +30,23 @@ Please note that all contributions require a signed Contributor License Agreemen
 
 ## Version Support Matrix
 
-Here is a quick overview of our current branches and their support status. Right now, all listed versions are actively supported!
+Here is a quick overview of our current branches, their support status, and the latest mod version available for each:
 
 - **Active:** Under full active development—receiving new features, bug fixes, and occasional API changes.
 - **Life Support:** Maintenance mode—receiving critical bug fixes only, with no new features or structural changes planned.
 - **Abandoned:** End of life—no longer maintained and will not receive any further updates.
 
-| Branch                                                                       | Game Version Range | Support Status |
-| ---------------------------------------------------------------------------- | ------------------ | -------------- |
-| [1.21](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21)       | 1.21 - 1.21.1      | Life Support   |
-| [1.21.2](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.2)   | 1.21.2 - 1.21.3    | Life Support   |
-| [1.21.4](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.4)   | 1.21.4             | Life Support   |
-| [1.21.5](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.5)   | 1.21.5             | Life Support   |
-| [1.21.6](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.6)   | 1.21.6 - 1.21.8    | Life Support   |
-| [1.21.9](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.9)   | 1.21.9 - 1.21.10   | Life Support   |
-| [1.21.11](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.11) | 1.21.11            | Life Support   |
-| [26.1](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/26.1)       | 26.1 - 26.1.2      | Active         |
-| [26.2](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/26.2)       | 26.2               | Active         |
+| Branch                                                                       | Game Version Range | Support Status | Latest Mod Version |
+| ---------------------------------------------------------------------------- | ------------------ | -------------- | ------------------ |
+| [1.21](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21)       | 1.21 - 1.21.1      | Life Support   | 1.1.1              |
+| [1.21.2](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.2)   | 1.21.2 - 1.21.3    | Life Support   | 1.1.1              |
+| [1.21.4](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.4)   | 1.21.4             | Life Support   | 1.1.1              |
+| [1.21.5](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.5)   | 1.21.5             | Life Support   | 1.1.1              |
+| [1.21.6](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.6)   | 1.21.6 - 1.21.8    | Life Support   | 1.1.1              |
+| [1.21.9](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.9)   | 1.21.9 - 1.21.10   | Life Support   | 1.1.1              |
+| [1.21.11](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/1.21.11) | 1.21.11            | Life Support   | 1.1.1              |
+| [26.1](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/26.1)       | 26.1 - 26.1.2      | Active         | 1.1.1              |
+| [26.2](https://github.com/JohnSmith474Mods/Enchantment-Core/tree/26.2)       | 26.2               | Active         | 1.1.1              |
 
 ## Third-Party Licenses & Credits
 
